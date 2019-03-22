@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"reflect"
 	"strconv"
 )
 
@@ -23,14 +22,22 @@ func (conn sqlConnection) Ping() bool {
 func (conn sqlConnection) Exec(params map[string]interface{}) bool {
 	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
 	if err != nil {
-		log.Fatal(err)
 		return false
 	}
 
 	return true
 }
 
-func GetMysqlSlaveConnection() interface{ Connection } {
+func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
+	rows, err := conn.base.Query(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return rows
+}
+
+func GetMysqlConnection(connection ConnectionSlave) interface{ ConnectionSlave } {
 	if connection == nil || connection.Ping() == true {
 		slave := GetCredentials("slave")
 		conn, err := sql.Open("mysql", buildMysqlString(slave))
@@ -45,12 +52,4 @@ func GetMysqlSlaveConnection() interface{ Connection } {
 
 func buildMysqlString(cred Credentials) string {
 	return cred.User + ":" + cred.Pass + "@tcp(" + cred.Host + ":" + strconv.Itoa(cred.Port) + ")/" + cred.DBname + "?charset=utf8&parseTime=True&loc=Local"
-}
-
-func CloseMysql(rows interface{}) {
-	testRow := new(sql.Rows)
-	if reflect.TypeOf(rows) == reflect.TypeOf(*testRow) {
-		pointer := rows.(sql.Rows)
-		defer pointer.Close()
-	}
 }

@@ -24,6 +24,10 @@ func (User) SchemaName() string {
 	return helpers.GetCredentials("master").DBname
 }
 
+func getType() string {
+	return helpers.GetCredentials("slave").Type
+}
+
 func (user *User) Insert() bool {
 	query := `INSERT INTO ` + user.TableName() + `(id, name, status, created) VALUES(?, ?, ?, ?);`
 	params := []interface{}{
@@ -33,11 +37,10 @@ func (user *User) Insert() bool {
 		user.Created,
 	}
 
-	res := helpers.Query(map[string]interface{}{
+	res := helpers.Exec(getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
-	helpers.CloseMysql(res)
 
 	return res
 }
@@ -51,11 +54,10 @@ func (user *User) Update() bool {
 		user.Id,
 	}
 
-	res := helpers.Query(map[string]interface{}{
+	res := helpers.Exec(getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
-	helpers.CloseMysql(res)
 
 	return res
 }
@@ -66,11 +68,10 @@ func (user *User) Delete() bool {
 		user.Id,
 	}
 
-	res := helpers.Query(map[string]interface{}{
+	res := helpers.Exec(getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
-	helpers.CloseMysql(res)
 
 	return res
 }

@@ -20,9 +20,10 @@ type Credentials struct {
 var credentials CredentialsPool
 
 type CredentialsPool struct {
-	master Credentials
-	slave  Credentials
-	tables []string
+	master     Credentials
+	slave      Credentials
+	replicator Credentials
+	tables     []string
 }
 
 func MakeCredentials() {
@@ -52,10 +53,21 @@ func MakeCredentials() {
 		os.Getenv("SLAVE_TYPE"),
 	}
 
+	replicationPort, _ := strconv.Atoi(os.Getenv("REPLICATOR_PORT"))
+	replicatorCredentials := Credentials{
+		os.Getenv("REPLICATOR_HOST"),
+		replicationPort,
+		os.Getenv("REPLICATOR_USER"),
+		os.Getenv("REPLICATOR_PASS"),
+		os.Getenv("REPLICATOR_DBNAME"),
+		"mysql",
+	}
+
 	credentials = CredentialsPool{
-		master: masterCredentials,
-		slave:  slaveCredentials,
-		tables: strings.Split(os.Getenv("ALLOWED_TABLES"), ","),
+		master:     masterCredentials,
+		slave:      slaveCredentials,
+		replicator: replicatorCredentials,
+		tables:     strings.Split(os.Getenv("ALLOWED_TABLES"), ","),
 	}
 }
 
@@ -65,6 +77,8 @@ func GetCredentials(dbName string) Credentials {
 		return credentials.master
 	case "slave":
 		return credentials.slave
+	case "replicator":
+		return credentials.replicator
 	default:
 		return Credentials{}
 	}

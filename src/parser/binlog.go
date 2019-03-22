@@ -3,9 +3,12 @@ package parser
 import (
 	"fmt"
 	"github.com/siddontang/go-mysql/canal"
-	"go-binlog-example/src/helpers"
-	"go-binlog-example/src/models"
+	"github.com/siddontang/go-mysql/mysql"
+	"go-binlog-replication/src/helpers"
+	"go-binlog-replication/src/models"
+	"log"
 	"runtime/debug"
+	"strconv"
 )
 
 type binlogHandler struct {
@@ -29,6 +32,9 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 			fmt.Print(r, " ", string(debug.Stack()))
 		}
 	}()
+
+	curPosition := getMasterPos()
+
 	var n int
 	var k int
 
@@ -42,8 +48,10 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
 			model.ParseKey(row)
-			model.Delete()
-			fmt.Printf("[%s] is deleted \n", e.Table)
+			if model.Delete() == true {
+				setMasterPosFromCanal(curPosition)
+				fmt.Printf("[%s] is deleted \n", e.Table)
+			}
 		}
 
 		return nil
@@ -64,14 +72,15 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 			if e.Action == canal.UpdateAction {
 				oldModel := models.GetModel(e.Table.Name)
 				h.GetBinLogData(oldModel, e, i-1)
-
-				model.Update()
-
-				fmt.Printf("[%s] update row\n", e.Table)
+				if model.Update() == true {
+					setMasterPosFromCanal(curPosition)
+					fmt.Printf("[%s] update row\n", e.Table)
+				}
 			} else {
-				model.Insert()
-
-				fmt.Printf("[%s] insert row\n", e.Table)
+				if model.Insert() == true {
+					setMasterPosFromCanal(curPosition)
+					fmt.Printf("[%s] insert row\n", e.Table)
+				}
 			}
 		}
 
@@ -88,12 +97,48 @@ func BinlogListener() {
 
 	c, err := getDefaultCanal()
 	if err == nil {
-		coords, err := c.GetMasterPos()
+		coords, err := getMasterPosFromCanal(c)
 		if err == nil {
 			c.SetEventHandler(&binlogHandler{})
 			c.RunFrom(coords)
 		}
 	}
+}
+
+func getMasterPosFromCanal(c *canal.Canal) (mysql.Position, error) {
+	// try to get coords from memory
+	position, err := strconv.ParseUint(models.GetValue(models.LastPositionPos), 10, 32)
+	if err == nil {
+		pos := mysql.Position{
+			models.GetValue(models.LastPositionName),
+			uint32(position),
+		}
+
+		return pos, nil
+	}
+
+	// get coords from mysql
+	return c.GetMasterPos()
+}
+
+func setMasterPosFromCanal(position mysql.Position) {
+	// save position
+	models.SetValue(models.LastPositionPos, fmt.Sprint(position.Pos))
+	models.SetValue(models.LastPositionName, position.Name)
+}
+
+func getMasterPos() mysql.Position {
+	c, err := getDefaultCanal()
+	if err != nil {
+		log.Fatal("Invalid canal")
+	}
+
+	coords, err := getMasterPosFromCanal(c)
+	if err != nil {
+		log.Fatal("Invalid pos")
+	}
+
+	return coords
 }
 
 func getDefaultCanal() (*canal.Canal, error) {
