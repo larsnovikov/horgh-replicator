@@ -6,3 +6,4 @@ bin/
 build/
 .DS_Store
 src/.env
+src/vendor

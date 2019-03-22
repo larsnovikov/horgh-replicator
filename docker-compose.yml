@@ -1,0 +1,9 @@
+version: '3'
+services:
+  go-binlog-replication:
+    container_name: go_binlog_replication
+    build:
+      context: ./
+    tty: true
+    volumes:
+      - .:/go/src/go-binlog-replication

@@ -33,7 +33,7 @@ func (conn sqlConnection) Exec(params map[string]interface{}) bool {
 func GetMysqlSlaveConnection() interface{ Connection } {
 	if connection == nil || connection.Ping() == true {
 		slave := GetCredentials("slave")
-		conn, err := sql.Open(slave.Type, buildMysqlString(slave))
+		conn, err := sql.Open("mysql", buildMysqlString(slave))
 		if err != nil {
 			log.Fatal(err)
 		}
