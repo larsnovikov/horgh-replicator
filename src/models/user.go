@@ -21,7 +21,7 @@ func (User) TableName() string {
 }
 
 func (User) SchemaName() string {
-	return helpers.GetCredentials("slave").DBname
+	return helpers.GetCredentials("master").DBname
 }
 
 func (user User) Insert() bool {
