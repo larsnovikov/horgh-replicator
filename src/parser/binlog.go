@@ -37,6 +37,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		}
 	}()
 
+	// build canal if not exists yet
 	if curCanal == nil {
 		canalTmp, err := getDefaultCanal()
 		if err != nil {
@@ -45,9 +46,12 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		curCanal = canalTmp
 	}
 
+	// build current position
 	if curPosition.Pos == 0 {
+		// first row after start, try to get pos from storage
 		curPosition = getMasterPos(curCanal, false)
 	} else {
+		// get pos from MySQL
 		curPosition = getMasterPos(curCanal, true)
 	}
 
@@ -154,7 +158,6 @@ func setMasterPosFromCanal(position mysql.Position) {
 }
 
 func getMasterPos(canal *canal.Canal, force bool) mysql.Position {
-
 	coords, err := getMasterPosFromCanal(canal, force)
 	if err != nil {
 		log.Fatal(constants.ErrorMysqlPosition)
