@@ -114,7 +114,9 @@ func getMasterPosFromCanal(c *canal.Canal) (mysql.Position, error) {
 			uint32(position),
 		}
 
-		return pos, nil
+		if pos.Pos != 0 && pos.Name != "" {
+			return pos, nil
+		}
 	}
 
 	// get coords from mysql

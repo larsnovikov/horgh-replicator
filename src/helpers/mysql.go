@@ -3,6 +3,7 @@ package helpers
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"strconv"
 )
@@ -29,6 +30,7 @@ func (conn sqlConnection) Exec(params map[string]interface{}) bool {
 }
 
 func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
+	fmt.Println(fmt.Sprintf("%v", params["query"]))
 	rows, err := conn.base.Query(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
 	if err != nil {
 		log.Fatal(err)
@@ -37,9 +39,9 @@ func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
 	return rows
 }
 
-func GetMysqlConnection(connection ConnectionSlave) interface{ ConnectionSlave } {
+func GetMysqlConnection(connection ConnectionSlave, dbName string) interface{} {
 	if connection == nil || connection.Ping() == true {
-		slave := GetCredentials("slave")
+		slave := GetCredentials(dbName)
 		conn, err := sql.Open("mysql", buildMysqlString(slave))
 		if err != nil {
 			log.Fatal(err)

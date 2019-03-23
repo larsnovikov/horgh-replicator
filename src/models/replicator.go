@@ -11,12 +11,12 @@ const (
 
 type replicator struct {
 	Id    int    `gorm:"column:id"`
-	Key   string `gorm:"column:key"`
-	Value string `gorm:"column:value"`
+	Key   string `gorm:"column:param_key"`
+	Value string `gorm:"column:param_value"`
 }
 
 func GetValue(key string) string {
-	query := `SELECT * FROM replicator WHERE key=? LIMIT 1;`
+	query := `SELECT * FROM param_values WHERE param_key=? LIMIT 1;`
 	params := []interface{}{
 		key,
 	}
@@ -38,7 +38,7 @@ func GetValue(key string) string {
 }
 
 func SetValue(key string, value string) bool {
-	query := `UPDATE replicator SET value=? WHERE key=?;`
+	query := `UPDATE param_values SET param_value=? WHERE param_key=?;`
 	params := []interface{}{
 		value,
 		key,

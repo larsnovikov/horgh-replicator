@@ -1,6 +1,8 @@
 package helpers
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type ConnectionSlave interface {
 	Ping() bool
@@ -22,14 +24,17 @@ var connectionPool ConnectionPool
 func Exec(mode string, params map[string]interface{}) bool {
 	switch mode {
 	case "mysql":
-		return GetMysqlConnection(connectionPool.slave).Exec(params)
+		connectionPool.slave = GetMysqlConnection(connectionPool.slave, "slave").(ConnectionSlave)
+		return connectionPool.slave.Exec(params)
 	case "replicator":
-		return GetMysqlConnection(connectionPool.replicator).Exec(params)
+		connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, "replicator").(ConnectionReplicator)
+		return connectionPool.replicator.Exec(params)
 	}
 
 	return false
 }
 
 func Get(params map[string]interface{}) *sql.Rows {
+	connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, "replicator").(ConnectionReplicator)
 	return connectionPool.replicator.Get(params)
 }
