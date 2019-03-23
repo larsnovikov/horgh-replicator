@@ -2,12 +2,12 @@ package parser
 
 import (
 	"fmt"
+	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/mysql"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models"
-	"log"
 	"runtime/debug"
 	"strconv"
 )
@@ -32,7 +32,7 @@ func canOperateTable(tableName string) bool {
 func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Print(r, " ", string(debug.Stack()))
+			log.Info(r, " ", string(debug.Stack()))
 		}
 	}()
 
@@ -55,7 +55,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 			model.ParseKey(row)
 			if model.Delete() == true {
 				setMasterPosFromCanal(curPosition)
-				fmt.Printf(constants.MessageDeleted, e.Table)
+				log.Infof(constants.MessageDeleted, e.Table)
 			}
 		}
 
@@ -79,12 +79,12 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 				h.GetBinLogData(oldModel, e, i-1)
 				if model.Update() == true {
 					setMasterPosFromCanal(curPosition)
-					fmt.Printf(constants.MessageUpdated, e.Table)
+					log.Infof(constants.MessageUpdated, e.Table)
 				}
 			} else {
 				if model.Insert() == true {
 					setMasterPosFromCanal(curPosition)
-					fmt.Printf(constants.MessageInserted, e.Table)
+					log.Infof(constants.MessageInserted, e.Table)
 				}
 			}
 		}
@@ -169,5 +169,5 @@ func getDefaultCanal() (*canal.Canal, error) {
 }
 
 func showPos(pos mysql.Position, from string) {
-	fmt.Println(fmt.Sprintf(constants.MessagePosFrom, from, fmt.Sprint(pos.Pos), pos.Name))
+	log.Info(fmt.Sprintf(constants.MessagePosFrom, from, fmt.Sprint(pos.Pos), pos.Name))
 }

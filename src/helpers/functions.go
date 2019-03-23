@@ -1,8 +1,8 @@
 package helpers
 
 import (
+	"github.com/siddontang/go-log/log"
 	"go-binlog-replication/src/constants"
-	"log"
 	"reflect"
 )
 

@@ -2,8 +2,8 @@ package helpers
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/siddontang/go-log/log"
 	"go-binlog-replication/src/constants"
-	"log"
 	"os"
 	"strconv"
 	"strings"

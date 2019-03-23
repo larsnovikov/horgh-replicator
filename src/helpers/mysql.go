@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"log"
+	"github.com/siddontang/go-log/log"
 	"strconv"
 )
 
