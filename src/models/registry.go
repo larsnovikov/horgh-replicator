@@ -12,9 +12,13 @@ type AbstractModel interface {
 func GetModel(name string) interface{ AbstractModel } {
 	var model func() interface{ AbstractModel }
 	switch name {
-	case "User":
+	case "user":
 		model = func() interface{ AbstractModel } {
 			return &User{}
+		}
+	case "post":
+		model = func() interface{ AbstractModel } {
+			return &Post{}
 		}
 	}
 

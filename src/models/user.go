@@ -18,14 +18,14 @@ func (user *User) ParseKey(row []interface{}) {
 }
 
 func (User) TableName() string {
-	return "User"
+	return "user"
 }
 
 func (User) SchemaName() string {
 	return helpers.GetCredentials(constants.DBMaster).DBname
 }
 
-func getType() string {
+func (User) getType() string {
 	return helpers.GetCredentials(constants.DBSlave).Type
 }
 
@@ -38,7 +38,7 @@ func (user *User) Insert() bool {
 		user.Created,
 	}
 
-	res := helpers.Exec(getType(), map[string]interface{}{
+	res := helpers.Exec(user.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -55,7 +55,7 @@ func (user *User) Update() bool {
 		user.Id,
 	}
 
-	res := helpers.Exec(getType(), map[string]interface{}{
+	res := helpers.Exec(user.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -69,7 +69,7 @@ func (user *User) Delete() bool {
 		user.Id,
 	}
 
-	res := helpers.Exec(getType(), map[string]interface{}{
+	res := helpers.Exec(user.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
