@@ -82,26 +82,21 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	}
 
 	for i := n; i < len(e.Rows); i += k {
-		key := e.Table.Schema + "." + e.Table.Name
-		switch key {
-		case h.tableHash:
-			h.GetBinLogData(model, e, i)
+		h.GetBinLogData(model, e, i)
 
-			if e.Action == canal.UpdateAction {
-				oldModel := models.GetModel(e.Table.Name)
-				h.GetBinLogData(oldModel, e, i-1)
-				if model.Update() == true {
-					h.setMasterPosFromCanal(curPosition)
-					log.Infof(constants.MessageUpdated, e.Table)
-				}
-			} else {
-				if model.Insert() == true {
-					h.setMasterPosFromCanal(curPosition)
-					log.Infof(constants.MessageInserted, e.Table)
-				}
+		if e.Action == canal.UpdateAction {
+			oldModel := models.GetModel(e.Table.Name)
+			h.GetBinLogData(oldModel, e, i-1)
+			if model.Update() == true {
+				h.setMasterPosFromCanal(curPosition)
+				log.Infof(constants.MessageUpdated, e.Table)
+			}
+		} else {
+			if model.Insert() == true {
+				h.setMasterPosFromCanal(curPosition)
+				log.Infof(constants.MessageInserted, e.Table)
 			}
 		}
-
 	}
 	return nil
 }
