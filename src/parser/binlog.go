@@ -37,7 +37,9 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	}()
 
 	if curPosition.Pos == 0 {
-		curPosition = getMasterPos()
+		curPosition = getMasterPos(false)
+	} else {
+		curPosition = getMasterPos(true)
 	}
 
 	var n int
@@ -102,7 +104,7 @@ func BinlogListener() {
 
 	c, err := getDefaultCanal()
 	if err == nil {
-		coords, err := getMasterPosFromCanal(c)
+		coords, err := getMasterPosFromCanal(c, false)
 		if err == nil {
 			c.SetEventHandler(&binlogHandler{})
 			c.RunFrom(coords)
@@ -110,18 +112,20 @@ func BinlogListener() {
 	}
 }
 
-func getMasterPosFromCanal(c *canal.Canal) (mysql.Position, error) {
+func getMasterPosFromCanal(c *canal.Canal, force bool) (mysql.Position, error) {
 	// try to get coords from storage
-	position, err := strconv.ParseUint(models.GetValue(constants.LastPositionPos), 10, 32)
-	if err == nil {
-		pos := mysql.Position{
-			models.GetValue(constants.LastPositionName),
-			uint32(position),
-		}
+	if force == false {
+		position, err := strconv.ParseUint(models.GetValue(constants.LastPositionPos), 10, 32)
+		if err == nil {
+			pos := mysql.Position{
+				models.GetValue(constants.LastPositionName),
+				uint32(position),
+			}
 
-		if pos.Pos != 0 && pos.Name != "" {
-			showPos(pos, "Storage")
-			return pos, nil
+			if pos.Pos != 0 && pos.Name != "" {
+				showPos(pos, "Storage")
+				return pos, nil
+			}
 		}
 	}
 
@@ -140,13 +144,13 @@ func setMasterPosFromCanal(position mysql.Position) {
 	curPosition = position
 }
 
-func getMasterPos() mysql.Position {
+func getMasterPos(force bool) mysql.Position {
 	c, err := getDefaultCanal()
 	if err != nil {
 		log.Fatal(constants.ErrorMysqlCanal)
 	}
 
-	coords, err := getMasterPosFromCanal(c)
+	coords, err := getMasterPosFromCanal(c, force)
 	if err != nil {
 		log.Fatal(constants.ErrorMysqlPosition)
 	}
@@ -169,5 +173,5 @@ func getDefaultCanal() (*canal.Canal, error) {
 }
 
 func showPos(pos mysql.Position, from string) {
-	log.Info(fmt.Sprintf(constants.MessagePosFrom, from, fmt.Sprint(pos.Pos), pos.Name))
+	// log.Info(fmt.Sprintf(constants.MessagePosFrom, from, fmt.Sprint(pos.Pos), pos.Name))
 }

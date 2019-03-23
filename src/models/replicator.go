@@ -6,7 +6,6 @@ import (
 )
 
 type replicator struct {
-	Id    int    `gorm:"column:id"`
 	Key   string `gorm:"column:param_key"`
 	Value string `gorm:"column:param_value"`
 }
@@ -24,7 +23,7 @@ func GetValue(key string) string {
 
 	var row replicator
 	for res.Next() {
-		err := res.Scan(&row.Id, &row.Key, &row.Value)
+		err := res.Scan(&row.Key, &row.Value)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -34,10 +33,11 @@ func GetValue(key string) string {
 }
 
 func SetValue(key string, value string) bool {
-	query := `UPDATE param_values SET param_value=? WHERE param_key=?;`
+	query := `INSERT INTO param_values(param_key, param_value) VALUES(?, ?) ON DUPLICATE KEY UPDATE param_value=?;`
 	params := []interface{}{
-		value,
 		key,
+		value,
+		value,
 	}
 
 	res := helpers.Exec(constants.DBReplicator, map[string]interface{}{
