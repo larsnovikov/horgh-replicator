@@ -18,6 +18,7 @@ type binlogHandler struct {
 }
 
 var curPosition mysql.Position
+var curCanal *canal.Canal
 
 func canOperateTable(tableName string) bool {
 	for _, v := range helpers.GetTables() {
@@ -36,10 +37,18 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		}
 	}()
 
+	if curCanal == nil {
+		canalTmp, err := getDefaultCanal()
+		if err != nil {
+			log.Fatal(constants.ErrorMysqlCanal)
+		}
+		curCanal = canalTmp
+	}
+
 	if curPosition.Pos == 0 {
-		curPosition = getMasterPos(false)
+		curPosition = getMasterPos(curCanal, false)
 	} else {
-		curPosition = getMasterPos(true)
+		curPosition = getMasterPos(curCanal, true)
 	}
 
 	var n int
@@ -144,13 +153,9 @@ func setMasterPosFromCanal(position mysql.Position) {
 	curPosition = position
 }
 
-func getMasterPos(force bool) mysql.Position {
-	c, err := getDefaultCanal()
-	if err != nil {
-		log.Fatal(constants.ErrorMysqlCanal)
-	}
+func getMasterPos(canal *canal.Canal, force bool) mysql.Position {
 
-	coords, err := getMasterPosFromCanal(c, force)
+	coords, err := getMasterPosFromCanal(canal, force)
 	if err != nil {
 		log.Fatal(constants.ErrorMysqlPosition)
 	}
