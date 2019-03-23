@@ -119,14 +119,16 @@ func getMasterPosFromCanal(c *canal.Canal) (mysql.Position, error) {
 		}
 
 		if pos.Pos != 0 && pos.Name != "" {
-			fmt.Println("Get pos from storage")
+			showPos(pos)
 			return pos, nil
 		}
 	}
 
-	fmt.Println("Get position from mysql")
 	// get coords from mysql
-	return c.GetMasterPos()
+	pos, err := c.GetMasterPos()
+	showPos(pos)
+
+	return pos, err
 }
 
 func setMasterPosFromCanal(position mysql.Position) {
@@ -163,4 +165,8 @@ func getDefaultCanal() (*canal.Canal, error) {
 	cfg.Dump.ExecutionPath = ""
 
 	return canal.NewCanal(cfg)
+}
+
+func showPos(pos mysql.Position) {
+	fmt.Println(fmt.Sprintf("Get pos from storage. Pos: %s; Name: %s", fmt.Sprint(pos.Pos), pos.Name))
 }
