@@ -12,4 +12,4 @@
 - Copy `/src/.env.dist` to `/src/.env` and set credentials
 - Configure your my MySQL master as `/mysql/mysql.conf`
 - Start as `cd src` && `go run main.go`
-- Execute `migration/user.sql` in your MySQL master and see output
+- Execute `migration/master.sql` in your MySQL master and see output

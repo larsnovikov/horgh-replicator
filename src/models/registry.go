@@ -16,6 +16,10 @@ func GetModel(name string) interface{ AbstractModel } {
 		model = func() interface{ AbstractModel } {
 			return &User{}
 		}
+	case "Post":
+		model = func() interface{ AbstractModel } {
+			return &Post{}
+		}
 	}
 
 	output := model()
