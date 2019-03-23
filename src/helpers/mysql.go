@@ -23,6 +23,9 @@ func (conn sqlConnection) Ping() bool {
 func (conn sqlConnection) Exec(params map[string]interface{}) bool {
 	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
 	if err != nil {
+		// TODO Надо проверять почему произошла ошибка.
+		// Если duplicate on insert - игнорить
+		// Поменялась структура - паниковать
 		return false
 	}
 
@@ -30,7 +33,6 @@ func (conn sqlConnection) Exec(params map[string]interface{}) bool {
 }
 
 func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
-	fmt.Println(fmt.Sprintf("%v", params["query"]))
 	rows, err := conn.base.Query(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
 	if err != nil {
 		log.Fatal(err)

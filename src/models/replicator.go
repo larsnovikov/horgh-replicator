@@ -39,7 +39,7 @@ func SetValue(key string, value string) bool {
 		key,
 	}
 
-	res := helpers.Exec(helpers.GetCredentials(helpers.DBSlave).Type, map[string]interface{}{
+	res := helpers.Exec(helpers.DBReplicator, map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})

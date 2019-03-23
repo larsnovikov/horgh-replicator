@@ -16,6 +16,8 @@ type binlogHandler struct {
 	BinlogParser
 }
 
+var curPosition mysql.Position
+
 func canOperateTable(tableName string) bool {
 	for _, v := range helpers.GetTables() {
 		if v == tableName {
@@ -33,7 +35,9 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		}
 	}()
 
-	curPosition := getMasterPos()
+	if curPosition.Pos == 0 {
+		curPosition = getMasterPos()
+	}
 
 	var n int
 	var k int
@@ -106,7 +110,7 @@ func BinlogListener() {
 }
 
 func getMasterPosFromCanal(c *canal.Canal) (mysql.Position, error) {
-	// try to get coords from memory
+	// try to get coords from storage
 	position, err := strconv.ParseUint(models.GetValue(helpers.LastPositionPos), 10, 32)
 	if err == nil {
 		pos := mysql.Position{
@@ -115,10 +119,12 @@ func getMasterPosFromCanal(c *canal.Canal) (mysql.Position, error) {
 		}
 
 		if pos.Pos != 0 && pos.Name != "" {
+			fmt.Println("Get pos from storage")
 			return pos, nil
 		}
 	}
 
+	fmt.Println("Get position from mysql")
 	// get coords from mysql
 	return c.GetMasterPos()
 }
@@ -127,6 +133,8 @@ func setMasterPosFromCanal(position mysql.Position) {
 	// save position
 	models.SetValue(helpers.LastPositionPos, fmt.Sprint(position.Pos))
 	models.SetValue(helpers.LastPositionName, position.Name)
+
+	curPosition = position
 }
 
 func getMasterPos() mysql.Position {

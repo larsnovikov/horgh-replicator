@@ -7,5 +7,5 @@ CREATE TABLE replicator.param_values
   param_value varchar(255) NOT NULL
 ) engine=InnoDB;
 
-INSERT INTO replicator.param_values(param_key, param_value) VALUES('last_position_pos', '');
+INSERT INTO replicator.param_values(param_key, param_value) VALUES('last_position_name', '');
 INSERT INTO replicator.param_values(param_key, param_value) VALUES('last_position_pos', '');
