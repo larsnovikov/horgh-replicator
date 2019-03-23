@@ -1,6 +1,6 @@
-CREATE DATABASE test;
+CREATE DATABASE Test;
 
-CREATE TABLE test.user
+CREATE TABLE Test.User
 (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(40),
@@ -8,7 +8,7 @@ CREATE TABLE test.user
   created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
 ) engine=InnoDB;
 
-CREATE TABLE test.post
+CREATE TABLE Test.Post
 (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(40),
@@ -16,7 +16,7 @@ CREATE TABLE test.post
   created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
 ) engine=InnoDB;
 
-/* This queries to test replication */
-INSERT INTO test.user (`name`, `status`) VALUE ("Jack", "active");
+/* This queries to Test replication */
+INSERT INTO Test.User (`name`, `status`) VALUE ("Jack", "active");
 
-INSERT INTO test.post (`title`, `text`) VALUE ("Title", "London is the capital of Great Britain");
+INSERT INTO Test.Post (`title`, `text`) VALUE ("Title", "London is the capital of Great Britain");

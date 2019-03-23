@@ -18,7 +18,7 @@ func (user *User) ParseKey(row []interface{}) {
 }
 
 func (User) TableName() string {
-	return "user"
+	return "User"
 }
 
 func (User) SchemaName() string {
