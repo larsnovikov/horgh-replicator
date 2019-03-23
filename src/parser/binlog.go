@@ -8,6 +8,7 @@ import (
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models"
+	"math/rand"
 	"runtime/debug"
 	"strconv"
 )
@@ -34,7 +35,6 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		}
 	}()
 
-	fmt.Println(e.Table)
 	// build canal if not exists yet
 	if curCanal == nil {
 		canalTmp, err := getDefaultCanal()
@@ -118,8 +118,6 @@ func BinlogListener(hash string) {
 	if err == nil {
 		coords, err := getMasterPosFromCanal(c, positionPosKey, positionNameKey, false)
 		if err == nil {
-			fmt.Println("2412414123")
-			fmt.Println(hash)
 			c.SetEventHandler(&binlogHandler{
 				tableHash:       hash,
 				positionNameKey: positionNameKey,
@@ -179,6 +177,7 @@ func getDefaultCanal() (*canal.Canal, error) {
 	cfg.User = master.User
 	cfg.Password = master.Pass
 	cfg.Flavor = master.Type
+	cfg.ServerID = uint32(rand.Intn(999999))
 
 	cfg.Dump.ExecutionPath = ""
 
