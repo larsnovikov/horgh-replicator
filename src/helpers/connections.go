@@ -24,10 +24,10 @@ var connectionPool ConnectionPool
 func Exec(mode string, params map[string]interface{}) bool {
 	switch mode {
 	case "mysql":
-		connectionPool.slave = GetMysqlConnection(connectionPool.slave, "slave").(ConnectionSlave)
+		connectionPool.slave = GetMysqlConnection(connectionPool.slave, DBSlave).(ConnectionSlave)
 		return connectionPool.slave.Exec(params)
-	case "replicator":
-		connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, "replicator").(ConnectionReplicator)
+	case DBReplicator:
+		connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, DBReplicator).(ConnectionReplicator)
 		return connectionPool.replicator.Exec(params)
 	}
 
@@ -35,6 +35,6 @@ func Exec(mode string, params map[string]interface{}) bool {
 }
 
 func Get(params map[string]interface{}) *sql.Rows {
-	connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, "replicator").(ConnectionReplicator)
+	connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, DBReplicator).(ConnectionReplicator)
 	return connectionPool.replicator.Get(params)
 }

@@ -4,11 +4,6 @@ import (
 	"go-binlog-replication/src/helpers"
 )
 
-const (
-	LastPositionPos  = "last_position_pos"
-	LastPositionName = "last_position_name"
-)
-
 type replicator struct {
 	Id    int    `gorm:"column:id"`
 	Key   string `gorm:"column:param_key"`
@@ -44,7 +39,7 @@ func SetValue(key string, value string) bool {
 		key,
 	}
 
-	res := helpers.Exec(helpers.GetCredentials("slave").Type, map[string]interface{}{
+	res := helpers.Exec(helpers.GetCredentials(helpers.DBSlave).Type, map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})

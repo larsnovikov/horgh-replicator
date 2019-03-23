@@ -73,11 +73,11 @@ func MakeCredentials() {
 
 func GetCredentials(dbName string) Credentials {
 	switch db := dbName; db {
-	case "master":
+	case DBMaster:
 		return credentials.master
-	case "slave":
+	case DBSlave:
 		return credentials.slave
-	case "replicator":
+	case DBReplicator:
 		return credentials.replicator
 	default:
 		return Credentials{}

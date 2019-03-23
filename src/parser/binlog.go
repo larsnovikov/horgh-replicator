@@ -107,10 +107,10 @@ func BinlogListener() {
 
 func getMasterPosFromCanal(c *canal.Canal) (mysql.Position, error) {
 	// try to get coords from memory
-	position, err := strconv.ParseUint(models.GetValue(models.LastPositionPos), 10, 32)
+	position, err := strconv.ParseUint(models.GetValue(helpers.LastPositionPos), 10, 32)
 	if err == nil {
 		pos := mysql.Position{
-			models.GetValue(models.LastPositionName),
+			models.GetValue(helpers.LastPositionName),
 			uint32(position),
 		}
 
@@ -125,8 +125,8 @@ func getMasterPosFromCanal(c *canal.Canal) (mysql.Position, error) {
 
 func setMasterPosFromCanal(position mysql.Position) {
 	// save position
-	models.SetValue(models.LastPositionPos, fmt.Sprint(position.Pos))
-	models.SetValue(models.LastPositionName, position.Name)
+	models.SetValue(helpers.LastPositionPos, fmt.Sprint(position.Pos))
+	models.SetValue(helpers.LastPositionName, position.Name)
 }
 
 func getMasterPos() mysql.Position {
@@ -144,7 +144,7 @@ func getMasterPos() mysql.Position {
 }
 
 func getDefaultCanal() (*canal.Canal, error) {
-	master := helpers.GetCredentials("master")
+	master := helpers.GetCredentials(helpers.DBMaster)
 
 	cfg := canal.NewDefaultConfig()
 	cfg.Addr = fmt.Sprintf("%s:%d", master.Host, master.Port)
