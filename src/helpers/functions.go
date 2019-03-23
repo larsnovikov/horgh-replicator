@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"go-binlog-replication/src/constants"
 	"log"
 	"reflect"
 )
@@ -8,7 +9,7 @@ import (
 func makeSlice(input interface{}) []interface{} {
 	s := reflect.ValueOf(input)
 	if s.Kind() != reflect.Slice {
-		log.Fatal("InterfaceSlice() given a non-slice type")
+		log.Fatal(constants.ErrorSliceCreation)
 	}
 
 	ret := make([]interface{}, s.Len())

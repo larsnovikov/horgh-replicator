@@ -1,6 +1,7 @@
 package models
 
 import (
+	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 )
 
@@ -39,7 +40,7 @@ func SetValue(key string, value string) bool {
 		key,
 	}
 
-	res := helpers.Exec(helpers.DBReplicator, map[string]interface{}{
+	res := helpers.Exec(constants.DBReplicator, map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})

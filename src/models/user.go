@@ -1,6 +1,7 @@
 package models
 
 import (
+	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"time"
 )
@@ -21,11 +22,11 @@ func (User) TableName() string {
 }
 
 func (User) SchemaName() string {
-	return helpers.GetCredentials(helpers.DBMaster).DBname
+	return helpers.GetCredentials(constants.DBMaster).DBname
 }
 
 func getType() string {
-	return helpers.GetCredentials(helpers.DBSlave).Type
+	return helpers.GetCredentials(constants.DBSlave).Type
 }
 
 func (user *User) Insert() bool {

@@ -5,6 +5,7 @@ import (
 	"github.com/json-iterator/go"
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/schema"
+	"go-binlog-replication/src/constants"
 	"reflect"
 	"strings"
 	"time"
@@ -153,7 +154,7 @@ func (m *BinlogParser) getBinlogIdByName(e *canal.RowsEvent, name string) int {
 			return id
 		}
 	}
-	panic(fmt.Sprintf("There is no column %s in table %s.%s", name, e.Table.Schema, e.Table.Name))
+	panic(fmt.Sprintf(constants.ErrorNoColumn, name, e.Table.Schema, e.Table.Name))
 }
 
 func parseTagSetting(tags reflect.StructTag) map[string]string {

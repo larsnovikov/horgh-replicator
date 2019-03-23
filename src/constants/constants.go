@@ -1,4 +1,4 @@
-package helpers
+package constants
 
 const (
 	LastPositionPos  = "last_position_pos"

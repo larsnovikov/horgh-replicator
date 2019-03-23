@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"database/sql"
+	"go-binlog-replication/src/constants"
 )
 
 type ConnectionSlave interface {
@@ -24,10 +25,10 @@ var connectionPool ConnectionPool
 func Exec(mode string, params map[string]interface{}) bool {
 	switch mode {
 	case "mysql":
-		connectionPool.slave = GetMysqlConnection(connectionPool.slave, DBSlave).(ConnectionSlave)
+		connectionPool.slave = GetMysqlConnection(connectionPool.slave, constants.DBSlave).(ConnectionSlave)
 		return connectionPool.slave.Exec(params)
-	case DBReplicator:
-		connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, DBReplicator).(ConnectionReplicator)
+	case constants.DBReplicator:
+		connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, constants.DBReplicator).(ConnectionReplicator)
 		return connectionPool.replicator.Exec(params)
 	}
 
@@ -35,6 +36,6 @@ func Exec(mode string, params map[string]interface{}) bool {
 }
 
 func Get(params map[string]interface{}) *sql.Rows {
-	connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, DBReplicator).(ConnectionReplicator)
+	connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, constants.DBReplicator).(ConnectionReplicator)
 	return connectionPool.replicator.Get(params)
 }

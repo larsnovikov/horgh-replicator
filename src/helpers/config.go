@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"github.com/joho/godotenv"
+	"go-binlog-replication/src/constants"
 	"log"
 	"os"
 	"strconv"
@@ -73,11 +74,11 @@ func MakeCredentials() {
 
 func GetCredentials(dbName string) Credentials {
 	switch db := dbName; db {
-	case DBMaster:
+	case constants.DBMaster:
 		return credentials.master
-	case DBSlave:
+	case constants.DBSlave:
 		return credentials.slave
-	case DBReplicator:
+	case constants.DBReplicator:
 		return credentials.replicator
 	default:
 		return Credentials{}
