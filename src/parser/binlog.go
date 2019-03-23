@@ -19,15 +19,12 @@ type binlogHandler struct {
 
 var curPosition mysql.Position
 var curCanal *canal.Canal
+var tableHash string
+var positionNameKey string
+var positionPosKey string
 
-func canOperateTable(tableName string) bool {
-	for _, v := range helpers.GetTables() {
-		if v == tableName {
-			return true
-		}
-	}
-
-	return false
+func canOperate(tableSchema string, tableName string) bool {
+	return fmt.Sprintf("%s.%s", tableSchema, tableName) == tableHash
 }
 
 func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
@@ -58,7 +55,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	var n int
 	var k int
 
-	if canOperateTable(e.Table.Name) == false {
+	if canOperate(e.Table.Schema, e.Table.Name) == false {
 		return nil
 	}
 
@@ -86,7 +83,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	for i := n; i < len(e.Rows); i += k {
 		key := e.Table.Schema + "." + e.Table.Name
 		switch key {
-		case model.SchemaName() + "." + model.TableName():
+		case tableHash:
 			h.GetBinLogData(model, e, i)
 
 			if e.Action == canal.UpdateAction {
@@ -112,8 +109,12 @@ func (h *binlogHandler) String() string {
 	return "binlogHandler"
 }
 
-func BinlogListener() {
-	helpers.MakeCredentials()
+func BinlogListener(hash string) {
+	// set table hash
+	tableHash = hash
+
+	// set position keys
+	positionPosKey, positionNameKey = helpers.MakeTablePosKey(hash)
 
 	c, err := getDefaultCanal()
 	if err == nil {
@@ -128,10 +129,10 @@ func BinlogListener() {
 func getMasterPosFromCanal(c *canal.Canal, force bool) (mysql.Position, error) {
 	// try to get coords from storage
 	if force == false {
-		position, err := strconv.ParseUint(models.GetValue(constants.LastPositionPos), 10, 32)
+		position, err := strconv.ParseUint(models.GetValue(positionPosKey), 10, 32)
 		if err == nil {
 			pos := mysql.Position{
-				models.GetValue(constants.LastPositionName),
+				models.GetValue(positionNameKey),
 				uint32(position),
 			}
 
@@ -151,8 +152,8 @@ func getMasterPosFromCanal(c *canal.Canal, force bool) (mysql.Position, error) {
 
 func setMasterPosFromCanal(position mysql.Position) {
 	// save position
-	models.SetValue(constants.LastPositionPos, fmt.Sprint(position.Pos))
-	models.SetValue(constants.LastPositionName, position.Name)
+	models.SetValue(positionPosKey, fmt.Sprint(position.Pos))
+	models.SetValue(positionNameKey, position.Name)
 
 	curPosition = position
 }

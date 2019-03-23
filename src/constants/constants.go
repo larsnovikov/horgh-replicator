@@ -1,9 +1,9 @@
 package constants
 
 const (
-	LastPositionPos  = "last_position_pos"
-	LastPositionName = "last_position_name"
-	DBSlave          = "slave"
-	DBReplicator     = "replicator"
-	DBMaster         = "master"
+	PositionPosPrefix  = "position_pos_%s"
+	PositionNamePrefix = "position_name_%s"
+	DBSlave            = "slave"
+	DBReplicator       = "replicator"
+	DBMaster           = "master"
 )

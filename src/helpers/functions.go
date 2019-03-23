@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"fmt"
 	"github.com/siddontang/go-log/log"
 	"go-binlog-replication/src/constants"
 	"reflect"
@@ -19,4 +20,11 @@ func makeSlice(input interface{}) []interface{} {
 	}
 
 	return ret
+}
+
+func MakeTablePosKey(hash string) (pos string, name string) {
+	pos = fmt.Sprintf(constants.PositionPosPrefix, hash)
+	name = fmt.Sprintf(constants.PositionNamePrefix, hash)
+
+	return pos, name
 }
