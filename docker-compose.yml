@@ -1,7 +1,7 @@
 version: '3'
 services:
-  go-binlog-replication:
-    container_name: go_binlog_replication
+  go-binlog-replicator:
+    container_name: go_binlog_replicator
     build:
       context: ./
     tty: true

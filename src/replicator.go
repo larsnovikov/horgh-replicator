@@ -15,6 +15,5 @@ func main() {
 		go parser.BinlogListener(tableHash)
 	}
 
-	time.Sleep(10 * time.Minute)
-	fmt.Print("Thx for watching, goodbuy")
+	time.Sleep(60 * time.Minute)
 }

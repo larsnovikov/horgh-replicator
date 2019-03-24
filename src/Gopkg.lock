@@ -123,6 +123,7 @@
     "github.com/go-sql-driver/mysql",
     "github.com/joho/godotenv",
     "github.com/json-iterator/go",
+    "github.com/siddontang/go-log/log",
     "github.com/siddontang/go-mysql/canal",
     "github.com/siddontang/go-mysql/mysql",
     "github.com/siddontang/go-mysql/schema",
