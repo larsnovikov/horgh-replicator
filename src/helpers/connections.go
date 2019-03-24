@@ -5,19 +5,19 @@ import (
 	"go-binlog-replication/src/constants"
 )
 
-type ConnectionSlave interface {
+type Connection interface {
 	Ping() bool
 	Exec(params map[string]interface{}) bool
 }
 
 type ConnectionReplicator interface {
-	ConnectionSlave
+	Connection
 	Get(map[string]interface{}) *sql.Rows
 }
 
 type ConnectionPool struct {
-	master     ConnectionSlave // used only for loader
-	slave      ConnectionSlave
+	master     Connection // used only for loader
+	slave      Connection
 	replicator ConnectionReplicator
 }
 
@@ -26,10 +26,10 @@ var connectionPool ConnectionPool
 func Exec(mode string, params map[string]interface{}) bool {
 	switch mode {
 	case "master":
-		connectionPool.master = GetMysqlConnection(connectionPool.master, constants.DBMaster).(ConnectionSlave)
+		connectionPool.master = GetMysqlConnection(connectionPool.master, constants.DBMaster).(Connection)
 		return connectionPool.master.Exec(params)
 	case "mysql":
-		connectionPool.slave = GetMysqlConnection(connectionPool.slave, constants.DBSlave).(ConnectionSlave)
+		connectionPool.slave = GetMysqlConnection(connectionPool.slave, constants.DBSlave).(Connection)
 		return connectionPool.slave.Exec(params)
 	case constants.DBReplicator:
 		connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, constants.DBReplicator).(ConnectionReplicator)

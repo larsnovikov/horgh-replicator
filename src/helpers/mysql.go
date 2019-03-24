@@ -41,7 +41,7 @@ func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
 	return rows
 }
 
-func GetMysqlConnection(connection ConnectionSlave, dbName string) interface{} {
+func GetMysqlConnection(connection Connection, dbName string) interface{} {
 	if connection == nil || connection.Ping() == true {
 		cred := GetCredentials(dbName)
 		conn, err := sql.Open("mysql", buildMysqlString(cred))
