@@ -25,15 +25,16 @@ var connectionPool ConnectionPool
 
 func Exec(mode string, params map[string]interface{}) bool {
 	switch mode {
-	case "master":
+	case constants.DBMaster:
 		connectionPool.master = GetMysqlConnection(connectionPool.master, constants.DBMaster).(Connection)
 		return connectionPool.master.Exec(params)
-	case "mysql":
-		connectionPool.slave = GetMysqlConnection(connectionPool.slave, constants.DBSlave).(Connection)
-		return connectionPool.slave.Exec(params)
 	case constants.DBReplicator:
 		connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, constants.DBReplicator).(ConnectionReplicator)
 		return connectionPool.replicator.Exec(params)
+	// adapters for slave databases
+	case "mysql":
+		connectionPool.slave = GetMysqlConnection(connectionPool.slave, constants.DBSlave).(Connection)
+		return connectionPool.slave.Exec(params)
 	}
 
 	return false

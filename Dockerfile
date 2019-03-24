@@ -8,4 +8,4 @@ COPY . .
 
 #installing dep and vendors
 RUN go get -u github.com/golang/dep/...
-RUN cd /go/src/go-binlog-replication/src && dep ensure -update
+CMD ["sh", "-c", "cd /go/src/go-binlog-replication/src && dep ensure -update && /bin/bash"]

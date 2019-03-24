@@ -5,6 +5,7 @@ import (
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/mysql"
+	"github.com/siddontang/go-mysql/replication"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models"
@@ -178,6 +179,18 @@ func getDefaultCanal() (*canal.Canal, error) {
 	cfg.Dump.ExecutionPath = ""
 
 	return canal.NewCanal(cfg)
+}
+
+func OnRotate(roateEvent *replication.RotateEvent) error {
+	return nil
+}
+
+func OnTableChanged(schema string, table string) error {
+	return nil
+}
+
+func OnDDL(nextPos mysql.Position, queryEvent *replication.QueryEvent) error {
+	return nil
 }
 
 func showPos(pos mysql.Position, from string) {
