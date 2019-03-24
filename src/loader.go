@@ -10,7 +10,7 @@ import (
 
 const (
 	// goroutine count
-	ThreadCount = 5
+	ThreadCount = 2
 	// time to create queries in minutes
 	LoadTime = 1
 )
@@ -29,10 +29,20 @@ func main() {
 	}
 
 	time.Sleep(LoadTime * time.Minute)
-	for i := 0; i < ThreadCount; i++ {
-		log.Infof("Goroutine create %s queries per %s minutes", strconv.Itoa(counters[i]), strconv.Itoa(LoadTime))
-	}
+	showStats()
 	log.Info("Stop loader")
+}
+
+func showStats() {
+	totalQueries := 0
+
+	for i := 0; i < ThreadCount; i++ {
+		log.Infof("Goroutine create %s queries per %s minute(s)", strconv.Itoa(counters[i]), strconv.Itoa(LoadTime))
+		totalQueries = totalQueries + counters[i]
+	}
+
+	queriesPerMinute := totalQueries / LoadTime
+	log.Infof("Total queries: %s; Queries per minute: %s", strconv.Itoa(totalQueries), strconv.Itoa(queriesPerMinute))
 }
 
 func randInt(min int, max int) int {
