@@ -43,8 +43,8 @@ func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
 
 func GetMysqlConnection(connection ConnectionSlave, dbName string) interface{} {
 	if connection == nil || connection.Ping() == true {
-		slave := GetCredentials(dbName)
-		conn, err := sql.Open("mysql", buildMysqlString(slave))
+		cred := GetCredentials(dbName)
+		conn, err := sql.Open("mysql", buildMysqlString(cred))
 		if err != nil {
 			log.Fatal(err)
 		}

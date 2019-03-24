@@ -16,6 +16,7 @@ type ConnectionReplicator interface {
 }
 
 type ConnectionPool struct {
+	master     ConnectionSlave // used only for loader
 	slave      ConnectionSlave
 	replicator ConnectionReplicator
 }
@@ -24,6 +25,9 @@ var connectionPool ConnectionPool
 
 func Exec(mode string, params map[string]interface{}) bool {
 	switch mode {
+	case "master":
+		connectionPool.master = GetMysqlConnection(connectionPool.master, constants.DBMaster).(ConnectionSlave)
+		return connectionPool.master.Exec(params)
 	case "mysql":
 		connectionPool.slave = GetMysqlConnection(connectionPool.slave, constants.DBSlave).(ConnectionSlave)
 		return connectionPool.slave.Exec(params)
