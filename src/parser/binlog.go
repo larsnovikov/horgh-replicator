@@ -8,6 +8,7 @@ import (
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models"
+	"go-binlog-replication/src/models/system"
 	"math/rand"
 	"runtime/debug"
 	"strconv"
@@ -126,10 +127,10 @@ func BinlogListener(hash string) {
 func getMasterPosFromCanal(c *canal.Canal, positionPosKey string, positionNameKey string, force bool) (mysql.Position, error) {
 	// try to get coords from storage
 	if force == false {
-		position, err := strconv.ParseUint(models.GetValue(positionPosKey), 10, 32)
+		position, err := strconv.ParseUint(system.GetValue(positionPosKey), 10, 32)
 		if err == nil {
 			pos := mysql.Position{
-				models.GetValue(positionNameKey),
+				system.GetValue(positionNameKey),
 				uint32(position),
 			}
 
@@ -149,8 +150,8 @@ func getMasterPosFromCanal(c *canal.Canal, positionPosKey string, positionNameKe
 
 func (h *binlogHandler) setMasterPosFromCanal(position mysql.Position) {
 	// save position
-	models.SetValue(h.positionPosKey, fmt.Sprint(position.Pos))
-	models.SetValue(h.positionNameKey, position.Name)
+	system.SetValue(h.positionPosKey, fmt.Sprint(position.Pos))
+	system.SetValue(h.positionNameKey, position.Name)
 
 	curPosition = position
 }

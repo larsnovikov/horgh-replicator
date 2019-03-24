@@ -1,5 +1,7 @@
 package models
 
+import "go-binlog-replication/src/models/slave"
+
 type AbstractModel interface {
 	TableName() string
 	SchemaName() string
@@ -15,11 +17,11 @@ func GetModel(name string) interface{ AbstractModel } {
 	switch name {
 	case "user":
 		model = func() interface{ AbstractModel } {
-			return &User{}
+			return &slave.User{}
 		}
 	case "post":
 		model = func() interface{ AbstractModel } {
-			return &Post{}
+			return &slave.Post{}
 		}
 	}
 

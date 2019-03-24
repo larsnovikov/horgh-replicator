@@ -1,4 +1,4 @@
-package models
+package system
 
 import (
 	"go-binlog-replication/src/constants"
