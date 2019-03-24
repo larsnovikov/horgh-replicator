@@ -9,7 +9,9 @@
 - MySQL
 
 ### Quick Start
-- Copy `/src/.env.dist` to `/src/.env` and set credentials
-- Configure your my MySQL master as `/mysql/mysql.conf`
-- Start as `cd src` && `go run main.go`
-- Execute `migration/master.sql` in your MySQL master and see output
+- Copy `/src/.env.dist` to `/src/.env` and set credentials.
+- Configure your my MySQL master as `/mysql/mysql.conf`. 
+Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
+- Start as `cd src` and `go run main.go`.
+- Execute `migration/structure.sql` in your MySQL master and MySQL slave.
+- Execute `migration/test.sql` in your MySQL master and see output.
