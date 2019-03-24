@@ -49,6 +49,5 @@ func GetClickhouseConnection(connection Connection, dbName string) interface{} {
 }
 
 func buildClickhouseString(cred Credentials) string {
-	// TODO разобраться с логином и паролем
 	return "tcp://" + cred.Host + ":" + strconv.Itoa(cred.Port) + "?username=" + cred.User + "&password=" + cred.Pass + "&database=" + cred.DBname + "&read_timeout=10&write_timeout=20"
 }
