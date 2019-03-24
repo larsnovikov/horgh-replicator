@@ -7,6 +7,7 @@
 
 ### Output
 - MySQL
+- Yandex ClickHouse
 
 ### Quick Start
 - Copy `/src/.env.dist` to `/src/.env` and set credentials.
@@ -28,7 +29,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 ### Add tables to replicator
 
 - Go to `src/models/slave`.
-- Create model for your table like `user.go` or `post.go`.
+- Create model for your table like `model_examples/<your_output_type>/user.go` or `model_examples/<your_output_type>post.go`.
 - Go to `src/models/registry.go`.
 - Add your model to method `GetModel(name string) interface{ AbstractModel }`.
 - Create table on MySQL slave.

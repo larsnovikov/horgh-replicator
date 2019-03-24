@@ -10,12 +10,31 @@
   version = "v0.3.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:05756b73bf7eae03d6f6c5f0ae83de42ce296e7d83336563dd9ce2072106d5e6"
+  name = "github.com/cloudflare/golz4"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ef862a3cdc58a6f1fee4e3af3d44fbe279194cde"
+
+[[projects]]
   digest = "1:ec6f9bf5e274c833c911923c9193867f3f18788c461f76f05f62bb1510e0ae65"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
   pruneopts = "UT"
   revision = "72cd26f257d44c1114970e19afddcd812016007e"
   version = "v1.4.1"
+
+[[projects]]
+  digest = "1:6c41d4f998a03b6604227ccad36edaed6126c397e5d78709ef4814a1145a6757"
+  name = "github.com/jmoiron/sqlx"
+  packages = [
+    ".",
+    "reflectx",
+  ]
+  pruneopts = "UT"
+  revision = "d161d7a76b5661016ad0b085869f77fd410f3e6a"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
@@ -32,6 +51,25 @@
   pruneopts = "UT"
   revision = "0ff49de124c6f76f8494e194af75bde0f1a49a29"
   version = "v1.1.6"
+
+[[projects]]
+  digest = "1:18110843f1b123fd4368a5e441354a1a8f66f8823516e799c2610eead34f322d"
+  name = "github.com/kshvakov/clickhouse"
+  packages = [
+    ".",
+    "lib/binary",
+    "lib/cityhash102",
+    "lib/column",
+    "lib/data",
+    "lib/leakypool",
+    "lib/lz4",
+    "lib/protocol",
+    "lib/types",
+    "lib/writebuffer",
+  ]
+  pruneopts = "UT"
+  revision = "1d87030de2a38bbe8c05e1b13f5b2f27466fd5a8"
+  version = "v1.3.6"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -121,8 +159,10 @@
   analyzer-version = 1
   input-imports = [
     "github.com/go-sql-driver/mysql",
+    "github.com/jmoiron/sqlx",
     "github.com/joho/godotenv",
     "github.com/json-iterator/go",
+    "github.com/kshvakov/clickhouse",
     "github.com/siddontang/go-log/log",
     "github.com/siddontang/go-mysql/canal",
     "github.com/siddontang/go-mysql/mysql",
