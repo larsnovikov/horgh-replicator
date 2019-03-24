@@ -13,6 +13,10 @@ type Post struct {
 	Created time.Time `gorm:"column:created"`
 }
 
+func (post *Post) BeforeSave() bool {
+	return true
+}
+
 func (post *Post) ParseKey(row []interface{}) {
 	post.Id = int(row[0].(int32))
 }

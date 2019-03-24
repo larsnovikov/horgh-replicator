@@ -13,6 +13,12 @@ type User struct {
 	Created time.Time `gorm:"column:created"`
 }
 
+func (user *User) BeforeSave() bool {
+	user.Status = "***"
+
+	return true
+}
+
 func (user *User) ParseKey(row []interface{}) {
 	user.Id = int(row[0].(int32))
 }

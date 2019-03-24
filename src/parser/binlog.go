@@ -87,12 +87,12 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		if e.Action == canal.UpdateAction {
 			oldModel := models.GetModel(e.Table.Name)
 			h.GetBinLogData(oldModel, e, i-1)
-			if model.Update() == true {
+			if model.BeforeSave() == true && model.Update() == true {
 				h.setMasterPosFromCanal(curPosition)
 				log.Infof(constants.MessageUpdated, e.Table)
 			}
 		} else {
-			if model.Insert() == true {
+			if model.BeforeSave() == true && model.Insert() == true {
 				h.setMasterPosFromCanal(curPosition)
 				log.Infof(constants.MessageInserted, e.Table)
 			}
@@ -172,7 +172,7 @@ func getDefaultCanal() (*canal.Canal, error) {
 	cfg.User = master.User
 	cfg.Password = master.Pass
 	cfg.Flavor = master.Type
-	cfg.ServerID = uint32(rand.Intn(999999))
+	cfg.ServerID = uint32(rand.Intn(9999999999))
 
 	cfg.Dump.ExecutionPath = ""
 

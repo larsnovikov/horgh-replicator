@@ -7,6 +7,7 @@ type AbstractModel interface {
 	Update() bool
 	Delete() bool
 	ParseKey([]interface{})
+	BeforeSave() bool
 }
 
 func GetModel(name string) interface{ AbstractModel } {
