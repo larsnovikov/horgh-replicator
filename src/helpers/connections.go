@@ -35,6 +35,9 @@ func Exec(mode string, params map[string]interface{}) bool {
 	case "mysql":
 		connectionPool.slave = GetMysqlConnection(connectionPool.slave, constants.DBSlave).(Connection)
 		return connectionPool.slave.Exec(params)
+	case "clickhouse":
+		connectionPool.slave = GetClickhouseConnection(connectionPool.slave, constants.DBSlave).(Connection)
+		return connectionPool.slave.Exec(params)
 	}
 
 	return false

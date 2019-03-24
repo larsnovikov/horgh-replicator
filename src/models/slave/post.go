@@ -51,7 +51,7 @@ func (post *Post) Insert() bool {
 }
 
 func (post *Post) Update() bool {
-	query := `UPDATE ` + post.TableName() + ` SET title=?, text=?, created=? WHERE id=?;`
+	query := `ALTER TABLE ` + post.SchemaName() + `.` + post.TableName() + ` UPDATE title=?, text=?, created=? WHERE id=?;`
 	params := []interface{}{
 		post.Title,
 		post.Text,
@@ -68,7 +68,7 @@ func (post *Post) Update() bool {
 }
 
 func (post *Post) Delete() bool {
-	query := `DELETE FROM ` + post.TableName() + ` WHERE id=?`
+	query := `ALTER TABLE ` + post.SchemaName() + `.` + post.TableName() + ` DELETE WHERE id=?`
 	params := []interface{}{
 		post.Id,
 	}

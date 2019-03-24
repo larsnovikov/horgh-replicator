@@ -53,7 +53,7 @@ func (user *User) Insert() bool {
 }
 
 func (user *User) Update() bool {
-	query := `UPDATE ` + user.TableName() + ` SET name=?, status=?, created=? WHERE id=?;`
+	query := `ALTER TABLE ` + user.SchemaName() + `.` + user.TableName() + ` UPDATE name=?, status=?, created=? WHERE id=?;`
 	params := []interface{}{
 		user.Name,
 		user.Status,
@@ -70,7 +70,7 @@ func (user *User) Update() bool {
 }
 
 func (user *User) Delete() bool {
-	query := `DELETE FROM ` + user.TableName() + ` WHERE id=?`
+	query := `ALTER TABLE ` + user.SchemaName() + `.` + user.TableName() + ` DELETE WHERE id=?`
 	params := []interface{}{
 		user.Id,
 	}
