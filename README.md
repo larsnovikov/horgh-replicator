@@ -2,10 +2,10 @@
 
 ##### Based on [JackShadow/go-binlog-example](https://github.com/JackShadow/go-binlog-example) 
 
-### Input
+### Master types
 - MySQL
 
-### Output
+### Slave types
 - MySQL
 - Yandex ClickHouse
 
@@ -29,7 +29,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 ### Add tables to replicator
 
 - Go to `src/models/slave`.
-- Create model for your table like `model_examples/<your_output_type>/user.go` or `model_examples/<your_output_type>post.go`.
+- Create model for your table like `model_examples/<your_slave_type>/user.go` or `model_examples/<your_slave_type>post.go`.
 - Go to `src/models/registry.go`.
 - Add your model to method `GetModel(name string) interface{ AbstractModel }`.
 - Create table on MySQL slave.
