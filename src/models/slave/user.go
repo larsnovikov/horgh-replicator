@@ -36,7 +36,7 @@ func (User) getType() string {
 }
 
 func (user *User) Insert() bool {
-	query := `INSERT INTO ` + user.TableName() + `(id, name, status, created) VALUES(?, ?, ?, ?);`
+	query := `INSERT INTO ` + user.SchemaName() + `.` + user.TableName() + `(id, name, status, created) VALUES(?, ?, ?, ?);`
 	params := []interface{}{
 		user.Id,
 		user.Name,

@@ -37,8 +37,6 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		}
 	}()
 
-	fmt.Println("444444")
-
 	// build canal if not exists yet
 	if curCanal == nil {
 		canalTmp, err := getDefaultCanal()

@@ -21,7 +21,9 @@ func (conn clickhouseConnection) Ping() bool {
 }
 
 func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
-	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
+	tx, _ := conn.base.Begin()
+	_, err := tx.Exec(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
+	tx.Commit()
 	if err != nil {
 		log.Fatal(err)
 		// TODO Надо проверять почему произошла ошибка.

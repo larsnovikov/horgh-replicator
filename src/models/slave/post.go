@@ -34,7 +34,7 @@ func (Post) getType() string {
 }
 
 func (post *Post) Insert() bool {
-	query := `INSERT INTO ` + post.TableName() + `(id, title, text, created) VALUES(?, ?, ?, ?);`
+	query := `INSERT INTO ` + post.SchemaName() + `.` + post.TableName() + `(id, title, text, created) VALUES(?, ?, ?, ?);`
 	params := []interface{}{
 		post.Id,
 		post.Title,
