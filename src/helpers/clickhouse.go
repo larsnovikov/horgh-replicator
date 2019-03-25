@@ -36,13 +36,14 @@ func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 }
 
 func GetClickhouseConnection(connection Connection, dbName string) interface{} {
-	if connection == nil || connection.Ping() == true {
+	if connection == nil || connection.Ping() == false {
 		cred := GetCredentials(dbName)
 		conn, err := sqlx.Open("clickhouse", buildClickhouseString(cred))
-		if err != nil {
-			Retry(cred, connection, GetClickhouseConnection)
+		if err != nil || conn.Ping() != nil {
+			connection = Retry(dbName, cred, connection, GetClickhouseConnection).(Connection)
+		} else {
+			connection = clickhouseConnection{conn}
 		}
-		connection = clickhouseConnection{conn}
 	}
 
 	return connection

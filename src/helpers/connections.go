@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/siddontang/go-log/log"
 	"go-binlog-replication/src/constants"
+	"strconv"
 	"time"
 )
 
@@ -57,15 +58,15 @@ func Get(params map[string]interface{}) *sql.Rows {
 	return connectionPool.replicator.Get(params)
 }
 
-func Retry(cred Credentials, connection Connection, method func(connection Connection, dbName string) interface{}) interface{} {
+func Retry(dbName string, cred Credentials, connection Connection, method func(connection Connection, dbName string) interface{}) interface{} {
 	if retryCounter[cred.DBname] > cred.RetryAttempts {
 		log.Fatal(fmt.Sprintf(constants.ErrorDBConnect, cred.DBname))
 	}
 
+	log.Infof(constants.MessageRetryConnect, cred.DBname, strconv.Itoa(cred.RetryTimeout))
+
 	time.Sleep(time.Duration(cred.RetryTimeout) * time.Second)
 	retryCounter[cred.DBname]++
 
-	log.Infof(constants.MessageRetryConnect, cred.DBname)
-
-	return method(connection, cred.DBname)
+	return method(connection, dbName)
 }

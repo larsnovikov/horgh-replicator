@@ -5,5 +5,5 @@ const (
 	MessageDeleted      = "[%s] delete row \n"
 	MessageInserted     = "[%s] insert row\n"
 	MessageUpdated      = "[%s] update row\n"
-	MessageRetryConnect = "Retry to connect to db %s"
+	MessageRetryConnect = "Retry to connect to db \"%s\" after %s seconds..."
 )
