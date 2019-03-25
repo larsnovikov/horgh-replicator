@@ -10,15 +10,15 @@ import (
 )
 
 type Credentials struct {
-	Host   string
-	Port   int
-	User   string
-	Pass   string
-	DBname string
-	Type   string
+	Host          string
+	Port          int
+	User          string
+	Pass          string
+	DBname        string
+	Type          string
+	RetryTimeout  int
+	RetryAttempts int
 }
-
-var credentials CredentialsPool
 
 type CredentialsPool struct {
 	master     Credentials
@@ -27,12 +27,19 @@ type CredentialsPool struct {
 	tables     []string
 }
 
+var credentials CredentialsPool
+
 func MakeCredentials() {
 	err := godotenv.Load()
 
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	var timeout, attempts int
+
+	timeout, _ = strconv.Atoi(os.Getenv("MASTER_RETRY_TIMEOUT"))
+	attempts, _ = strconv.Atoi(os.Getenv("MASTER_RETRY_ATTEMPTS"))
 
 	masterPort, _ := strconv.Atoi(os.Getenv("MASTER_PORT"))
 	masterCredentials := Credentials{
@@ -42,8 +49,12 @@ func MakeCredentials() {
 		os.Getenv("MASTER_PASS"),
 		os.Getenv("MASTER_DBNAME"),
 		os.Getenv("MASTER_TYPE"),
+		timeout,
+		attempts,
 	}
 
+	timeout, _ = strconv.Atoi(os.Getenv("SLAVE_RETRY_TIMEOUT"))
+	attempts, _ = strconv.Atoi(os.Getenv("SLAVE_RETRY_ATTEMPTS"))
 	slavePort, _ := strconv.Atoi(os.Getenv("SLAVE_PORT"))
 	slaveCredentials := Credentials{
 		os.Getenv("SLAVE_HOST"),
@@ -52,8 +63,12 @@ func MakeCredentials() {
 		os.Getenv("SLAVE_PASS"),
 		os.Getenv("SLAVE_DBNAME"),
 		os.Getenv("SLAVE_TYPE"),
+		timeout,
+		attempts,
 	}
 
+	timeout, _ = strconv.Atoi(os.Getenv("REPLICATOR_RETRY_TIMEOUT"))
+	attempts, _ = strconv.Atoi(os.Getenv("REPLICATOR_RETRY_ATTEMPTS"))
 	replicationPort, _ := strconv.Atoi(os.Getenv("REPLICATOR_PORT"))
 	replicatorCredentials := Credentials{
 		os.Getenv("REPLICATOR_HOST"),
@@ -62,6 +77,8 @@ func MakeCredentials() {
 		os.Getenv("REPLICATOR_PASS"),
 		os.Getenv("REPLICATOR_DBNAME"),
 		"mysql",
+		timeout,
+		attempts,
 	}
 
 	credentials = CredentialsPool{

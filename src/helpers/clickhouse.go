@@ -40,7 +40,7 @@ func GetClickhouseConnection(connection Connection, dbName string) interface{} {
 		cred := GetCredentials(dbName)
 		conn, err := sqlx.Open("clickhouse", buildClickhouseString(cred))
 		if err != nil {
-			log.Fatal(err)
+			Retry(cred, connection, GetClickhouseConnection)
 		}
 		connection = clickhouseConnection{conn}
 	}

@@ -2,7 +2,10 @@ package helpers
 
 import (
 	"database/sql"
+	"fmt"
+	"github.com/siddontang/go-log/log"
 	"go-binlog-replication/src/constants"
+	"time"
 )
 
 type Connection interface {
@@ -22,6 +25,12 @@ type ConnectionPool struct {
 }
 
 var connectionPool ConnectionPool
+
+var retryCounter = map[string]int{
+	constants.DBReplicator: 0,
+	constants.DBSlave:      0,
+	constants.DBMaster:     0,
+}
 
 func Exec(mode string, params map[string]interface{}) bool {
 	switch mode {
@@ -46,4 +55,17 @@ func Exec(mode string, params map[string]interface{}) bool {
 func Get(params map[string]interface{}) *sql.Rows {
 	connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, constants.DBReplicator).(ConnectionReplicator)
 	return connectionPool.replicator.Get(params)
+}
+
+func Retry(cred Credentials, connection Connection, method func(connection Connection, dbName string) interface{}) interface{} {
+	if retryCounter[cred.DBname] > cred.RetryAttempts {
+		log.Fatal(fmt.Sprintf(constants.ErrorDBConnect, cred.DBname))
+	}
+
+	time.Sleep(time.Duration(cred.RetryTimeout) * time.Second)
+	retryCounter[cred.DBname]++
+
+	log.Infof(constants.MessageRetryConnect, cred.DBname)
+
+	return method(connection, cred.DBname)
 }

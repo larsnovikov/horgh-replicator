@@ -46,7 +46,7 @@ func GetMysqlConnection(connection Connection, dbName string) interface{} {
 		cred := GetCredentials(dbName)
 		conn, err := sql.Open("mysql", buildMysqlString(cred))
 		if err != nil {
-			log.Fatal(err)
+			Retry(cred, connection, GetMysqlConnection)
 		}
 		connection = sqlConnection{conn}
 	}
