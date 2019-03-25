@@ -45,10 +45,11 @@ func GetPostgresqlConnection(connection Connection, dbName string) interface{} {
 	if connection == nil || connection.Ping() == true {
 		cred := GetCredentials(dbName)
 		conn, err := sql.Open("postgres", buildPostgresqlString(cred))
-		if err != nil {
-			log.Fatal(err)
+		if err != nil || conn.Ping() != nil {
+			connection = Retry(dbName, cred, connection, GetClickhouseConnection).(Connection)
+		} else {
+			connection = postgresqlConnection{conn}
 		}
-		connection = sqlConnection{conn}
 	}
 
 	return connection
