@@ -42,13 +42,14 @@ func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
 }
 
 func GetMysqlConnection(connection Connection, dbName string) interface{} {
-	if connection == nil || connection.Ping() == true {
+	if connection == nil || connection.Ping() == false {
 		cred := GetCredentials(dbName)
 		conn, err := sql.Open("mysql", buildMysqlString(cred))
-		if err != nil {
-			log.Fatal(err)
+		if err != nil || conn.Ping() != nil {
+			connection = Retry(dbName, cred, connection, GetMysqlConnection).(Connection)
+		} else {
+			connection = sqlConnection{conn}
 		}
-		connection = sqlConnection{conn}
 	}
 
 	return connection
