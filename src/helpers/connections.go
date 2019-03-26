@@ -48,6 +48,9 @@ func Exec(mode string, params map[string]interface{}) bool {
 	case "clickhouse":
 		connectionPool.slave = GetClickhouseConnection(connectionPool.slave, constants.DBSlave).(Connection)
 		return connectionPool.slave.Exec(params)
+	case "postgresql":
+		connectionPool.slave = GetPostgresqlConnection(connectionPool.slave, constants.DBSlave).(Connection)
+		return connectionPool.slave.Exec(params)
 	}
 
 	return false

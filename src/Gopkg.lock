@@ -72,6 +72,17 @@
   version = "v1.3.6"
 
 [[projects]]
+  digest = "1:8ef506fc2bb9ced9b151dafa592d4046063d744c646c1bbe801982ce87e4bc24"
+  name = "github.com/lib/pq"
+  packages = [
+    ".",
+    "oid",
+  ]
+  pruneopts = "UT"
+  revision = "4ded0e9383f75c197b3a2aaa6d590ac52df6fd79"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
   name = "github.com/modern-go/concurrent"
   packages = ["."]
@@ -163,6 +174,7 @@
     "github.com/joho/godotenv",
     "github.com/json-iterator/go",
     "github.com/kshvakov/clickhouse",
+    "github.com/lib/pq",
     "github.com/siddontang/go-log/log",
     "github.com/siddontang/go-mysql/canal",
     "github.com/siddontang/go-mysql/mysql",
