@@ -13,7 +13,7 @@ type sqlConnection struct {
 }
 
 func (conn sqlConnection) Ping() bool {
-	if conn.base.Ping() != nil {
+	if conn.base.Ping() == nil {
 		return true
 	}
 
@@ -37,6 +37,11 @@ func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	defer func() {
+		_ = rows.Close()
+		fmt.Println("clear")
+	}()
 
 	return rows
 }
