@@ -13,7 +13,7 @@ type postgresqlConnection struct {
 }
 
 func (conn postgresqlConnection) Ping() bool {
-	if conn.base.Ping() != nil {
+	if conn.base.Ping() == nil {
 		return true
 	}
 
@@ -42,7 +42,7 @@ func (conn postgresqlConnection) Get(params map[string]interface{}) *sql.Rows {
 }
 
 func GetPostgresqlConnection(connection Connection, dbName string) interface{} {
-	if connection == nil || connection.Ping() == true {
+	if connection == nil || connection.Ping() == false {
 		cred := GetCredentials(dbName)
 		conn, err := sql.Open("postgres", buildPostgresqlString(cred))
 		if err != nil || conn.Ping() != nil {
