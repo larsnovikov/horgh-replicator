@@ -36,7 +36,7 @@ func (User) getType() string {
 }
 
 func (user *User) Insert() bool {
-	query := `INSERT INTO ` + user.TableName() + `(id, name, status, created) VALUES(?, ?, ?, ?);`
+	query := `INSERT INTO "` + user.TableName() + `"(id, name, status, created) VALUES($1, $2, $3, $4);`
 	params := []interface{}{
 		user.Id,
 		user.Name,
@@ -53,7 +53,7 @@ func (user *User) Insert() bool {
 }
 
 func (user *User) Update() bool {
-	query := `UPDATE ` + user.TableName() + ` SET name=?, status=?, created=? WHERE id=?;`
+	query := `UPDATE "` + user.TableName() + `" SET name=$1, status=$2, created=$3 WHERE id=$4;`
 	params := []interface{}{
 		user.Name,
 		user.Status,
@@ -70,7 +70,7 @@ func (user *User) Update() bool {
 }
 
 func (user *User) Delete() bool {
-	query := `DELETE FROM ` + user.TableName() + ` WHERE id=?`
+	query := `DELETE FROM "` + user.TableName() + `" WHERE id=$1`
 	params := []interface{}{
 		user.Id,
 	}

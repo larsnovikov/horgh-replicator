@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jmoiron/sqlx"
-	"github.com/siddontang/go-log/log"
+	_ "github.com/lib/pq"
 	"strconv"
 )
 
@@ -30,15 +30,6 @@ func (conn postgresqlConnection) Exec(params map[string]interface{}) bool {
 	}
 
 	return true
-}
-
-func (conn postgresqlConnection) Get(params map[string]interface{}) *sql.Rows {
-	rows, err := conn.base.Query(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return rows
 }
 
 func GetPostgresqlConnection(connection Connection, dbName string) interface{} {

@@ -18,7 +18,6 @@ CREATE TABLE test.post
 ) engine=InnoDB;
 
 /*For MySQL Slave*/
-
 CREATE TABLE test.user
 (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,7 +37,7 @@ CREATE TABLE test.post
 /*For PostgreSQL Slave*/
 CREATE DATABASE test;
 
-CREATE TABLE "user"
+CREATE TABLE public."user"
 (
   id BIGSERIAL PRIMARY KEY,
   name VARCHAR(40),
@@ -46,7 +45,7 @@ CREATE TABLE "user"
   created TIMESTAMP DEFAULT NULL
 );
 
-CREATE TABLE post
+CREATE TABLE public.post
 (
   id BIGSERIAL PRIMARY KEY,
   title VARCHAR(40),
