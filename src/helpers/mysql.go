@@ -40,7 +40,6 @@ func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
 
 	defer func() {
 		_ = rows.Close()
-		fmt.Println("clear")
 	}()
 
 	return rows
