@@ -120,7 +120,7 @@ func BinlogListener(hash string) {
 				positionNameKey: positionNameKey,
 				positionPosKey:  positionPosKey,
 			})
-			c.RunFrom(coords)
+			err = c.RunFrom(coords)
 		}
 	}
 }
