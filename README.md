@@ -7,7 +7,7 @@
 
 ### Slave types
 - MySQL
-- PostgreeSQL
+- PostgreSQL
 - Yandex ClickHouse
 
 ### Quick Start
