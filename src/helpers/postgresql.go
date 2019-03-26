@@ -37,7 +37,7 @@ func GetPostgresqlConnection(connection Connection, dbName string) interface{} {
 		cred := GetCredentials(dbName)
 		conn, err := sql.Open("postgres", buildPostgresqlString(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = Retry(dbName, cred, connection, GetClickhouseConnection).(Connection)
+			connection = Retry(dbName, cred, connection, GetPostgresqlConnection).(Connection)
 		} else {
 			connection = postgresqlConnection{conn}
 		}
