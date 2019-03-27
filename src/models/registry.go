@@ -1,6 +1,10 @@
 package models
 
-import "go-binlog-replication/src/models/slave"
+import (
+	"github.com/siddontang/go-log/log"
+	"go-binlog-replication/src/constants"
+	"go-binlog-replication/src/models/slave"
+)
 
 type AbstractModel interface {
 	TableName() string
@@ -28,4 +32,31 @@ func GetModel(name string) interface{ AbstractModel } {
 	output := model()
 
 	return output
+}
+
+func Insert(model AbstractModel) bool {
+	if model.BeforeSave() == true && model.Insert() == true {
+		log.Infof(constants.MessageInserted, model.TableName())
+		return true
+	}
+
+	return false
+}
+
+func Update(model AbstractModel) bool {
+	if model.BeforeSave() == true && model.Update() == true {
+		log.Infof(constants.MessageUpdated, model.TableName())
+		return true
+	}
+
+	return false
+}
+
+func Delete(model AbstractModel) bool {
+	if model.Delete() == true {
+		log.Infof(constants.MessageDeleted, model.TableName())
+		return true
+	}
+
+	return false
 }

@@ -68,10 +68,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
 			model.ParseKey(row)
-			if model.Delete() == true {
-				h.setMasterPosFromCanal(curPosition)
-				log.Infof(constants.MessageDeleted, e.Table)
-			}
+			models.Delete(model)
 		}
 
 		return nil
@@ -89,15 +86,9 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		if e.Action == canal.UpdateAction {
 			oldModel := models.GetModel(e.Table.Name)
 			h.GetBinLogData(oldModel, e, i-1)
-			if model.BeforeSave() == true && model.Update() == true {
-				h.setMasterPosFromCanal(curPosition)
-				log.Infof(constants.MessageUpdated, e.Table)
-			}
+			models.Update(model)
 		} else {
-			if model.BeforeSave() == true && model.Insert() == true {
-				h.setMasterPosFromCanal(curPosition)
-				log.Infof(constants.MessageInserted, e.Table)
-			}
+			models.Insert(model)
 		}
 	}
 	return nil

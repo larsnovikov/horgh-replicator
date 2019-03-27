@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	// goroutine count
-	ThreadCount = 2
+	// goroutine count. WARNING if you set more 1, may be concurrency problems
+	ThreadCount = 1
 	// time to create queries in minutes
 	LoadTime = 1
 )
