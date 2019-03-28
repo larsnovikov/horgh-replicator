@@ -43,7 +43,7 @@ func (post *Post) Insert() bool {
 		post.Created,
 	}
 
-	res := helpers.Exec(post.getType(), map[string]interface{}{
+	res := connectors.Exec(post.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
