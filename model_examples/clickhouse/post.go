@@ -27,11 +27,11 @@ func (Post) TableName() string {
 }
 
 func (Post) SchemaName() string {
-	return helpers.GetCredentials(constants.DBMaster).DBname
+	return helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB).DBname
 }
 
 func (Post) getType() string {
-	return helpers.GetCredentials(constants.DBSlave).Type
+	return helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).Type
 }
 
 func (post *Post) Insert() bool {

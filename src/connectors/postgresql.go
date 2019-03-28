@@ -35,10 +35,10 @@ func (conn postgresqlConnection) Exec(params map[string]interface{}) bool {
 
 func GetPostgresqlConnection(connection Connection, dbName string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		cred := helpers.GetCredentials(dbName)
+		cred := helpers.GetCredentials(dbName).(helpers.CredentialsDB)
 		conn, err := sql.Open("postgres", buildPostgresqlString(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = Retry(dbName, cred, connection, GetPostgresqlConnection).(Connection)
+			connection = Retry(dbName, cred.Credentials, connection, GetPostgresqlConnection).(Connection)
 		} else {
 			connection = postgresqlConnection{conn}
 		}
@@ -47,6 +47,6 @@ func GetPostgresqlConnection(connection Connection, dbName string) interface{} {
 	return connection
 }
 
-func buildPostgresqlString(cred helpers.Credentials) string {
+func buildPostgresqlString(cred helpers.CredentialsDB) string {
 	return "host=" + cred.Host + " port=" + strconv.Itoa(cred.Port) + " user=" + cred.User + " password=" + cred.Pass + " dbname=" + cred.DBname + " sslmode=disable"
 }

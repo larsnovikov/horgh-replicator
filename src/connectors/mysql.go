@@ -44,10 +44,10 @@ func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
 
 func GetMysqlConnection(connection Connection, dbName string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		cred := helpers.GetCredentials(dbName)
+		cred := helpers.GetCredentials(dbName).(helpers.CredentialsDB)
 		conn, err := sql.Open("mysql", buildMysqlString(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = Retry(dbName, cred, connection, GetMysqlConnection).(Connection)
+			connection = Retry(dbName, cred.Credentials, connection, GetMysqlConnection).(Connection)
 		} else {
 			connection = sqlConnection{conn}
 		}
@@ -56,6 +56,6 @@ func GetMysqlConnection(connection Connection, dbName string) interface{} {
 	return connection
 }
 
-func buildMysqlString(cred helpers.Credentials) string {
+func buildMysqlString(cred helpers.CredentialsDB) string {
 	return cred.User + ":" + cred.Pass + "@tcp(" + cred.Host + ":" + strconv.Itoa(cred.Port) + ")/" + cred.DBname + "?charset=utf8&parseTime=True&loc=Local"
 }

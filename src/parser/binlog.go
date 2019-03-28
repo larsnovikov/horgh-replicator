@@ -30,19 +30,7 @@ func (h *binlogHandler) canOperate(tableSchema string, tableName string) bool {
 	return fmt.Sprintf("%s.%s", tableSchema, tableName) == h.tableHash
 }
 
-func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Info(r, " ", string(debug.Stack()))
-		}
-	}()
-
-	// position of current event
-	eventPos := mysql.Position{
-		curPosition.Name, // TODO its potential big problem
-		e.Header.LogPos,
-	}
-
+func (h *binlogHandler) prepareCanal() {
 	// build canal if not exists yet
 	if curCanal == nil {
 		canalTmp, err := getDefaultCanal()
@@ -56,13 +44,17 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	if curPosition.Pos == 0 {
 		// first row after start, try to get pos from storage
 		curPosition = h.getMasterPos(curCanal, false)
-	} else {
-		// get pos from MySQL
-		curPosition = h.getMasterPos(curCanal, true)
 	}
+}
 
-	var n int
-	var k int
+func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Info(r, " ", string(debug.Stack()))
+		}
+	}()
+
+	h.prepareCanal()
 
 	if h.canOperate(e.Table.Schema, e.Table.Name) == false {
 		return nil
@@ -70,12 +62,15 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 
 	model := models.GetModel(e.Table.Name)
 
+	var n int
+	var k int
+
 	switch e.Action {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
 			model.ParseKey(row)
 			if models.Delete(model) {
-				h.setMasterPosFromCanal(eventPos)
+				h.setMasterPosFromCanal(e)
 			}
 		}
 
@@ -95,11 +90,11 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 			oldModel := models.GetModel(e.Table.Name)
 			h.GetBinLogData(oldModel, e, i-1)
 			if models.Update(model) {
-				h.setMasterPosFromCanal(eventPos)
+				h.setMasterPosFromCanal(e)
 			}
 		} else {
 			if models.Insert(model) {
-				h.setMasterPosFromCanal(eventPos)
+				h.setMasterPosFromCanal(e)
 			}
 		}
 	}
@@ -152,12 +147,11 @@ func getMasterPosFromCanal(c *canal.Canal, positionPosKey string, positionNameKe
 	return pos, err
 }
 
-func (h *binlogHandler) setMasterPosFromCanal(position mysql.Position) {
+func (h *binlogHandler) setMasterPosFromCanal(event *canal.RowsEvent) {
+	curPosition.Pos = event.Header.LogPos
 	// save position
-	system.SetValue(h.positionPosKey, fmt.Sprint(position.Pos))
-	system.SetValue(h.positionNameKey, position.Name)
-
-	curPosition = position
+	system.SetValue(h.positionPosKey, fmt.Sprint(curPosition.Pos))
+	system.SetValue(h.positionNameKey, curPosition.Name)
 }
 
 func (h *binlogHandler) getMasterPos(canal *canal.Canal, force bool) mysql.Position {
@@ -170,7 +164,7 @@ func (h *binlogHandler) getMasterPos(canal *canal.Canal, force bool) mysql.Posit
 }
 
 func getDefaultCanal() (*canal.Canal, error) {
-	master := helpers.GetCredentials(constants.DBMaster)
+	master := helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB)
 
 	cfg := canal.NewDefaultConfig()
 	cfg.Addr = fmt.Sprintf("%s:%d", master.Host, master.Port)

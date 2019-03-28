@@ -29,11 +29,11 @@ func (User) TableName() string {
 }
 
 func (User) SchemaName() string {
-	return helpers.GetCredentials(constants.DBMaster).DBname
+	return helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB).DBname
 }
 
 func (User) getType() string {
-	return helpers.GetCredentials(constants.DBSlave).Type
+	return helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).Type
 }
 
 func (user *User) Insert() bool {

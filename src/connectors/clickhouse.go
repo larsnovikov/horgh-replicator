@@ -42,10 +42,10 @@ func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 
 func GetClickhouseConnection(connection Connection, dbName string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		cred := helpers.GetCredentials(dbName)
+		cred := helpers.GetCredentials(dbName).(helpers.CredentialsDB)
 		conn, err := sqlx.Open("clickhouse", buildClickhouseString(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = Retry(dbName, cred, connection, GetClickhouseConnection).(Connection)
+			connection = Retry(dbName, cred.Credentials, connection, GetClickhouseConnection).(Connection)
 		} else {
 			connection = clickhouseConnection{conn}
 		}
@@ -54,6 +54,6 @@ func GetClickhouseConnection(connection Connection, dbName string) interface{} {
 	return connection
 }
 
-func buildClickhouseString(cred helpers.Credentials) string {
+func buildClickhouseString(cred helpers.CredentialsDB) string {
 	return "tcp://" + cred.Host + ":" + strconv.Itoa(cred.Port) + "?username=" + cred.User + "&password=" + cred.Pass + "&database=" + cred.DBname + "&read_timeout=10&write_timeout=20"
 }

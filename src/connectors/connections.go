@@ -62,15 +62,15 @@ func Get(params map[string]interface{}) *sql.Rows {
 	return connectionPool.replicator.Get(params)
 }
 
-func Retry(dbName string, cred helpers.Credentials, connection Connection, method func(connection Connection, dbName string) interface{}) interface{} {
-	if retryCounter[cred.DBname] > cred.RetryAttempts {
-		log.Fatal(fmt.Sprintf(constants.ErrorDBConnect, cred.DBname))
+func Retry(storageType string, cred helpers.Credentials, connection Connection, method func(connection Connection, dbName string) interface{}) interface{} {
+	if retryCounter[storageType] > cred.RetryAttempts {
+		log.Fatal(fmt.Sprintf(constants.ErrorDBConnect, storageType))
 	}
 
-	log.Infof(constants.MessageRetryConnect, cred.DBname, strconv.Itoa(cred.RetryTimeout))
+	log.Infof(constants.MessageRetryConnect, storageType, strconv.Itoa(cred.RetryTimeout))
 
 	time.Sleep(time.Duration(cred.RetryTimeout) * time.Second)
-	retryCounter[cred.DBname]++
+	retryCounter[storageType]++
 
-	return method(connection, dbName)
+	return method(connection, storageType)
 }

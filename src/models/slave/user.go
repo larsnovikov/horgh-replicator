@@ -1,6 +1,7 @@
 package slave
 
 import (
+	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"time"
@@ -28,15 +29,15 @@ func (User) TableName() string {
 }
 
 func (User) SchemaName() string {
-	return helpers.GetCredentials(constants.DBMaster).DBname
+	return helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB).DBname
 }
 
 func (User) getType() string {
-	return helpers.GetCredentials(constants.DBSlave).Type
+	return helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).Type
 }
 
 func (user *User) Insert() bool {
-	query := `INSERT INTO ` + user.TableName() + `(id, name, status, created) VALUES(?, ?, ?, ?);`
+	query := `INSERT INTO "` + user.TableName() + `"(id, name, status, created) VALUES($1, $2, $3, $4);`
 	params := []interface{}{
 		user.Id,
 		user.Name,
@@ -44,7 +45,7 @@ func (user *User) Insert() bool {
 		user.Created,
 	}
 
-	res := helpers.Exec(user.getType(), map[string]interface{}{
+	res := connectors.Exec(user.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -53,7 +54,7 @@ func (user *User) Insert() bool {
 }
 
 func (user *User) Update() bool {
-	query := `UPDATE ` + user.TableName() + ` SET name=?, status=?, created=? WHERE id=?;`
+	query := `UPDATE "` + user.TableName() + `" SET name=$1, status=$2, created=$3 WHERE id=$4;`
 	params := []interface{}{
 		user.Name,
 		user.Status,
@@ -61,7 +62,7 @@ func (user *User) Update() bool {
 		user.Id,
 	}
 
-	res := helpers.Exec(user.getType(), map[string]interface{}{
+	res := connectors.Exec(user.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -70,12 +71,12 @@ func (user *User) Update() bool {
 }
 
 func (user *User) Delete() bool {
-	query := `DELETE FROM ` + user.TableName() + ` WHERE id=?`
+	query := `DELETE FROM "` + user.TableName() + `" WHERE id=$1`
 	params := []interface{}{
 		user.Id,
 	}
 
-	res := helpers.Exec(user.getType(), map[string]interface{}{
+	res := connectors.Exec(user.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})

@@ -1,6 +1,7 @@
 package slave
 
 import (
+	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"time"
@@ -26,15 +27,15 @@ func (Post) TableName() string {
 }
 
 func (Post) SchemaName() string {
-	return helpers.GetCredentials(constants.DBMaster).DBname
+	return helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB).DBname
 }
 
 func (Post) getType() string {
-	return helpers.GetCredentials(constants.DBSlave).Type
+	return helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).Type
 }
 
 func (post *Post) Insert() bool {
-	query := `INSERT INTO ` + post.TableName() + `(id, title, text, created) VALUES(?, ?, ?, ?);`
+	query := `INSERT INTO ` + post.TableName() + `(id, title, text, created) VALUES($1, $2, $3, $4);`
 	params := []interface{}{
 		post.Id,
 		post.Title,
@@ -42,7 +43,7 @@ func (post *Post) Insert() bool {
 		post.Created,
 	}
 
-	res := helpers.Exec(post.getType(), map[string]interface{}{
+	res := connectors.Exec(post.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -51,7 +52,7 @@ func (post *Post) Insert() bool {
 }
 
 func (post *Post) Update() bool {
-	query := `UPDATE ` + post.TableName() + ` SET title=?, text=?, created=? WHERE id=?;`
+	query := `UPDATE ` + post.TableName() + ` SET title=$1, text=$2, created=$3 WHERE id=$4;`
 	params := []interface{}{
 		post.Title,
 		post.Text,
@@ -59,7 +60,7 @@ func (post *Post) Update() bool {
 		post.Id,
 	}
 
-	res := helpers.Exec(post.getType(), map[string]interface{}{
+	res := connectors.Exec(post.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -68,12 +69,12 @@ func (post *Post) Update() bool {
 }
 
 func (post *Post) Delete() bool {
-	query := `DELETE FROM ` + post.TableName() + ` WHERE id=?`
+	query := `DELETE FROM ` + post.TableName() + ` WHERE id=$1`
 	params := []interface{}{
 		post.Id,
 	}
 
-	res := helpers.Exec(post.getType(), map[string]interface{}{
+	res := connectors.Exec(post.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
