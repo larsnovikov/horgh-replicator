@@ -37,6 +37,12 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		}
 	}()
 
+	// position of current event
+	eventPos := mysql.Position{
+		curPosition.Name, // TODO its potential big problem
+		e.Header.LogPos,
+	}
+
 	// build canal if not exists yet
 	if curCanal == nil {
 		canalTmp, err := getDefaultCanal()
@@ -54,8 +60,6 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		// get pos from MySQL
 		curPosition = h.getMasterPos(curCanal, true)
 	}
-	fmt.Println("11111111111111111111111")
-	fmt.Println(curPosition)
 
 	var n int
 	var k int
@@ -71,7 +75,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		for _, row := range e.Rows {
 			model.ParseKey(row)
 			if models.Delete(model) {
-				h.setMasterPosFromCanal(curPosition)
+				h.setMasterPosFromCanal(eventPos)
 			}
 		}
 
@@ -91,11 +95,11 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 			oldModel := models.GetModel(e.Table.Name)
 			h.GetBinLogData(oldModel, e, i-1)
 			if models.Update(model) {
-				h.setMasterPosFromCanal(curPosition)
+				h.setMasterPosFromCanal(eventPos)
 			}
 		} else {
 			if models.Insert(model) {
-				h.setMasterPosFromCanal(curPosition)
+				h.setMasterPosFromCanal(eventPos)
 			}
 		}
 	}
