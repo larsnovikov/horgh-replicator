@@ -24,8 +24,16 @@ type CredentialsDB struct {
 	DBname string
 }
 
+type CredentialsAMQP struct {
+	Credentials
+	Host string
+	Port string
+	User string
+	Pass string
+}
+
 var master CredentialsDB
-var slave CredentialsDB
+var slave interface{}
 var replicator CredentialsDB
 
 var tables []string
@@ -108,7 +116,7 @@ func getMaster() CredentialsDB {
 	return master
 }
 
-func getSlave() CredentialsDB {
+func getSlave() interface{} {
 	return slave
 }
 

@@ -10,19 +10,19 @@ import (
 	"time"
 )
 
-type Connection interface {
+type Storage interface {
 	Ping() bool
 	Exec(params map[string]interface{}) bool
 }
 
 type ConnectionReplicator interface {
-	Connection
+	Storage
 	Get(map[string]interface{}) *sql.Rows
 }
 
 type ConnectionPool struct {
-	master     Connection // used only for loader
-	slave      Connection
+	master     Storage // used only for loader
+	slave      Storage
 	replicator ConnectionReplicator
 }
 
@@ -37,21 +37,23 @@ var retryCounter = map[string]int{
 func Exec(mode string, params map[string]interface{}) bool {
 	switch mode {
 	case constants.DBMaster:
-		connectionPool.master = GetMysqlConnection(connectionPool.master, constants.DBMaster).(Connection)
+		connectionPool.master = GetMysqlConnection(connectionPool.master, constants.DBMaster).(Storage)
 		return connectionPool.master.Exec(params)
 	case constants.DBReplicator:
 		connectionPool.replicator = GetMysqlConnection(connectionPool.replicator, constants.DBReplicator).(ConnectionReplicator)
 		return connectionPool.replicator.Exec(params)
-	// adapters for slave databases
+	// adapters for slave storages
 	case "mysql":
-		connectionPool.slave = GetMysqlConnection(connectionPool.slave, constants.DBSlave).(Connection)
+		connectionPool.slave = GetMysqlConnection(connectionPool.slave, constants.DBSlave).(Storage)
 		return connectionPool.slave.Exec(params)
 	case "clickhouse":
-		connectionPool.slave = GetClickhouseConnection(connectionPool.slave, constants.DBSlave).(Connection)
+		connectionPool.slave = GetClickhouseConnection(connectionPool.slave, constants.DBSlave).(Storage)
 		return connectionPool.slave.Exec(params)
 	case "postgresql":
-		connectionPool.slave = GetPostgresqlConnection(connectionPool.slave, constants.DBSlave).(Connection)
+		connectionPool.slave = GetPostgresqlConnection(connectionPool.slave, constants.DBSlave).(Storage)
 		return connectionPool.slave.Exec(params)
+	case "rabbitmq":
+		connectionPool.slave = GetRabbitmqConnection(connectionPool.slave, constants.DBSlave).(Storage)
 	}
 
 	return false
@@ -62,7 +64,7 @@ func Get(params map[string]interface{}) *sql.Rows {
 	return connectionPool.replicator.Get(params)
 }
 
-func Retry(storageType string, cred helpers.Credentials, connection Connection, method func(connection Connection, dbName string) interface{}) interface{} {
+func Retry(storageType string, cred helpers.Credentials, connection Storage, method func(connection Storage, dbName string) interface{}) interface{} {
 	if retryCounter[storageType] > cred.RetryAttempts {
 		log.Fatal(fmt.Sprintf(constants.ErrorDBConnect, storageType))
 	}

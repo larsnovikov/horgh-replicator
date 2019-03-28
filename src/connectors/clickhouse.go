@@ -40,12 +40,12 @@ func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func GetClickhouseConnection(connection Connection, dbName string) interface{} {
+func GetClickhouseConnection(connection Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		cred := helpers.GetCredentials(dbName).(helpers.CredentialsDB)
+		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sqlx.Open("clickhouse", buildClickhouseString(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = Retry(dbName, cred.Credentials, connection, GetClickhouseConnection).(Connection)
+			connection = Retry(storageType, cred.Credentials, connection, GetClickhouseConnection).(Storage)
 		} else {
 			connection = clickhouseConnection{conn}
 		}
