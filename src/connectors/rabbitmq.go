@@ -12,12 +12,25 @@ type rabbitmqConnection struct {
 func (conn rabbitmqConnection) Ping() bool {
 	// TODO проверить подключение
 	return true
-
-	return false
 }
 
 func (conn rabbitmqConnection) Exec(params map[string]interface{}) bool {
-	// TODO разобрать параметры и послать в RabbitMq
+	ch := params["channel"].(amqp.Channel)
+
+	err := ch.Publish(
+		params["exchange"].(string),
+		params["routingKey"].(string),
+		params["mandatory"].(bool),
+		params["immediate"].(bool),
+		amqp.Publishing{
+			ContentType: params["contentType"].(string),
+			Body:        []byte(params["body"].(string)),
+		})
+
+	if err != nil {
+		return false
+	}
+
 	return true
 }
 
