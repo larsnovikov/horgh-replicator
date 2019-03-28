@@ -6,6 +6,7 @@ import (
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go-mysql/replication"
+	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models"
@@ -164,6 +165,12 @@ func (h *binlogHandler) getMasterPos(canal *canal.Canal, force bool) mysql.Posit
 }
 
 func getDefaultCanal() (*canal.Canal, error) {
+	// try to connect to check credentials
+	connectors.Exec(constants.DBMaster, map[string]interface{}{
+		"query":  "SELECT 1",
+		"params": make([]interface{}, 0),
+	})
+
 	master := helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB)
 
 	cfg := canal.NewDefaultConfig()
