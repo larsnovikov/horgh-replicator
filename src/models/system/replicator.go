@@ -1,8 +1,8 @@
 package system
 
 import (
+	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/helpers"
 )
 
 type replicator struct {
@@ -16,7 +16,7 @@ func GetValue(key string) string {
 		key,
 	}
 
-	res := helpers.Get(map[string]interface{}{
+	res := connectors.Get(map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -28,8 +28,13 @@ func GetValue(key string) string {
 			panic(err.Error())
 		}
 	}
+	result := row.Value
 
-	return row.Value
+	defer func() {
+		_ = res.Close()
+	}()
+
+	return result
 }
 
 func SetValue(key string, value string) bool {
@@ -40,7 +45,7 @@ func SetValue(key string, value string) bool {
 		value,
 	}
 
-	res := helpers.Exec(constants.DBReplicator, map[string]interface{}{
+	res := connectors.Exec(constants.DBReplicator, map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})

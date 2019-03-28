@@ -1,10 +1,11 @@
-package helpers
+package connectors
 
 import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"go-binlog-replication/src/helpers"
 	"strconv"
 )
 
@@ -21,7 +22,7 @@ func (conn postgresqlConnection) Ping() bool {
 }
 
 func (conn postgresqlConnection) Exec(params map[string]interface{}) bool {
-	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
+	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
 		// TODO Надо проверять почему произошла ошибка.
 		// Если duplicate on insert - игнорить
@@ -34,7 +35,7 @@ func (conn postgresqlConnection) Exec(params map[string]interface{}) bool {
 
 func GetPostgresqlConnection(connection Connection, dbName string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		cred := GetCredentials(dbName)
+		cred := helpers.GetCredentials(dbName)
 		conn, err := sql.Open("postgres", buildPostgresqlString(cred))
 		if err != nil || conn.Ping() != nil {
 			connection = Retry(dbName, cred, connection, GetPostgresqlConnection).(Connection)
@@ -46,6 +47,6 @@ func GetPostgresqlConnection(connection Connection, dbName string) interface{} {
 	return connection
 }
 
-func buildPostgresqlString(cred Credentials) string {
+func buildPostgresqlString(cred helpers.Credentials) string {
 	return "host=" + cred.Host + " port=" + strconv.Itoa(cred.Port) + " user=" + cred.User + " password=" + cred.Pass + " dbname=" + cred.DBname + " sslmode=disable"
 }

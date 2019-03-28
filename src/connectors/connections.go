@@ -1,10 +1,11 @@
-package helpers
+package connectors
 
 import (
 	"database/sql"
 	"fmt"
 	"github.com/siddontang/go-log/log"
 	"go-binlog-replication/src/constants"
+	"go-binlog-replication/src/helpers"
 	"strconv"
 	"time"
 )
@@ -61,7 +62,7 @@ func Get(params map[string]interface{}) *sql.Rows {
 	return connectionPool.replicator.Get(params)
 }
 
-func Retry(dbName string, cred Credentials, connection Connection, method func(connection Connection, dbName string) interface{}) interface{} {
+func Retry(dbName string, cred helpers.Credentials, connection Connection, method func(connection Connection, dbName string) interface{}) interface{} {
 	if retryCounter[cred.DBname] > cred.RetryAttempts {
 		log.Fatal(fmt.Sprintf(constants.ErrorDBConnect, cred.DBname))
 	}

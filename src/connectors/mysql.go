@@ -1,10 +1,11 @@
-package helpers
+package connectors
 
 import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/siddontang/go-log/log"
+	"go-binlog-replication/src/helpers"
 	"strconv"
 )
 
@@ -21,7 +22,7 @@ func (conn sqlConnection) Ping() bool {
 }
 
 func (conn sqlConnection) Exec(params map[string]interface{}) bool {
-	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
+	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
 		// TODO Надо проверять почему произошла ошибка.
 		// Если duplicate on insert - игнорить
@@ -33,21 +34,17 @@ func (conn sqlConnection) Exec(params map[string]interface{}) bool {
 }
 
 func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
-	rows, err := conn.base.Query(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
+	rows, err := conn.base.Query(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	defer func() {
-		_ = rows.Close()
-	}()
 
 	return rows
 }
 
 func GetMysqlConnection(connection Connection, dbName string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		cred := GetCredentials(dbName)
+		cred := helpers.GetCredentials(dbName)
 		conn, err := sql.Open("mysql", buildMysqlString(cred))
 		if err != nil || conn.Ping() != nil {
 			connection = Retry(dbName, cred, connection, GetMysqlConnection).(Connection)
@@ -59,6 +56,6 @@ func GetMysqlConnection(connection Connection, dbName string) interface{} {
 	return connection
 }
 
-func buildMysqlString(cred Credentials) string {
+func buildMysqlString(cred helpers.Credentials) string {
 	return cred.User + ":" + cred.Pass + "@tcp(" + cred.Host + ":" + strconv.Itoa(cred.Port) + ")/" + cred.DBname + "?charset=utf8&parseTime=True&loc=Local"
 }

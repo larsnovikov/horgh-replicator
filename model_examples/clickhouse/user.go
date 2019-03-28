@@ -1,6 +1,7 @@
 package slave
 
 import (
+	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"time"
@@ -44,7 +45,7 @@ func (user *User) Insert() bool {
 		user.Created,
 	}
 
-	res := helpers.Exec(user.getType(), map[string]interface{}{
+	res := connectors.Exec(user.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -61,7 +62,7 @@ func (user *User) Update() bool {
 		user.Id,
 	}
 
-	res := helpers.Exec(user.getType(), map[string]interface{}{
+	res := connectors.Exec(user.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -75,7 +76,7 @@ func (user *User) Delete() bool {
 		user.Id,
 	}
 
-	res := helpers.Exec(user.getType(), map[string]interface{}{
+	res := connectors.Exec(user.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})

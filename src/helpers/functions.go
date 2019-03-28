@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-func makeSlice(input interface{}) []interface{} {
+func MakeSlice(input interface{}) []interface{} {
 	s := reflect.ValueOf(input)
 	if s.Kind() != reflect.Slice {
 		log.Fatal(constants.ErrorSliceCreation)

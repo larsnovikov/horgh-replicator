@@ -54,6 +54,8 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		// get pos from MySQL
 		curPosition = h.getMasterPos(curCanal, true)
 	}
+	fmt.Println("11111111111111111111111")
+	fmt.Println(curPosition)
 
 	var n int
 	var k int
@@ -68,7 +70,9 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
 			model.ParseKey(row)
-			models.Delete(model)
+			if models.Delete(model) {
+				h.setMasterPosFromCanal(curPosition)
+			}
 		}
 
 		return nil
@@ -86,9 +90,13 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		if e.Action == canal.UpdateAction {
 			oldModel := models.GetModel(e.Table.Name)
 			h.GetBinLogData(oldModel, e, i-1)
-			models.Update(model)
+			if models.Update(model) {
+				h.setMasterPosFromCanal(curPosition)
+			}
 		} else {
-			models.Insert(model)
+			if models.Insert(model) {
+				h.setMasterPosFromCanal(curPosition)
+			}
 		}
 	}
 	return nil

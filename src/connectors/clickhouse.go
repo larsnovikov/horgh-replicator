@@ -1,9 +1,10 @@
-package helpers
+package connectors
 
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/kshvakov/clickhouse"
+	"go-binlog-replication/src/helpers"
 	"log"
 	"strconv"
 )
@@ -22,7 +23,7 @@ func (conn clickhouseConnection) Ping() bool {
 
 func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 	tx, _ := conn.base.Begin()
-	_, err := tx.Exec(fmt.Sprintf("%v", params["query"]), makeSlice(params["params"])...)
+	_, err := tx.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 
 	if err != nil {
 		log.Fatal(err)
@@ -41,7 +42,7 @@ func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 
 func GetClickhouseConnection(connection Connection, dbName string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		cred := GetCredentials(dbName)
+		cred := helpers.GetCredentials(dbName)
 		conn, err := sqlx.Open("clickhouse", buildClickhouseString(cred))
 		if err != nil || conn.Ping() != nil {
 			connection = Retry(dbName, cred, connection, GetClickhouseConnection).(Connection)
@@ -53,6 +54,6 @@ func GetClickhouseConnection(connection Connection, dbName string) interface{} {
 	return connection
 }
 
-func buildClickhouseString(cred Credentials) string {
+func buildClickhouseString(cred helpers.Credentials) string {
 	return "tcp://" + cred.Host + ":" + strconv.Itoa(cred.Port) + "?username=" + cred.User + "&password=" + cred.Pass + "&database=" + cred.DBname + "&read_timeout=10&write_timeout=20"
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/siddontang/go-log/log"
+	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/helpers"
 	"math/rand"
 	"strconv"
@@ -68,7 +69,7 @@ func load(id int) {
 	for {
 		query = queries[randInt(0, len(queries))]
 
-		result = helpers.Exec("master", map[string]interface{}{
+		result = connectors.Exec("master", map[string]interface{}{
 			"query":  query,
 			"params": []interface{}{},
 		})
