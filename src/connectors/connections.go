@@ -52,8 +52,8 @@ func Exec(mode string, params map[string]interface{}) bool {
 	case "postgresql":
 		connectionPool.slave = GetPostgresqlConnection(connectionPool.slave, constants.DBSlave).(Storage)
 		return connectionPool.slave.Exec(params)
-	case "rabbitmq":
-		connectionPool.slave = GetRabbitmqConnection(connectionPool.slave, constants.DBSlave).(Storage)
+		/*case "rabbitmq":
+		connectionPool.slave = GetRabbitmqConnection(connectionPool.slave, constants.DBSlave).(Storage)*/
 	}
 
 	return false
