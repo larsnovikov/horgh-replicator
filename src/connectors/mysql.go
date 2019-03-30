@@ -24,9 +24,6 @@ func (conn sqlConnection) Ping() bool {
 func (conn sqlConnection) Exec(params map[string]interface{}) bool {
 	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
-		// TODO Надо проверять почему произошла ошибка.
-		// Если duplicate on insert - игнорить
-		// Поменялась структура - паниковать
 		return false
 	}
 

@@ -5,7 +5,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/kshvakov/clickhouse"
 	"go-binlog-replication/src/helpers"
-	"log"
 	"strconv"
 )
 
@@ -26,10 +25,6 @@ func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 	_, err := tx.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 
 	if err != nil {
-		log.Fatal(err)
-		// TODO Надо проверять почему произошла ошибка.
-		// Если duplicate on insert - игнорить
-		// Поменялась структура - паниковать
 		return false
 	}
 

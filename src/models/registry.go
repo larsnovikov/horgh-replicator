@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/siddontang/go-log/log"
+	"github.com/siddontang/go-mysql/replication"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/models/slave"
 )
@@ -34,27 +35,27 @@ func GetModel(name string) interface{ AbstractModel } {
 	return output
 }
 
-func Insert(model AbstractModel) bool {
+func Insert(model AbstractModel, header *replication.EventHeader) bool {
 	if model.BeforeSave() == true && model.Insert() == true {
-		log.Infof(constants.MessageInserted, model.TableName())
+		log.Infof(constants.MessageInserted, header.Timestamp, model.TableName(), header.LogPos)
 		return true
 	}
 
 	return false
 }
 
-func Update(model AbstractModel) bool {
+func Update(model AbstractModel, header *replication.EventHeader) bool {
 	if model.BeforeSave() == true && model.Update() == true {
-		log.Infof(constants.MessageUpdated, model.TableName())
+		log.Infof(constants.MessageUpdated, header.Timestamp, model.TableName(), header.LogPos)
 		return true
 	}
 
 	return false
 }
 
-func Delete(model AbstractModel) bool {
+func Delete(model AbstractModel, header *replication.EventHeader) bool {
 	if model.Delete() == true {
-		log.Infof(constants.MessageDeleted, model.TableName())
+		log.Infof(constants.MessageDeleted, header.Timestamp, model.TableName(), header.LogPos)
 		return true
 	}
 
