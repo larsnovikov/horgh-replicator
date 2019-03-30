@@ -35,7 +35,7 @@ func (Post) getType() string {
 }
 
 func (post *Post) Insert() bool {
-	query := `INSERT INTO ` + post.TableName() + `(id, title, text, created) VALUES($1, $2, $3, $4);`
+	query := `INSERT INTO ` + post.TableName() + `(id, title, text, created) VALUES(?, ?, ?, ?);`
 	params := []interface{}{
 		post.Id,
 		post.Title,
@@ -52,7 +52,7 @@ func (post *Post) Insert() bool {
 }
 
 func (post *Post) Update() bool {
-	query := `UPDATE ` + post.TableName() + ` SET title=$1, text=$2, created=$3 WHERE id=$4;`
+	query := `UPDATE ` + post.TableName() + ` SET title=?, text=?, created=? WHERE id=?;`
 	params := []interface{}{
 		post.Title,
 		post.Text,
@@ -69,7 +69,7 @@ func (post *Post) Update() bool {
 }
 
 func (post *Post) Delete() bool {
-	query := `DELETE FROM ` + post.TableName() + ` WHERE id=$1`
+	query := `DELETE FROM ` + post.TableName() + ` WHERE id=?`
 	params := []interface{}{
 		post.Id,
 	}

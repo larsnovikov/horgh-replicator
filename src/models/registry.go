@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/replication"
 	"go-binlog-replication/src/constants"
@@ -41,6 +42,8 @@ func Insert(model AbstractModel, header *replication.EventHeader) bool {
 		return true
 	}
 
+	logError(model, "insert")
+
 	return false
 }
 
@@ -49,6 +52,8 @@ func Update(model AbstractModel, header *replication.EventHeader) bool {
 		log.Infof(constants.MessageUpdated, header.Timestamp, model.TableName(), header.LogPos)
 		return true
 	}
+
+	logError(model, "update")
 
 	return false
 }
@@ -59,5 +64,13 @@ func Delete(model AbstractModel, header *replication.EventHeader) bool {
 		return true
 	}
 
+	logError(model, "delete")
+
 	return false
+}
+
+func logError(model AbstractModel, operationType string) {
+	out, _ := json.Marshal(model)
+
+	log.Infof(constants.ErrorSave, operationType, model.TableName(), string(out))
 }
