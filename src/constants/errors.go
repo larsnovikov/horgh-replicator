@@ -6,4 +6,5 @@ const (
 	ErrorSliceCreation = "InterfaceSlice() given a non-slice type"
 	ErrorNoColumn      = "There is no column %s in table %s.%s"
 	ErrorDBConnect     = "Can't connect to db %s"
+	ErrorSave          = "Can't %s model in \"%s\" data: %v"
 )

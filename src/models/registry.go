@@ -1,7 +1,9 @@
 package models
 
 import (
+	"encoding/json"
 	"github.com/siddontang/go-log/log"
+	"github.com/siddontang/go-mysql/replication"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/models/slave"
 )
@@ -34,29 +36,41 @@ func GetModel(name string) interface{ AbstractModel } {
 	return output
 }
 
-func Insert(model AbstractModel) bool {
+func Insert(model AbstractModel, header *replication.EventHeader) bool {
 	if model.BeforeSave() == true && model.Insert() == true {
-		log.Infof(constants.MessageInserted, model.TableName())
+		log.Infof(constants.MessageInserted, header.Timestamp, model.TableName(), header.LogPos)
 		return true
 	}
+
+	logError(model, "insert")
 
 	return false
 }
 
-func Update(model AbstractModel) bool {
+func Update(model AbstractModel, header *replication.EventHeader) bool {
 	if model.BeforeSave() == true && model.Update() == true {
-		log.Infof(constants.MessageUpdated, model.TableName())
+		log.Infof(constants.MessageUpdated, header.Timestamp, model.TableName(), header.LogPos)
 		return true
 	}
+
+	logError(model, "update")
 
 	return false
 }
 
-func Delete(model AbstractModel) bool {
+func Delete(model AbstractModel, header *replication.EventHeader) bool {
 	if model.Delete() == true {
-		log.Infof(constants.MessageDeleted, model.TableName())
+		log.Infof(constants.MessageDeleted, header.Timestamp, model.TableName(), header.LogPos)
 		return true
 	}
 
+	logError(model, "delete")
+
 	return false
+}
+
+func logError(model AbstractModel, operationType string) {
+	out, _ := json.Marshal(model)
+
+	log.Infof(constants.ErrorSave, operationType, model.TableName(), string(out))
 }

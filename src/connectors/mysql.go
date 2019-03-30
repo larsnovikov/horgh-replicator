@@ -24,9 +24,6 @@ func (conn sqlConnection) Ping() bool {
 func (conn sqlConnection) Exec(params map[string]interface{}) bool {
 	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
-		// TODO Надо проверять почему произошла ошибка.
-		// Если duplicate on insert - игнорить
-		// Поменялась структура - паниковать
 		return false
 	}
 
@@ -42,12 +39,12 @@ func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
 	return rows
 }
 
-func GetMysqlConnection(connection Connection, dbName string) interface{} {
+func GetMysqlConnection(connection Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		cred := helpers.GetCredentials(dbName).(helpers.CredentialsDB)
+		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sql.Open("mysql", buildMysqlString(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = Retry(dbName, cred.Credentials, connection, GetMysqlConnection).(Connection)
+			connection = Retry(storageType, cred.Credentials, connection, GetMysqlConnection).(Storage)
 		} else {
 			connection = sqlConnection{conn}
 		}
