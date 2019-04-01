@@ -37,6 +37,7 @@ func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 
 func GetClickhouseConnection(connection Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
+		helpers.ParseDBConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sqlx.Open("clickhouse", buildClickhouseString(cred))
 		if err != nil || conn.Ping() != nil {

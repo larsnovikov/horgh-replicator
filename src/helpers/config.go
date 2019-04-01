@@ -27,7 +27,7 @@ type CredentialsDB struct {
 type CredentialsAMQP struct {
 	Credentials
 	Host string
-	Port string
+	Port int
 	User string
 	Pass string
 }
@@ -62,22 +62,6 @@ func MakeCredentials() {
 		os.Getenv("MASTER_USER"),
 		os.Getenv("MASTER_PASS"),
 		os.Getenv("MASTER_DBNAME"),
-	}
-
-	timeout, _ = strconv.Atoi(os.Getenv("SLAVE_RETRY_TIMEOUT"))
-	attempts, _ = strconv.Atoi(os.Getenv("SLAVE_RETRY_ATTEMPTS"))
-	slavePort, _ := strconv.Atoi(os.Getenv("SLAVE_PORT"))
-	slave = CredentialsDB{
-		Credentials{
-			os.Getenv("SLAVE_TYPE"),
-			timeout,
-			attempts,
-		},
-		os.Getenv("SLAVE_HOST"),
-		slavePort,
-		os.Getenv("SLAVE_USER"),
-		os.Getenv("SLAVE_PASS"),
-		os.Getenv("SLAVE_DBNAME"),
 	}
 
 	timeout, _ = strconv.Atoi(os.Getenv("REPLICATOR_RETRY_TIMEOUT"))
@@ -126,4 +110,41 @@ func getReplicator() CredentialsDB {
 
 func GetTables() []string {
 	return tables
+}
+
+func ParseDBConfig() {
+	timeout, _ := strconv.Atoi(os.Getenv("SLAVE_RETRY_TIMEOUT"))
+	attempts, _ := strconv.Atoi(os.Getenv("SLAVE_RETRY_ATTEMPTS"))
+	slavePort, _ := strconv.Atoi(os.Getenv("SLAVE_PORT"))
+
+	slave = CredentialsDB{
+		Credentials{
+			os.Getenv("SLAVE_TYPE"),
+			timeout,
+			attempts,
+		},
+		os.Getenv("SLAVE_HOST"),
+		slavePort,
+		os.Getenv("SLAVE_USER"),
+		os.Getenv("SLAVE_PASS"),
+		os.Getenv("SLAVE_DBNAME"),
+	}
+}
+
+func ParseAMQPConfig() {
+	timeout, _ := strconv.Atoi(os.Getenv("SLAVE_RETRY_TIMEOUT"))
+	attempts, _ := strconv.Atoi(os.Getenv("SLAVE_RETRY_ATTEMPTS"))
+	slavePort, _ := strconv.Atoi(os.Getenv("SLAVE_PORT"))
+
+	slave = CredentialsAMQP{
+		Credentials{
+			os.Getenv("SLAVE_TYPE"),
+			timeout,
+			attempts,
+		},
+		os.Getenv("SLAVE_HOST"),
+		slavePort,
+		os.Getenv("SLAVE_USER"),
+		os.Getenv("SLAVE_PASS"),
+	}
 }

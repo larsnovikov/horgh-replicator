@@ -3,6 +3,7 @@ package connectors
 import (
 	"github.com/streadway/amqp"
 	"go-binlog-replication/src/helpers"
+	"strconv"
 )
 
 type rabbitmqConnection struct {
@@ -36,6 +37,7 @@ func (conn rabbitmqConnection) Exec(params map[string]interface{}) bool {
 
 func GetRabbitmqConnection(connection Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
+		helpers.ParseAMQPConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsAMQP)
 		conn, err := amqp.Dial(buildRabbitmqString(cred))
 		if err != nil {
@@ -49,5 +51,5 @@ func GetRabbitmqConnection(connection Storage, storageType string) interface{} {
 }
 
 func buildRabbitmqString(cred helpers.CredentialsAMQP) string {
-	return "amqp://" + cred.User + ":" + cred.Pass + "@" + cred.Host + ":" + cred.Port + "/"
+	return "amqp://" + cred.User + ":" + cred.Pass + "@" + cred.Host + ":" + strconv.Itoa(cred.Port) + "/"
 }
