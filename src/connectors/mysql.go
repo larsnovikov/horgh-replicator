@@ -5,6 +5,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/siddontang/go-log/log"
+	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"strconv"
 )
@@ -24,6 +25,7 @@ func (conn sqlConnection) Ping() bool {
 func (conn sqlConnection) Exec(params map[string]interface{}) bool {
 	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
+		log.Warnf(constants.ErrorExecQuery, "mysql", err)
 		return false
 	}
 

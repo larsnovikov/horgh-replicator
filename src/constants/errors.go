@@ -7,4 +7,5 @@ const (
 	ErrorNoColumn      = "There is no column %s in %s.%s"
 	ErrorDBConnect     = "Can't connect to \"%s\""
 	ErrorSave          = "Can't %s model in \"%s\" data: %v"
+	ErrorExecQuery     = "Can't exec query. Type: \"%s\" error: \"%v\""
 )

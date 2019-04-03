@@ -159,11 +159,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d6bb6f3240a488ffe5bb6952b513569d009927dcb20ff94885f87b76cef2b698"
+  digest = "1:7ab9394e38507ed6c39d8843c40152198689e6ce81235a761784fdd7bfa29f37"
   name = "github.com/streadway/amqp"
-  packages = ["."]
+  packages = [
+    ".",
+    "internal/proto",
+  ]
   pruneopts = "UT"
-  revision = "14f78b41ce6da3d698c2ef2cc8c0ea7ce9e26688"
+  revision = "16ed540749f64417a42006ad795b01c0f5d4677a"
 
 [[projects]]
   digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
@@ -184,6 +187,7 @@
     "github.com/kshvakov/clickhouse",
     "github.com/lib/pq",
     "github.com/siddontang/go-log/log",
+    "github.com/siddontang/go-log/loggers",
     "github.com/siddontang/go-mysql/canal",
     "github.com/siddontang/go-mysql/mysql",
     "github.com/siddontang/go-mysql/replication",

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	_ "github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"go-binlog-replication/src/_vendor-20190326172913/github.com/siddontang/go-log/log"
+	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"strconv"
 )
@@ -24,6 +26,7 @@ func (conn postgresqlConnection) Ping() bool {
 func (conn postgresqlConnection) Exec(params map[string]interface{}) bool {
 	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
+		log.Warnf(constants.ErrorExecQuery, "postgresql", err)
 		return false
 	}
 

@@ -2,6 +2,8 @@ package connectors
 
 import (
 	"github.com/streadway/amqp"
+	"go-binlog-replication/src/_vendor-20190326172913/github.com/siddontang/go-log/log"
+	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"strconv"
 )
@@ -29,6 +31,7 @@ func (conn rabbitmqConnection) Exec(params map[string]interface{}) bool {
 		})
 
 	if err != nil {
+		log.Warnf(constants.ErrorExecQuery, "rabbitmq", err)
 		return false
 	}
 

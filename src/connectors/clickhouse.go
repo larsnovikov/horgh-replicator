@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/kshvakov/clickhouse"
+	"go-binlog-replication/src/_vendor-20190326172913/github.com/siddontang/go-log/log"
+	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"strconv"
 )
@@ -25,6 +27,7 @@ func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 	_, err := tx.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 
 	if err != nil {
+		log.Warnf(constants.ErrorExecQuery, "clickhouse", err)
 		return false
 	}
 
