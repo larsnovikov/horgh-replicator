@@ -1,8 +1,8 @@
 package connectors
 
 import (
+	"github.com/siddontang/go-log/log"
 	"github.com/streadway/amqp"
-	"go-binlog-replication/src/_vendor-20190326172913/github.com/siddontang/go-log/log"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"strconv"
