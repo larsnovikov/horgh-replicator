@@ -5,21 +5,22 @@ import (
 	"fmt"
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/replication"
+	"go-binlog-replication/src/connectors2/mysql"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"io/ioutil"
 )
 
 type AbstractConnector interface {
-	Insert(slave Slave) bool
-	Update(slave Slave) bool
-	Delete(slave Slave) bool
+	Insert() bool
+	Update() bool
+	Delete() bool
+	GetConfig() interface{}
 }
 
 type Slave struct {
 	connector AbstractConnector
 	config    Config
-	fields    map[string]ConfigField
 	key       string
 	table     string
 	schema    string
@@ -27,27 +28,11 @@ type Slave struct {
 
 type Config struct {
 	Master ConfigMaster `json:"master"`
-	Slave  ConfigSlave  `json:"slave"`
+	Slave  interface{}  `json:"slave"`
 }
 
 type ConfigMaster struct {
 	Table string `json:"table"`
-}
-
-type ConfigSlave struct {
-	Fields []ConfigField `json:"fields"`
-}
-
-type ConfigBeforeSave struct {
-	Method string   `json:"method"`
-	Params []string `json:"params"`
-}
-
-type ConfigField struct {
-	Name       string           `json:"name"`
-	Key        bool             `json:"key"`
-	Mode       string           `json:"mode"`
-	BeforeSave ConfigBeforeSave `json:"beforeSave"`
 }
 
 var slave Slave
@@ -55,6 +40,12 @@ var slave Slave
 // make model, read config by modelName, set var model
 func MakeSlave(modelName string) {
 	slave = Slave{}
+	// TODO в зависимости от типа слейва подключаем разные коннекторы
+	slave.connector = mysql.Model{}
+
+	// добавляем к базовому конфигу конфиг коннектора
+	slave.config.Slave = slave.connector.GetConfig()
+
 	// make config
 	file := helpers.ReadConfig(modelName)
 	byteValue, _ := ioutil.ReadAll(file)
@@ -62,36 +53,19 @@ func MakeSlave(modelName string) {
 	defer func() {
 		_ = file.Close()
 	}()
-	log.Fatal(err)
-
-	slave.fields = make(map[string]ConfigField)
-	for _, val := range slave.config.Slave.Fields {
-		// set key
-		if val.Key == true && slave.key == "" {
-			slave.key = val.Name
-		}
-
-		// set fields
-		slave.fields[val.Name] = val
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	fmt.Println(slave.config.Slave)
 
 	// set table
 	slave.table = slave.config.Master.Table
 
 	// set schema TODO по идее в конфиге модели должен быть указан название БД но это не точно!
 	slave.schema = helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB).DBname
-	fmt.Println(slave.fields)
 
-	// TODO don'forget to set connector
 	log.Fatal("debug stop")
-}
-
-func (slave Slave) Type() string {
-	return "111"
-}
-
-func (slave Slave) Fields() map[string]ConfigField {
-	return slave.fields
 }
 
 func (slave Slave) TableName() string {
@@ -107,7 +81,7 @@ func (slave Slave) BeforeSave() bool {
 }
 
 func (slave Slave) Insert(header *replication.EventHeader) bool {
-	if slave.BeforeSave() == true && slave.connector.Insert(slave) == true {
+	if slave.BeforeSave() == true && slave.connector.Insert() == true {
 		log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
 		return true
 	}
@@ -118,7 +92,7 @@ func (slave Slave) Insert(header *replication.EventHeader) bool {
 }
 
 func (slave Slave) Update(header *replication.EventHeader) bool {
-	if slave.BeforeSave() == true && slave.connector.Update(slave) == true {
+	if slave.BeforeSave() == true && slave.connector.Update() == true {
 		log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
 		return true
 	}
@@ -129,7 +103,7 @@ func (slave Slave) Update(header *replication.EventHeader) bool {
 }
 
 func (slave Slave) Delete(header *replication.EventHeader) bool {
-	if slave.connector.Delete(slave) == true {
+	if slave.connector.Delete() == true {
 		log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
 		return true
 	}
