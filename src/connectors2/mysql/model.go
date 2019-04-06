@@ -18,6 +18,7 @@ type Model struct {
 	table  string
 	key    string
 	fields map[string]connectors2.ConfigField
+	params map[string]interface{}
 }
 
 func (model *Model) GetConfigStruct() interface{} {
@@ -47,7 +48,7 @@ func (model *Model) Insert() bool {
 		fieldNames = append(fieldNames, value.Name)
 		fieldValues = append(fieldValues, "?")
 
-		// TODO Create params
+		params = append(params, model.params[value.Name])
 	}
 
 	query := fmt.Sprintf(Insert, model.table, strings.Join(fieldNames, ","), strings.Join(fieldValues, ","))
@@ -65,7 +66,7 @@ func (model *Model) Update() bool {
 	for _, value := range model.fields {
 		fields = append(fields, value.Name+"=?")
 
-		// TODO Create params
+		params = append(params, model.params[value.Name])
 	}
 
 	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key)
@@ -80,7 +81,8 @@ func (model *Model) Delete() bool {
 	var params []interface{}
 	query := fmt.Sprintf(Delete, model.table, model.key)
 
-	// TODO Create params
+	params = append(params, model.params[model.key])
+
 	return connectors.Exec(Type, map[string]interface{}{
 		"query":  query,
 		"params": params,

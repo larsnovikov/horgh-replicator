@@ -63,7 +63,7 @@ func MakeSlave(modelName string) {
 	// set schema TODO по идее в конфиге модели должен быть указан название БД но это не точно!
 	slave.schema = helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB).DBname
 
-	log.Fatal("debug stop")
+	//log.Fatal("debug stop")
 }
 
 func (slave Slave) TableName() string {
