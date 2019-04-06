@@ -10,9 +10,7 @@ import (
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models"
-	"go-binlog-replication/src/models/system"
 	"math/rand"
-	"runtime/debug"
 	"strconv"
 )
 
@@ -49,56 +47,56 @@ func (h *binlogHandler) prepareCanal() {
 }
 
 func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Info(r, " ", string(debug.Stack()))
-		}
-	}()
-
-	h.prepareCanal()
-
-	if h.canOperate(e.Table.Schema, e.Table.Name) == false {
-		return nil
-	}
-
-	model := models.GetModel(e.Table.Name)
-
-	var n int
-	var k int
-
-	switch e.Action {
-	case canal.DeleteAction:
-		for _, row := range e.Rows {
-			model.ParseKey(row)
-			if models.Delete(model, e.Header) {
-				h.setMasterPosFromCanal(e)
-			}
-		}
-
-		return nil
-	case canal.UpdateAction:
-		n = 1
-		k = 2
-	case canal.InsertAction:
-		n = 0
-		k = 1
-	}
-
-	for i := n; i < len(e.Rows); i += k {
-		h.GetBinLogData(model, e, i)
-
-		if e.Action == canal.UpdateAction {
-			oldModel := models.GetModel(e.Table.Name)
-			h.GetBinLogData(oldModel, e, i-1)
-			if models.Update(model, e.Header) {
-				h.setMasterPosFromCanal(e)
-			}
-		} else {
-			if models.Insert(model, e.Header) {
-				h.setMasterPosFromCanal(e)
-			}
-		}
-	}
+	//defer func() {
+	//	if r := recover(); r != nil {
+	//		log.Info(r, " ", string(debug.Stack()))
+	//	}
+	//}()
+	//
+	//h.prepareCanal()
+	//
+	//if h.canOperate(e.Table.Schema, e.Table.Name) == false {
+	//	return nil
+	//}
+	//
+	//model := models.GetModel(e.Table.Name)
+	//
+	//var n int
+	//var k int
+	//
+	//switch e.Action {
+	//case canal.DeleteAction:
+	//	for _, row := range e.Rows {
+	//		model.ParseKey(row)
+	//		if models.Delete(model, e.Header) {
+	//			h.setMasterPosFromCanal(e)
+	//		}
+	//	}
+	//
+	//	return nil
+	//case canal.UpdateAction:
+	//	n = 1
+	//	k = 2
+	//case canal.InsertAction:
+	//	n = 0
+	//	k = 1
+	//}
+	//
+	//for i := n; i < len(e.Rows); i += k {
+	//	h.GetBinLogData(model, e, i)
+	//
+	//	if e.Action == canal.UpdateAction {
+	//		oldModel := models.GetModel(e.Table.Name)
+	//		h.GetBinLogData(oldModel, e, i-1)
+	//		if models.Update(model, e.Header) {
+	//			h.setMasterPosFromCanal(e)
+	//		}
+	//	} else {
+	//		if models.Insert(model, e.Header) {
+	//			h.setMasterPosFromCanal(e)
+	//		}
+	//	}
+	//}
 	return nil
 }
 
@@ -127,10 +125,10 @@ func BinlogListener(hash string) {
 func getMasterPosFromCanal(c *canal.Canal, positionPosKey string, positionNameKey string, force bool) (mysql.Position, error) {
 	// try to get coords from storage
 	if force == false {
-		position, err := strconv.ParseUint(system.GetValue(positionPosKey), 10, 32)
+		position, err := strconv.ParseUint(models.GetValue(positionPosKey), 10, 32)
 		if err == nil {
 			pos := mysql.Position{
-				system.GetValue(positionNameKey),
+				models.GetValue(positionNameKey),
 				uint32(position),
 			}
 
@@ -151,8 +149,8 @@ func getMasterPosFromCanal(c *canal.Canal, positionPosKey string, positionNameKe
 func (h *binlogHandler) setMasterPosFromCanal(event *canal.RowsEvent) {
 	curPosition.Pos = event.Header.LogPos
 	// save position
-	system.SetValue(h.positionPosKey, fmt.Sprint(curPosition.Pos))
-	system.SetValue(h.positionNameKey, curPosition.Name)
+	models.SetValue(h.positionPosKey, fmt.Sprint(curPosition.Pos))
+	models.SetValue(h.positionNameKey, curPosition.Name)
 }
 
 func (h *binlogHandler) getMasterPos(canal *canal.Canal, force bool) mysql.Position {

@@ -1,4 +1,4 @@
-package system
+package models
 
 import (
 	"go-binlog-replication/src/connectors"

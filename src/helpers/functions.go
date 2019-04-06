@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/siddontang/go-log/log"
 	"go-binlog-replication/src/constants"
+	"os"
 	"reflect"
 )
 
@@ -27,4 +28,15 @@ func MakeTablePosKey(hash string) (pos string, name string) {
 	name = fmt.Sprintf(constants.PositionNamePrefix, hash)
 
 	return pos, name
+}
+
+func ReadConfig(configName string) *os.File {
+	// TODO check file exist
+	jsonFile, err := os.Open(fmt.Sprintf(constants.ConfigPath, configName))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return jsonFile
 }
