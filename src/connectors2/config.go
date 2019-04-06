@@ -1,6 +1,7 @@
 package connectors2
 
 type ConfigSlave struct {
+	Table  string        `json:"table"`
 	Fields []ConfigField `json:"fields"`
 }
 

@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/replication"
 	"go-binlog-replication/src/connectors2/mysql"
@@ -15,7 +14,8 @@ type AbstractConnector interface {
 	Insert() bool
 	Update() bool
 	Delete() bool
-	GetConfig() interface{}
+	GetConfigStruct() interface{}
+	SetConfig(interface{})
 }
 
 type Slave struct {
@@ -41,10 +41,10 @@ var slave Slave
 func MakeSlave(modelName string) {
 	slave = Slave{}
 	// TODO в зависимости от типа слейва подключаем разные коннекторы
-	slave.connector = mysql.Model{}
+	slave.connector = &mysql.Model{}
 
 	// добавляем к базовому конфигу конфиг коннектора
-	slave.config.Slave = slave.connector.GetConfig()
+	slave.config.Slave = slave.connector.GetConfigStruct()
 
 	// make config
 	file := helpers.ReadConfig(modelName)
@@ -57,10 +57,8 @@ func MakeSlave(modelName string) {
 		log.Fatal(err)
 	}
 
-	fmt.Println(slave.config.Slave)
-
-	// set table
-	slave.table = slave.config.Master.Table
+	// set model params from config
+	slave.connector.SetConfig(slave.config.Slave)
 
 	// set schema TODO по идее в конфиге модели должен быть указан название БД но это не точно!
 	slave.schema = helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB).DBname
