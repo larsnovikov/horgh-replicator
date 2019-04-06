@@ -1,11 +1,18 @@
 package mysql
 
 import (
+	"fmt"
 	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/connectors2"
+	"strings"
 )
 
-const Type = "mysql"
+const (
+	Type   = "mysql"
+	Insert = "INSERT INTO %s(%s) VALUES(%s);"
+	Update = "UPDATE %s SET %s WHERE %s=?;"
+	Delete = "DELETE FROM %s WHERE %s=?"
+)
 
 type Model struct {
 	table  string
@@ -32,12 +39,18 @@ func (model *Model) SetConfig(config interface{}) {
 
 func (model *Model) Insert() bool {
 	var params []interface{}
-	//for _, value := range model.Fields {
-	//	// берем values и формируем строку вида (id, name, status, created) и (?, ?, ?, ?) и массив params
-	//}
+	var fieldNames []string
+	var fieldValues []string
 
-	// собираем запрос вида
-	query := `INSERT INTO ` + model.table + `(id, name, status, created) VALUES(?, ?, ?, ?);`
+	for _, value := range model.fields {
+		// берем values и формируем строку вида (id, name, status, created) и (?, ?, ?, ?) и массив params
+		fieldNames = append(fieldNames, value.Name)
+		fieldValues = append(fieldValues, "?")
+
+		// TODO Create params
+	}
+
+	query := fmt.Sprintf(Insert, model.table, strings.Join(fieldNames, ","), strings.Join(fieldValues, ","))
 
 	return connectors.Exec(Type, map[string]interface{}{
 		"query":  query,
@@ -46,9 +59,30 @@ func (model *Model) Insert() bool {
 }
 
 func (model *Model) Update() bool {
-	return true
+	var params []interface{}
+	var fields []string
+
+	for _, value := range model.fields {
+		fields = append(fields, value.Name+"=?")
+
+		// TODO Create params
+	}
+
+	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key)
+
+	return connectors.Exec(Type, map[string]interface{}{
+		"query":  query,
+		"params": params,
+	})
 }
 
 func (model *Model) Delete() bool {
-	return true
+	var params []interface{}
+	query := fmt.Sprintf(Delete, model.table, model.key)
+
+	// TODO Create params
+	return connectors.Exec(Type, map[string]interface{}{
+		"query":  query,
+		"params": params,
+	})
 }
