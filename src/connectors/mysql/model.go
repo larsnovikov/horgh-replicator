@@ -23,6 +23,10 @@ type Model struct {
 	params      map[string]interface{}
 }
 
+func (model *Model) ParseConfig() {
+	helpers.ParseDBConfig()
+}
+
 func (model Model) GetFields() map[string]connectors.ConfigField {
 	return model.fields
 }

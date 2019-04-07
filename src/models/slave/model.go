@@ -5,10 +5,13 @@ import (
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/replication"
 	"go-binlog-replication/src/connectors"
+	"go-binlog-replication/src/connectors/clickhouse"
 	"go-binlog-replication/src/connectors/mysql"
+	"go-binlog-replication/src/connectors/postgresql"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"io/ioutil"
+	"os"
 )
 
 type AbstractConnector interface {
@@ -22,6 +25,7 @@ type AbstractConnector interface {
 	GetFields() map[string]connectors.ConfigField
 	GetTable() string
 	Connection() helpers.Storage
+	ParseConfig()
 }
 
 type Slave struct {
@@ -43,13 +47,30 @@ type ConfigMaster struct {
 
 var slave Slave
 
+func getModel() AbstractConnector {
+
+	switch os.Getenv("SLAVE_TYPE") {
+	case "mysql":
+		return &mysql.Model{}
+	case "clickhouse":
+		return &clickhouse.Model{}
+	case "postgres":
+		return &postgresql.Model{}
+	}
+
+	return &mysql.Model{}
+}
+
 // make model, read config by modelName, set var model
 func MakeSlave(modelName string) Slave {
 	slave = Slave{}
-	// TODO в зависимости от типа слейва подключаем разные коннекторы
-	slave.connector = &mysql.Model{}
 
-	// добавляем к базовому конфигу конфиг коннектора
+	slave.connector = getModel()
+
+	// parse .env config
+	slave.GetConnector().ParseConfig()
+
+	// add connector config to base config
 	slave.config.Slave = slave.connector.GetConfigStruct()
 
 	// make config

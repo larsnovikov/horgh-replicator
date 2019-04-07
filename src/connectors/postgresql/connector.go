@@ -37,7 +37,6 @@ func (conn postgresqlConnection) Exec(params map[string]interface{}) bool {
 
 func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		helpers.ParseDBConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sql.Open("postgres", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {

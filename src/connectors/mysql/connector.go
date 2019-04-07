@@ -45,7 +45,6 @@ func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
 
 func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		helpers.ParseDBConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sql.Open("mysql", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
