@@ -10,6 +10,8 @@ import (
 	"strconv"
 )
 
+const DSN = "%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local"
+
 type sqlConnection struct {
 	base *sql.DB
 }
@@ -57,6 +59,5 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 }
 
 func buildDSN(cred helpers.CredentialsDB) string {
-	// TODO to constant and sprintf
-	return cred.User + ":" + cred.Pass + "@tcp(" + cred.Host + ":" + strconv.Itoa(cred.Port) + ")/" + cred.DBname + "?charset=utf8&parseTime=True&loc=Local"
+	return fmt.Sprintf(DSN, cred.User, cred.Pass, cred.Host, strconv.Itoa(cred.Port), cred.DBname)
 }

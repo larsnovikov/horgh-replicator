@@ -10,6 +10,8 @@ import (
 	"strconv"
 )
 
+const DSN = "tcp://%s:%s?username=%s&password=%s&database=%s&read_timeout=10&write_timeout=20"
+
 type clickhouseConnection struct {
 	base *sqlx.DB
 }
@@ -54,6 +56,5 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 }
 
 func buildDSN(cred helpers.CredentialsDB) string {
-	// TODO constant and sprintf
-	return "tcp://" + cred.Host + ":" + strconv.Itoa(cred.Port) + "?username=" + cred.User + "&password=" + cred.Pass + "&database=" + cred.DBname + "&read_timeout=10&write_timeout=20"
+	return fmt.Sprintf(DSN, cred.Host, strconv.Itoa(cred.Port), cred.User, cred.Pass, cred.DBname)
 }

@@ -11,6 +11,8 @@ import (
 	"strconv"
 )
 
+const DSN = "host=%s port=%s user=%s password=%s dbname=%s sslmode=disable"
+
 type postgresqlConnection struct {
 	base *sql.DB
 }
@@ -49,6 +51,5 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 }
 
 func buildDSN(cred helpers.CredentialsDB) string {
-	// TODO constant
-	return "host=" + cred.Host + " port=" + strconv.Itoa(cred.Port) + " user=" + cred.User + " password=" + cred.Pass + " dbname=" + cred.DBname + " sslmode=disable"
+	return fmt.Sprintf(DSN, cred.Host, strconv.Itoa(cred.Port), cred.User, cred.Pass, cred.DBname)
 }
