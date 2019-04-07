@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/schema"
-	"go-binlog-replication/src/connectors2"
+	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/models/slave"
 	"time"
@@ -36,7 +36,7 @@ func (m *BinlogParser) ParseBinLog(slave slave.Slave, e *canal.RowsEvent, n int)
 	return nil
 }
 
-func (m *BinlogParser) beforeSave(beforeSave connectors2.ConfigBeforeSave, functionMap map[string]func(interface{}, []interface{}) interface{}, value interface{}) interface{} {
+func (m *BinlogParser) beforeSave(beforeSave connectors.ConfigBeforeSave, functionMap map[string]func(interface{}, []interface{}) interface{}, value interface{}) interface{} {
 	if beforeSave.Method == "" {
 		return value
 	}

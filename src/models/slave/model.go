@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/replication"
-	"go-binlog-replication/src/connectors2"
-	"go-binlog-replication/src/connectors2/mysql"
+	"go-binlog-replication/src/connectors"
+	"go-binlog-replication/src/connectors/mysql"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"io/ioutil"
@@ -19,7 +19,7 @@ type AbstractConnector interface {
 	SetConfig(interface{})
 	SetParams(map[string]interface{})
 	ParseKey([]interface{})
-	GetFields() map[string]connectors2.ConfigField
+	GetFields() map[string]connectors.ConfigField
 	GetTable() string
 	Connection() helpers.Storage
 }

@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"fmt"
-	"go-binlog-replication/src/connectors2"
+	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"strings"
@@ -19,11 +19,11 @@ type Model struct {
 	table       string
 	key         string
 	keyPosition int
-	fields      map[string]connectors2.ConfigField
+	fields      map[string]connectors.ConfigField
 	params      map[string]interface{}
 }
 
-func (model Model) GetFields() map[string]connectors2.ConfigField {
+func (model Model) GetFields() map[string]connectors.ConfigField {
 	return model.fields
 }
 
@@ -34,7 +34,7 @@ func (model *Model) ParseKey(row []interface{}) {
 }
 
 func (model *Model) GetConfigStruct() interface{} {
-	return &connectors2.ConfigSlave{}
+	return &connectors.ConfigSlave{}
 }
 
 func (model *Model) GetTable() string {
@@ -42,10 +42,10 @@ func (model *Model) GetTable() string {
 }
 
 func (model *Model) SetConfig(config interface{}) {
-	model.table = config.(*connectors2.ConfigSlave).Table
+	model.table = config.(*connectors.ConfigSlave).Table
 
-	model.fields = make(map[string]connectors2.ConfigField)
-	for pos, value := range config.(*connectors2.ConfigSlave).Fields {
+	model.fields = make(map[string]connectors.ConfigField)
+	for pos, value := range config.(*connectors.ConfigSlave).Fields {
 		if model.key == "" && value.Key == true {
 			model.key = value.Name
 			model.keyPosition = pos

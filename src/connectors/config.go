@@ -1,4 +1,4 @@
-package connectors2
+package connectors
 
 type ConfigSlave struct {
 	Table  string        `json:"table"`

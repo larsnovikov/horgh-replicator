@@ -1,30 +1,30 @@
-package postgresql
+package clickhouse
 
 import (
 	"fmt"
-	"go-binlog-replication/src/connectors2"
+	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
-	"strconv"
 	"strings"
 )
 
 const (
-	Type   = "postgresql"
-	Insert = "INSERT INTO \"%s\"(%s) VALUES(%s);"
-	Update = "UPDATE \"%s\" SET %s WHERE %s=%s;"
-	Delete = "DELETE FROM \"%s\" WHERE %s=$1"
+	Type   = "clickhouse"
+	Insert = "INSERT INTO %s.%s(%s) VALUES(%s);"
+	Update = "ALTER TABLE %s.%s UPDATE %s WHERE %s=?;"
+	Delete = "ALTER TABLE %s.%s DELETE WHERE %s=?"
 )
 
 type Model struct {
 	table       string
+	schema      string
 	key         string
 	keyPosition int
-	fields      map[string]connectors2.ConfigField
+	fields      map[string]connectors.ConfigField
 	params      map[string]interface{}
 }
 
-func (model Model) GetFields() map[string]connectors2.ConfigField {
+func (model Model) GetFields() map[string]connectors.ConfigField {
 	return model.fields
 }
 
@@ -35,7 +35,7 @@ func (model *Model) ParseKey(row []interface{}) {
 }
 
 func (model *Model) GetConfigStruct() interface{} {
-	return &connectors2.ConfigSlave{}
+	return &connectors.ConfigSlave{}
 }
 
 func (model *Model) GetTable() string {
@@ -43,10 +43,11 @@ func (model *Model) GetTable() string {
 }
 
 func (model *Model) SetConfig(config interface{}) {
-	model.table = config.(*connectors2.ConfigSlave).Table
+	model.table = config.(*connectors.ConfigSlave).Table
+	model.schema = helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
 
-	model.fields = make(map[string]connectors2.ConfigField)
-	for pos, value := range config.(*connectors2.ConfigSlave).Fields {
+	model.fields = make(map[string]connectors.ConfigField)
+	for pos, value := range config.(*connectors.ConfigSlave).Fields {
 		if model.key == "" && value.Key == true {
 			model.key = value.Name
 			model.keyPosition = pos
@@ -65,16 +66,14 @@ func (model *Model) Insert() bool {
 	var fieldNames []string
 	var fieldValues []string
 
-	i := 0
 	for _, value := range model.fields {
-		i++
 		fieldNames = append(fieldNames, value.Name)
-		fieldValues = append(fieldValues, "$"+strconv.Itoa(i))
+		fieldValues = append(fieldValues, "?")
 
 		params = append(params, model.params[value.Name])
 	}
 
-	query := fmt.Sprintf(Insert, model.table, strings.Join(fieldNames, ","), strings.Join(fieldValues, ","))
+	query := fmt.Sprintf(Insert, model.schema, model.table, strings.Join(fieldNames, ","), strings.Join(fieldValues, ","))
 
 	return model.Connection().Exec(map[string]interface{}{
 		"query":  query,
@@ -86,10 +85,8 @@ func (model *Model) Update() bool {
 	var params []interface{}
 	var fields []string
 
-	i := 0
 	for _, value := range model.fields {
-		i++
-		fields = append(fields, value.Name+"=$"+strconv.Itoa(i))
+		fields = append(fields, value.Name+"=?")
 
 		params = append(params, model.params[value.Name])
 	}
@@ -97,8 +94,7 @@ func (model *Model) Update() bool {
 	// add key to params
 	params = append(params, model.params[model.key])
 
-	i++
-	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key, "$"+strconv.Itoa(i))
+	query := fmt.Sprintf(Update, model.schema, model.table, strings.Join(fields, ","), model.key)
 
 	return model.Connection().Exec(map[string]interface{}{
 		"query":  query,
@@ -108,7 +104,7 @@ func (model *Model) Update() bool {
 
 func (model *Model) Delete() bool {
 	var params []interface{}
-	query := fmt.Sprintf(Delete, model.table, model.key)
+	query := fmt.Sprintf(Delete, model.schema, model.table, model.key)
 
 	params = append(params, model.params[model.key])
 

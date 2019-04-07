@@ -2,7 +2,7 @@ package system
 
 import (
 	"database/sql"
-	"go-binlog-replication/src/connectors2/mysql"
+	"go-binlog-replication/src/connectors/mysql"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 )
