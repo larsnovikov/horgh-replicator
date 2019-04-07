@@ -2,8 +2,9 @@ package mysql
 
 import (
 	"fmt"
-	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/connectors2"
+	"go-binlog-replication/src/constants"
+	"go-binlog-replication/src/helpers"
 	"strings"
 )
 
@@ -72,7 +73,7 @@ func (model *Model) Insert() bool {
 
 	query := fmt.Sprintf(Insert, model.table, strings.Join(fieldNames, ","), strings.Join(fieldValues, ","))
 
-	return connectors.Exec(Type, map[string]interface{}{
+	return model.Connection().Exec(map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -93,7 +94,7 @@ func (model *Model) Update() bool {
 
 	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key)
 
-	return connectors.Exec(Type, map[string]interface{}{
+	return model.Connection().Exec(map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -105,8 +106,13 @@ func (model *Model) Delete() bool {
 
 	params = append(params, model.params[model.key])
 
-	return connectors.Exec(Type, map[string]interface{}{
+	return model.Connection().Exec(map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
+}
+
+func (model *Model) Connection() helpers.Storage {
+	helpers.ConnPool.Slave = GetConnection(helpers.ConnPool.Slave, constants.DBSlave).(helpers.Storage)
+	return helpers.ConnPool.Slave
 }

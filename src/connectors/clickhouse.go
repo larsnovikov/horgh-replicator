@@ -38,13 +38,13 @@ func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func GetClickhouseConnection(connection Storage, storageType string) interface{} {
+func GetClickhouseConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		helpers.ParseDBConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sqlx.Open("clickhouse", buildClickhouseString(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = Retry(storageType, cred.Credentials, connection, GetClickhouseConnection).(Storage)
+			connection = helpers.Retry(storageType, cred.Credentials, connection, GetClickhouseConnection).(helpers.Storage)
 		} else {
 			connection = clickhouseConnection{conn}
 		}

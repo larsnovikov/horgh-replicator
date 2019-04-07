@@ -1,4 +1,4 @@
-package connectors
+package mysql
 
 import (
 	"database/sql"
@@ -41,13 +41,13 @@ func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
 	return rows
 }
 
-func GetMysqlConnection(connection Storage, storageType string) interface{} {
+func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		helpers.ParseDBConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
-		conn, err := sql.Open("mysql", buildMysqlString(cred))
+		conn, err := sql.Open("mysql", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = Retry(storageType, cred.Credentials, connection, GetMysqlConnection).(Storage)
+			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
 		} else {
 			connection = sqlConnection{conn}
 		}
@@ -56,6 +56,7 @@ func GetMysqlConnection(connection Storage, storageType string) interface{} {
 	return connection
 }
 
-func buildMysqlString(cred helpers.CredentialsDB) string {
+func buildDSN(cred helpers.CredentialsDB) string {
+	// TODO to constant and sprintf
 	return cred.User + ":" + cred.Pass + "@tcp(" + cred.Host + ":" + strconv.Itoa(cred.Port) + ")/" + cred.DBname + "?charset=utf8&parseTime=True&loc=Local"
 }

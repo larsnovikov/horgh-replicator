@@ -33,13 +33,13 @@ func (conn postgresqlConnection) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func GetPostgresqlConnection(connection Storage, storageType string) interface{} {
+func GetPostgresqlConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		helpers.ParseDBConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sql.Open("postgres", buildPostgresqlString(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = Retry(storageType, cred.Credentials, connection, GetPostgresqlConnection).(Storage)
+			connection = helpers.Retry(storageType, cred.Credentials, connection, GetPostgresqlConnection).(helpers.Storage)
 		} else {
 			connection = postgresqlConnection{conn}
 		}

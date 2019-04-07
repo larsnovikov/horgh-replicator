@@ -38,13 +38,13 @@ func (conn rabbitmqConnection) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func GetRabbitmqConnection(connection Storage, storageType string) interface{} {
+func GetRabbitmqConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		helpers.ParseAMQPConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsAMQP)
 		conn, err := amqp.Dial(buildRabbitmqString(cred))
 		if err != nil {
-			connection = Retry(storageType, cred.Credentials, connection, GetRabbitmqConnection).(Storage)
+			connection = helpers.Retry(storageType, cred.Credentials, connection, GetRabbitmqConnection).(helpers.Storage)
 		} else {
 			connection = rabbitmqConnection{conn}
 		}

@@ -21,6 +21,7 @@ type AbstractConnector interface {
 	ParseKey([]interface{})
 	GetFields() map[string]connectors2.ConfigField
 	GetTable() string
+	Connection() helpers.Storage
 }
 
 type Slave struct {
