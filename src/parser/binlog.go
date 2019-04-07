@@ -11,6 +11,7 @@ import (
 	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models"
 	"math/rand"
+	"runtime/debug"
 	"strconv"
 )
 
@@ -20,6 +21,7 @@ type binlogHandler struct {
 	tableHash       string
 	positionNameKey string
 	positionPosKey  string
+	slave           models.Slave
 }
 
 var curPosition mysql.Position
@@ -47,56 +49,55 @@ func (h *binlogHandler) prepareCanal() {
 }
 
 func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
-	//defer func() {
-	//	if r := recover(); r != nil {
-	//		log.Info(r, " ", string(debug.Stack()))
-	//	}
-	//}()
-	//
-	//h.prepareCanal()
-	//
-	//if h.canOperate(e.Table.Schema, e.Table.Name) == false {
-	//	return nil
-	//}
-	//
-	//model := models.GetModel(e.Table.Name)
-	//
-	//var n int
-	//var k int
-	//
-	//switch e.Action {
-	//case canal.DeleteAction:
-	//	for _, row := range e.Rows {
-	//		model.ParseKey(row)
-	//		if models.Delete(model, e.Header) {
-	//			h.setMasterPosFromCanal(e)
-	//		}
-	//	}
-	//
-	//	return nil
-	//case canal.UpdateAction:
-	//	n = 1
-	//	k = 2
-	//case canal.InsertAction:
-	//	n = 0
-	//	k = 1
-	//}
-	//
-	//for i := n; i < len(e.Rows); i += k {
-	//	h.GetBinLogData(model, e, i)
-	//
-	//	if e.Action == canal.UpdateAction {
-	//		oldModel := models.GetModel(e.Table.Name)
-	//		h.GetBinLogData(oldModel, e, i-1)
-	//		if models.Update(model, e.Header) {
-	//			h.setMasterPosFromCanal(e)
-	//		}
-	//	} else {
-	//		if models.Insert(model, e.Header) {
-	//			h.setMasterPosFromCanal(e)
-	//		}
-	//	}
-	//}
+	defer func() {
+		if r := recover(); r != nil {
+			log.Info(r, " ", string(debug.Stack()))
+		}
+	}()
+
+	h.prepareCanal()
+
+	if h.canOperate(e.Table.Schema, e.Table.Name) == false {
+		return nil
+	}
+
+	h.slave.ClearParams()
+
+	var n int
+	var k int
+
+	switch e.Action {
+	case canal.DeleteAction:
+		for _, row := range e.Rows {
+			h.slave.GetConnector().ParseKey(row)
+			if h.slave.Delete(e.Header) {
+				h.setMasterPosFromCanal(e)
+			}
+		}
+
+		return nil
+	case canal.UpdateAction:
+		n = 1
+		k = 2
+	case canal.InsertAction:
+		n = 0
+		k = 1
+	}
+
+	for i := n; i < len(e.Rows); i += k {
+		h.ParseBinLog(h.slave, e, i)
+
+		//log.Fatal("debug stop")
+		if e.Action == canal.UpdateAction {
+			if h.slave.Update(e.Header) {
+				h.setMasterPosFromCanal(e)
+			}
+		} else {
+			if h.slave.Insert(e.Header) {
+				h.setMasterPosFromCanal(e)
+			}
+		}
+	}
 	return nil
 }
 
@@ -104,7 +105,7 @@ func (h *binlogHandler) String() string {
 	return "binlogHandler"
 }
 
-func BinlogListener(hash string) {
+func BinlogListener(hash string, slave models.Slave) {
 	// set position keys
 	positionPosKey, positionNameKey := helpers.MakeTablePosKey(hash)
 
@@ -116,6 +117,7 @@ func BinlogListener(hash string) {
 				tableHash:       hash,
 				positionNameKey: positionNameKey,
 				positionPosKey:  positionPosKey,
+				slave:           slave,
 			})
 			err = c.RunFrom(coords)
 		}

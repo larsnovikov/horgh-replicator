@@ -14,8 +14,8 @@ func main() {
 		DBName := helpers.GetCredentials("master").(helpers.CredentialsDB).DBname
 		tableHash := fmt.Sprintf("%s.%s", DBName, tableName)
 		go func() {
-			models.MakeSlave(tableName)
-			parser.BinlogListener(tableHash)
+			slave := models.MakeSlave(tableName)
+			parser.BinlogListener(tableHash, slave)
 		}()
 	}
 

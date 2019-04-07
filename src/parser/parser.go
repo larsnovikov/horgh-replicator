@@ -2,58 +2,48 @@ package parser
 
 import (
 	"fmt"
-	"github.com/json-iterator/go"
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/schema"
 	"go-binlog-replication/src/constants"
-	"reflect"
-	"strings"
+	"go-binlog-replication/src/models"
 	"time"
 )
 
 type BinlogParser struct{}
 
-func (m *BinlogParser) GetBinLogData(element interface{}, e *canal.RowsEvent, n int) error {
-	var columnName string
-	var ok bool
-	v := reflect.ValueOf(element)
-	s := reflect.Indirect(v)
-	t := s.Type()
-	num := t.NumField()
-	for k := 0; k < num; k++ {
-		parsedTag := parseTagSetting(t.Field(k).Tag)
-		name := s.Field(k).Type().Name()
+func (m *BinlogParser) ParseBinLog(slave models.Slave, e *canal.RowsEvent, n int) error {
+	masterFields := slave.GetConfig().Master.Fields
+	slaveFields := slave.GetConnector().GetFields()
 
-		if columnName, ok = parsedTag["COLUMN"]; !ok || columnName == "COLUMN" {
-			continue
+	params := make(map[string]interface{})
+	var fieldType string
+	for key, fieldName := range masterFields {
+		fieldType = slaveFields[fieldName].Mode
+		row := e.Rows[0]
+		if len(e.Rows) > 1 {
+			row = e.Rows[1]
 		}
-
-		switch name {
-		case "bool":
-			s.Field(k).SetBool(m.boolHelper(e, n, columnName))
-		case "int":
-			s.Field(k).SetInt(m.intHelper(e, n, columnName))
-		case "string":
-			s.Field(k).SetString(m.stringHelper(e, n, columnName))
-		case "Time":
-			timeVal := m.dateTimeHelper(e, n, columnName)
-			s.Field(k).Set(reflect.ValueOf(timeVal))
-		case "float64":
-			s.Field(k).SetFloat(m.floatHelper(e, n, columnName))
-		default:
-			if _, ok := parsedTag["FROMJSON"]; ok {
-
-				newObject := reflect.New(s.Field(k).Type()).Interface()
-				json := m.stringHelper(e, n, columnName)
-
-				jsoniter.Unmarshal([]byte(json), &newObject)
-
-				s.Field(k).Set(reflect.ValueOf(newObject).Elem().Convert(s.Field(k).Type()))
-			}
-		}
+		m.prepareType(fieldName, fieldType, row[key], params)
 	}
+
 	return nil
 }
+
+func (m *BinlogParser) prepareType(fieldName string, fieldType string, value interface{}, params map[string]interface{}) {
+	switch fieldType {
+	case "bool":
+		params[fieldName] = value.(bool)
+	case "int":
+		params[fieldName] = value.(int32)
+	case "string":
+		params[fieldName] = value.(string)
+	case "float":
+		params[fieldName] = value.(float64)
+	case "timestamp":
+		params[fieldName] = value // TODO ???
+	}
+}
+
 func (m *BinlogParser) dateTimeHelper(e *canal.RowsEvent, n int, columnName string) time.Time {
 
 	columnId := m.getBinlogIdByName(e, columnName)
@@ -155,21 +145,4 @@ func (m *BinlogParser) getBinlogIdByName(e *canal.RowsEvent, name string) int {
 		}
 	}
 	panic(fmt.Sprintf(constants.ErrorNoColumn, name, e.Table.Schema, e.Table.Name))
-}
-
-func parseTagSetting(tags reflect.StructTag) map[string]string {
-	settings := map[string]string{}
-	for _, str := range []string{tags.Get("sql"), tags.Get("gorm")} {
-		tags := strings.Split(str, ";")
-		for _, value := range tags {
-			v := strings.Split(value, ":")
-			k := strings.TrimSpace(strings.ToUpper(v[0]))
-			if len(v) >= 2 {
-				settings[k] = strings.Join(v[1:], ":")
-			} else {
-				settings[k] = k
-			}
-		}
-	}
-	return settings
 }
