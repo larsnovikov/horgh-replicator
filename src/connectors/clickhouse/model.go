@@ -99,11 +99,7 @@ func (model *Model) Update() bool {
 	// add key to params
 	params = append(params, model.params[model.key])
 
-	query := fmt.Sprintf(Update, model.schema, model.table, strings.Join(fields, ","), model.key)
-
-	fmt.Println(query)
-	fmt.Println(params)
-	//log.Fatal("555")
+	query := fmt.Sprintf(Update, model.schema, model.table, strings.Join(fields, ", "), model.key)
 
 	return model.Connection().Exec(map[string]interface{}{
 		"query":  query,

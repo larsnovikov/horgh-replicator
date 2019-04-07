@@ -55,7 +55,8 @@ func (m *BinlogParser) prepareType(fieldName string, fieldType string, value int
 	case "float":
 		params[fieldName] = value.(float64)
 	case "timestamp":
-		params[fieldName] = value // TODO ???
+		t, _ := time.Parse("2006-01-02 15:04:05", value.(string))
+		params[fieldName] = t
 	}
 }
 
