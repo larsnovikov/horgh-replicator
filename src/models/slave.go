@@ -29,7 +29,6 @@ type Slave struct {
 	config    Config
 	key       string
 	table     string
-	schema    string
 }
 
 type Config struct {
@@ -67,9 +66,6 @@ func MakeSlave(modelName string) Slave {
 	// set model params from config
 	slave.connector.SetConfig(slave.config.Slave)
 
-	// set schema TODO по идее в конфиге модели должен быть указан название БД но это не точно!
-	slave.schema = helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB).DBname
-
 	return slave
 }
 
@@ -98,10 +94,6 @@ func (slave Slave) ClearParams() {
 
 func (slave Slave) TableName() string {
 	return slave.GetConnector().GetTable()
-}
-
-func (slave Slave) SchemaName() string {
-	return slave.schema
 }
 
 func (slave Slave) BeforeSave() bool {

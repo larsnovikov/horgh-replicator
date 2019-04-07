@@ -1,4 +1,4 @@
-package connectors
+package clickhouse
 
 import (
 	"fmt"
@@ -38,13 +38,13 @@ func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func GetClickhouseConnection(connection helpers.Storage, storageType string) interface{} {
+func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		helpers.ParseDBConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
-		conn, err := sqlx.Open("clickhouse", buildClickhouseString(cred))
+		conn, err := sqlx.Open("clickhouse", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = helpers.Retry(storageType, cred.Credentials, connection, GetClickhouseConnection).(helpers.Storage)
+			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
 		} else {
 			connection = clickhouseConnection{conn}
 		}
@@ -53,6 +53,7 @@ func GetClickhouseConnection(connection helpers.Storage, storageType string) int
 	return connection
 }
 
-func buildClickhouseString(cred helpers.CredentialsDB) string {
+func buildDSN(cred helpers.CredentialsDB) string {
+	// TODO constant and sprintf
 	return "tcp://" + cred.Host + ":" + strconv.Itoa(cred.Port) + "?username=" + cred.User + "&password=" + cred.Pass + "&database=" + cred.DBname + "&read_timeout=10&write_timeout=20"
 }

@@ -1,4 +1,4 @@
-package connectors
+package postgresql
 
 import (
 	"database/sql"
@@ -33,13 +33,13 @@ func (conn postgresqlConnection) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func GetPostgresqlConnection(connection helpers.Storage, storageType string) interface{} {
+func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		helpers.ParseDBConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
-		conn, err := sql.Open("postgres", buildPostgresqlString(cred))
+		conn, err := sql.Open("postgres", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = helpers.Retry(storageType, cred.Credentials, connection, GetPostgresqlConnection).(helpers.Storage)
+			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
 		} else {
 			connection = postgresqlConnection{conn}
 		}
@@ -48,6 +48,7 @@ func GetPostgresqlConnection(connection helpers.Storage, storageType string) int
 	return connection
 }
 
-func buildPostgresqlString(cred helpers.CredentialsDB) string {
+func buildDSN(cred helpers.CredentialsDB) string {
+	// TODO constant
 	return "host=" + cred.Host + " port=" + strconv.Itoa(cred.Port) + " user=" + cred.User + " password=" + cred.Pass + " dbname=" + cred.DBname + " sslmode=disable"
 }
