@@ -6,13 +6,13 @@ import (
 	"github.com/siddontang/go-mysql/schema"
 	"go-binlog-replication/src/connectors2"
 	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/models"
+	"go-binlog-replication/src/models/slave"
 	"time"
 )
 
 type BinlogParser struct{}
 
-func (m *BinlogParser) ParseBinLog(slave models.Slave, e *canal.RowsEvent, n int) error {
+func (m *BinlogParser) ParseBinLog(slave slave.Slave, e *canal.RowsEvent, n int) error {
 	masterFields := slave.GetConfig().Master.Fields
 	slaveFields := slave.GetConnector().GetFields()
 

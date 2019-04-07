@@ -1,4 +1,4 @@
-package models
+package slave
 
 import (
 	"encoding/json"

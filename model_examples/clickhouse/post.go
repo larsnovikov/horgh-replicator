@@ -1,9 +1,9 @@
 package slave
 
 import (
-	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
+	"go-binlog-replication/src/models/system"
 	"time"
 )
 
@@ -43,7 +43,7 @@ func (post *Post) Insert() bool {
 		post.Created,
 	}
 
-	res := connectors.Exec(post.getType(), map[string]interface{}{
+	res := system.Exec(post.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -60,7 +60,7 @@ func (post *Post) Update() bool {
 		post.Id,
 	}
 
-	res := connectors.Exec(post.getType(), map[string]interface{}{
+	res := system.Exec(post.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -74,7 +74,7 @@ func (post *Post) Delete() bool {
 		post.Id,
 	}
 
-	res := connectors.Exec(post.getType(), map[string]interface{}{
+	res := system.Exec(post.getType(), map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})

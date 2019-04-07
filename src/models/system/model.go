@@ -1,7 +1,6 @@
-package models
+package system
 
 import (
-	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
 )
 
@@ -16,7 +15,7 @@ func GetValue(key string) string {
 		key,
 	}
 
-	res := connectors.Get(map[string]interface{}{
+	res := Get(map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})
@@ -45,7 +44,7 @@ func SetValue(key string, value string) bool {
 		value,
 	}
 
-	res := connectors.Exec(constants.DBReplicator, map[string]interface{}{
+	res := Exec(constants.DBReplicator, map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})

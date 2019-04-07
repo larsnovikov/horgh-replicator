@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"go-binlog-replication/src/helpers"
-	"go-binlog-replication/src/models"
+	slave2 "go-binlog-replication/src/models/slave"
 	"go-binlog-replication/src/parser"
 	"time"
 )
@@ -13,7 +13,7 @@ func main() {
 	for _, tableName := range helpers.GetTables() {
 		DBName := helpers.GetCredentials("master").(helpers.CredentialsDB).DBname
 		tableHash := fmt.Sprintf("%s.%s", DBName, tableName)
-		slave := models.MakeSlave(tableName)
+		slave := slave2.MakeSlave(tableName)
 		go func() {
 			parser.BinlogListener(tableHash, slave)
 		}()
