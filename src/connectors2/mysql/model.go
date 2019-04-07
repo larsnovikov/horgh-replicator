@@ -29,7 +29,7 @@ func (model Model) GetFields() map[string]connectors2.ConfigField {
 func (model *Model) ParseKey(row []interface{}) {
 	// TODO в зависимости от типа поля ключа, тут могут быть разные приведения типов
 	// а если будет составной ключ вообще будет тяжко
-	model.params["key"] = int(row[model.keyPosition].(int32))
+	model.params[model.key] = int(row[model.keyPosition].(int32))
 }
 
 func (model *Model) GetConfigStruct() interface{} {

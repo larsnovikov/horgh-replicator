@@ -13,10 +13,11 @@ func main() {
 	for _, tableName := range helpers.GetTables() {
 		DBName := helpers.GetCredentials("master").(helpers.CredentialsDB).DBname
 		tableHash := fmt.Sprintf("%s.%s", DBName, tableName)
+		slave := models.MakeSlave(tableName)
 		go func() {
-			slave := models.MakeSlave(tableName)
 			parser.BinlogListener(tableHash, slave)
 		}()
+		time.Sleep(5 * time.Second)
 	}
 
 	time.Sleep(60 * time.Minute)
