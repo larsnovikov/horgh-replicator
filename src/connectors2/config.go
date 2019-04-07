@@ -6,8 +6,8 @@ type ConfigSlave struct {
 }
 
 type ConfigBeforeSave struct {
-	Method string   `json:"method"`
-	Params []string `json:"params"`
+	Method string        `json:"method"`
+	Params []interface{} `json:"params"`
 }
 
 type ConfigField struct {

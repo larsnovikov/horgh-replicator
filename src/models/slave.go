@@ -72,6 +72,17 @@ func MakeSlave(modelName string) Slave {
 	return slave
 }
 
+func (slave Slave) GetBeforeSaveMethods() map[string]func(interface{}, []interface{}) interface{} {
+	// TODO fix violent pornography
+	functions := map[string]func(interface{}, []interface{}) interface{}{
+		"SetValue": func(value interface{}, params []interface{}) interface{} {
+			return helpers.SetValue(value, params)
+		},
+	}
+
+	return functions
+}
+
 func (slave Slave) GetConfig() Config {
 	return slave.config
 }

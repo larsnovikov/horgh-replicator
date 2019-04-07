@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/schema"
+	"go-binlog-replication/src/connectors2"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/models"
 	"time"
@@ -17,17 +18,30 @@ func (m *BinlogParser) ParseBinLog(slave models.Slave, e *canal.RowsEvent, n int
 
 	params := make(map[string]interface{})
 	var fieldType string
+	var value interface{}
 	for key, fieldName := range masterFields {
 		fieldType = slaveFields[fieldName].Mode
 		row := e.Rows[0]
 		if len(e.Rows) > 1 {
 			row = e.Rows[1]
 		}
-		m.prepareType(fieldName, fieldType, row[key], params)
+		// prepare value before save
+		value = m.beforeSave(slaveFields[fieldName].BeforeSave, slave.GetBeforeSaveMethods(), row[key])
+		// prepare value type
+		m.prepareType(fieldName, fieldType, value, params)
+		// set values to storage
 		slave.GetConnector().SetParams(params)
 	}
 
 	return nil
+}
+
+func (m *BinlogParser) beforeSave(beforeSave connectors2.ConfigBeforeSave, functionMap map[string]func(interface{}, []interface{}) interface{}, value interface{}) interface{} {
+	if beforeSave.Method == "" {
+		return value
+	}
+
+	return functionMap[beforeSave.Method](value, beforeSave.Params)
 }
 
 func (m *BinlogParser) prepareType(fieldName string, fieldType string, value interface{}, params map[string]interface{}) {
