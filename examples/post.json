@@ -1,0 +1,36 @@
+{
+  "master": {
+    "table": "post",
+    "fields": [
+      "id",
+      "title",
+      "text",
+      "created"
+    ]
+  },
+  "slave": {
+    "table": "post",
+    "fields": [
+      {
+        "name": "id",
+        "key": true,
+        "mode": "int"
+      },
+      {
+        "name": "title",
+        "key": false,
+        "mode": "string"
+      },
+      {
+        "name": "text",
+        "key": false,
+        "mode": "string"
+      },
+      {
+        "name": "created",
+        "key": false,
+        "mode": "timestamp"
+      }
+    ]
+  }
+}

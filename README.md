@@ -21,6 +21,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Testing
 
+- Copy `examples/user.json` and `examples/post.json` to `src/slave_models`
 - Execute `sql/test.sql` in your MySQL master and see output.
 
   ##### OR 
@@ -29,12 +30,5 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Add tables to replicator
 
-- Go to `src/models/slave`.
-- Create model for your table like `model_examples/<your_slave_type>/user.go` or `model_examples/<your_slave_type>post.go`.
-- Go to `src/models/registry.go`.
-- Add your model to method `GetModel(name string) interface{ AbstractModel }`.
-- Create table on MySQL slave.
-
-### Secure columns
-
-If you have private data in column, you can add something like `user.Status = "***"` in function `BeforeSave` in model, and all values of column will be "***".
+- Create json config for your table like `examples/user.json` or `examples.post.json`.
+- Create table on slave.

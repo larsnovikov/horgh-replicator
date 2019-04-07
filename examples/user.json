@@ -1,0 +1,42 @@
+{
+  "master": {
+    "table": "user",
+    "fields": [
+      "id",
+      "name",
+      "status",
+      "created"
+    ]
+  },
+  "slave": {
+    "table": "user",
+    "fields": [
+      {
+        "name": "id",
+        "key": true,
+        "mode": "int"
+      },
+      {
+        "name": "name",
+        "key": false,
+        "mode": "string"
+      },
+      {
+        "name": "status",
+        "key": false,
+        "mode": "string",
+        "beforeSave": {
+          "method": "SetValue",
+          "params": [
+            "***"
+          ]
+        }
+      },
+      {
+        "name": "created",
+        "key": false,
+        "mode": "timestamp"
+      }
+    ]
+  }
+}
