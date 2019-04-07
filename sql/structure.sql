@@ -37,6 +37,8 @@ CREATE TABLE test.post
 /*For PostgreSQL Slave*/
 CREATE DATABASE test;
 
+/*\c test*/
+
 CREATE TABLE public."user"
 (
   id BIGSERIAL PRIMARY KEY,

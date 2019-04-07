@@ -54,7 +54,7 @@ func getModel() AbstractConnector {
 		return &mysql.Model{}
 	case "clickhouse":
 		return &clickhouse.Model{}
-	case "postgres":
+	case "postgresql":
 		return &postgresql.Model{}
 	}
 

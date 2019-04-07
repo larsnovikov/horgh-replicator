@@ -11,9 +11,9 @@ import (
 
 const (
 	Type   = "postgresql"
-	Insert = "INSERT INTO \"%s\"(%s) VALUES(%s);"
-	Update = "UPDATE \"%s\" SET %s WHERE %s=%s;"
-	Delete = "DELETE FROM \"%s\" WHERE %s=$1"
+	Insert = `INSERT INTO "%s"(%s) VALUES(%s);`
+	Update = `UPDATE "%s" SET %s WHERE %s=%s;`
+	Delete = `DELETE FROM "%s" WHERE %s=$1`
 )
 
 type Model struct {

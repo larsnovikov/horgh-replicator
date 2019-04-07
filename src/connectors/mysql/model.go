@@ -10,9 +10,9 @@ import (
 
 const (
 	Type   = "mysql"
-	Insert = "INSERT INTO %s(%s) VALUES(%s);"
-	Update = "UPDATE %s SET %s WHERE %s=?;"
-	Delete = "DELETE FROM %s WHERE %s=?"
+	Insert = `INSERT INTO %s(%s) VALUES(%s);`
+	Update = `UPDATE %s SET %s WHERE %s=?;`
+	Delete = `DELETE FROM %s WHERE %s=?;`
 )
 
 type Model struct {

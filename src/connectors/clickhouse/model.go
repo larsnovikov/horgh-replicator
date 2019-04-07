@@ -10,9 +10,9 @@ import (
 
 const (
 	Type   = "clickhouse"
-	Insert = "INSERT INTO %s.%s(%s) VALUES(%s);"
-	Update = "ALTER TABLE %s.%s UPDATE %s WHERE %s=?;"
-	Delete = "ALTER TABLE %s.%s DELETE WHERE %s=?"
+	Insert = `INSERT INTO %s.%s(%s) VALUES(%s);`
+	Update = `ALTER TABLE %s.%s UPDATE %s WHERE %s=?;`
+	Delete = `ALTER TABLE %s.%s DELETE WHERE %s=?;`
 )
 
 type Model struct {
