@@ -2,9 +2,7 @@ package connectors
 
 import (
 	"database/sql"
-	"go-binlog-replication/src/connectors2/clickhouse"
 	"go-binlog-replication/src/connectors2/mysql"
-	"go-binlog-replication/src/connectors2/postgresql"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 )
@@ -25,18 +23,6 @@ func Exec(mode string, params map[string]interface{}) bool {
 	case constants.DBReplicator:
 		connectionPool.replicator = mysql.GetConnection(connectionPool.replicator, constants.DBReplicator).(helpers.ConnectionReplicator)
 		return connectionPool.replicator.Exec(params)
-	// adapters for slave storages
-	case "mysql":
-		connectionPool.slave = mysql.GetConnection(connectionPool.slave, constants.DBSlave).(helpers.Storage)
-		return connectionPool.slave.Exec(params)
-	case "clickhouse":
-		connectionPool.slave = clickhouse.GetConnection(connectionPool.slave, constants.DBSlave).(helpers.Storage)
-		return connectionPool.slave.Exec(params)
-	case "postgresql":
-		connectionPool.slave = postgresql.GetConnection(connectionPool.slave, constants.DBSlave).(helpers.Storage)
-		return connectionPool.slave.Exec(params)
-		/*case "rabbitmq":
-		connectionPool.slave = GetConnection(connectionPool.slave, constants.DBSlave).(Storage)*/
 	}
 
 	return false

@@ -5,14 +5,15 @@ import (
 	"go-binlog-replication/src/connectors2"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
+	"strconv"
 	"strings"
 )
 
 const (
 	Type   = "postgresql"
-	Insert = "INSERT INTO %s(%s) VALUES(%s);"
-	Update = "UPDATE %s SET %s WHERE %s=?;"
-	Delete = "DELETE FROM %s WHERE %s=?"
+	Insert = "INSERT INTO \"%s\"(%s) VALUES(%s);"
+	Update = "UPDATE \"%s\" SET %s WHERE %s=%s;"
+	Delete = "DELETE FROM \"%s\" WHERE %s=$1"
 )
 
 type Model struct {
@@ -64,9 +65,11 @@ func (model *Model) Insert() bool {
 	var fieldNames []string
 	var fieldValues []string
 
+	i := 0
 	for _, value := range model.fields {
+		i++
 		fieldNames = append(fieldNames, value.Name)
-		fieldValues = append(fieldValues, "?")
+		fieldValues = append(fieldValues, "$"+strconv.Itoa(i))
 
 		params = append(params, model.params[value.Name])
 	}
@@ -83,8 +86,10 @@ func (model *Model) Update() bool {
 	var params []interface{}
 	var fields []string
 
+	i := 0
 	for _, value := range model.fields {
-		fields = append(fields, value.Name+"=?")
+		i++
+		fields = append(fields, value.Name+"=$"+strconv.Itoa(i))
 
 		params = append(params, model.params[value.Name])
 	}
@@ -92,7 +97,8 @@ func (model *Model) Update() bool {
 	// add key to params
 	params = append(params, model.params[model.key])
 
-	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key)
+	i++
+	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key, "$"+strconv.Itoa(i))
 
 	return model.Connection().Exec(map[string]interface{}{
 		"query":  query,
