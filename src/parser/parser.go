@@ -24,6 +24,7 @@ func (m *BinlogParser) ParseBinLog(slave models.Slave, e *canal.RowsEvent, n int
 			row = e.Rows[1]
 		}
 		m.prepareType(fieldName, fieldType, row[key], params)
+		slave.GetConnector().SetParams(params)
 	}
 
 	return nil

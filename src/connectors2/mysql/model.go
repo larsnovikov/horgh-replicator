@@ -64,7 +64,6 @@ func (model *Model) Insert() bool {
 	var fieldValues []string
 
 	for _, value := range model.fields {
-		// берем values и формируем строку вида (id, name, status, created) и (?, ?, ?, ?) и массив params
 		fieldNames = append(fieldNames, value.Name)
 		fieldValues = append(fieldValues, "?")
 
