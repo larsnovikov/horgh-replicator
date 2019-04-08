@@ -8,4 +8,5 @@ const (
 	ErrorDBConnect     = "Can't connect to \"%s\""
 	ErrorSave          = "Can't %s model in \"%s\" data: %v"
 	ErrorExecQuery     = "Can't exec query. Type: \"%s\" error: \"%v\""
+	ErrorNoModelFile   = "Model file \"%s\" not exists"
 )

@@ -31,8 +31,12 @@ func MakeTablePosKey(hash string) (pos string, name string) {
 }
 
 func ReadConfig(configName string) *os.File {
-	// TODO check file exist
-	jsonFile, err := os.Open(fmt.Sprintf(constants.ConfigPath, configName))
+	fileName := fmt.Sprintf(constants.ConfigPath, configName)
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+		log.Fatalf(constants.ErrorNoModelFile, fileName)
+	}
+
+	jsonFile, err := os.Open(fileName)
 
 	if err != nil {
 		log.Fatal(err)
