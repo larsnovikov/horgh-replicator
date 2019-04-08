@@ -1,7 +1,7 @@
 FROM golang:1.10
 
 RUN apt-get update
-RUN apt-get -y install curl g++ make bzip2 nano
+RUN apt-get -y install curl g++ make bzip2 nano unixodbc unixodbc-dev
 
 WORKDIR /go/src/go-binlog-replication
 COPY . .

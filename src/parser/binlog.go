@@ -6,10 +6,9 @@ import (
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go-mysql/replication"
-	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
-	"go-binlog-replication/src/models"
+	"go-binlog-replication/src/models/slave"
 	"go-binlog-replication/src/models/system"
 	"math/rand"
 	"runtime/debug"
@@ -22,6 +21,7 @@ type binlogHandler struct {
 	tableHash       string
 	positionNameKey string
 	positionPosKey  string
+	slave           slave.Slave
 }
 
 var curPosition mysql.Position
@@ -61,7 +61,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		return nil
 	}
 
-	model := models.GetModel(e.Table.Name)
+	h.slave.ClearParams()
 
 	var n int
 	var k int
@@ -69,8 +69,8 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	switch e.Action {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
-			model.ParseKey(row)
-			if models.Delete(model, e.Header) {
+			h.slave.GetConnector().ParseKey(row)
+			if h.slave.Delete(e.Header) {
 				h.setMasterPosFromCanal(e)
 			}
 		}
@@ -85,16 +85,15 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	}
 
 	for i := n; i < len(e.Rows); i += k {
-		h.GetBinLogData(model, e, i)
+		h.ParseBinLog(h.slave, e, i)
 
+		//log.Fatal("debug stop")
 		if e.Action == canal.UpdateAction {
-			oldModel := models.GetModel(e.Table.Name)
-			h.GetBinLogData(oldModel, e, i-1)
-			if models.Update(model, e.Header) {
+			if h.slave.Update(e.Header) {
 				h.setMasterPosFromCanal(e)
 			}
 		} else {
-			if models.Insert(model, e.Header) {
+			if h.slave.Insert(e.Header) {
 				h.setMasterPosFromCanal(e)
 			}
 		}
@@ -106,7 +105,7 @@ func (h *binlogHandler) String() string {
 	return "binlogHandler"
 }
 
-func BinlogListener(hash string) {
+func BinlogListener(hash string, slave slave.Slave) {
 	// set position keys
 	positionPosKey, positionNameKey := helpers.MakeTablePosKey(hash)
 
@@ -118,6 +117,7 @@ func BinlogListener(hash string) {
 				tableHash:       hash,
 				positionNameKey: positionNameKey,
 				positionPosKey:  positionPosKey,
+				slave:           slave,
 			})
 			err = c.RunFrom(coords)
 		}
@@ -166,7 +166,7 @@ func (h *binlogHandler) getMasterPos(canal *canal.Canal, force bool) mysql.Posit
 
 func getDefaultCanal() (*canal.Canal, error) {
 	// try to connect to check credentials
-	connectors.Exec(constants.DBMaster, map[string]interface{}{
+	system.Exec(constants.DBMaster, map[string]interface{}{
 		"query":  "SELECT 1",
 		"params": make([]interface{}, 0),
 	})

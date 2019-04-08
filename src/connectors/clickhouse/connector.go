@@ -1,4 +1,4 @@
-package connectors
+package clickhouse
 
 import (
 	"fmt"
@@ -10,11 +10,13 @@ import (
 	"strconv"
 )
 
-type clickhouseConnection struct {
+const DSN = "tcp://%s:%s?username=%s&password=%s&database=%s&read_timeout=10&write_timeout=20"
+
+type connect struct {
 	base *sqlx.DB
 }
 
-func (conn clickhouseConnection) Ping() bool {
+func (conn connect) Ping() bool {
 	if conn.base.Ping() == nil {
 		return true
 	}
@@ -22,7 +24,7 @@ func (conn clickhouseConnection) Ping() bool {
 	return false
 }
 
-func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
+func (conn connect) Exec(params map[string]interface{}) bool {
 	tx, _ := conn.base.Begin()
 	_, err := tx.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 
@@ -38,21 +40,20 @@ func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func GetClickhouseConnection(connection Storage, storageType string) interface{} {
+func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		helpers.ParseDBConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
-		conn, err := sqlx.Open("clickhouse", buildClickhouseString(cred))
+		conn, err := sqlx.Open("clickhouse", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = Retry(storageType, cred.Credentials, connection, GetClickhouseConnection).(Storage)
+			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
 		} else {
-			connection = clickhouseConnection{conn}
+			connection = connect{conn}
 		}
 	}
 
 	return connection
 }
 
-func buildClickhouseString(cred helpers.CredentialsDB) string {
-	return "tcp://" + cred.Host + ":" + strconv.Itoa(cred.Port) + "?username=" + cred.User + "&password=" + cred.Pass + "&database=" + cred.DBname + "&read_timeout=10&write_timeout=20"
+func buildDSN(cred helpers.CredentialsDB) string {
+	return fmt.Sprintf(DSN, cred.Host, strconv.Itoa(cred.Port), cred.User, cred.Pass, cred.DBname)
 }

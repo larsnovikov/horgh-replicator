@@ -1,4 +1,4 @@
-package connectors
+package rabbitmq
 
 import (
 	"github.com/siddontang/go-log/log"
@@ -38,13 +38,13 @@ func (conn rabbitmqConnection) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func GetRabbitmqConnection(connection Storage, storageType string) interface{} {
+func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		helpers.ParseAMQPConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsAMQP)
 		conn, err := amqp.Dial(buildRabbitmqString(cred))
 		if err != nil {
-			connection = Retry(storageType, cred.Credentials, connection, GetRabbitmqConnection).(Storage)
+			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
 		} else {
 			connection = rabbitmqConnection{conn}
 		}
@@ -53,6 +53,7 @@ func GetRabbitmqConnection(connection Storage, storageType string) interface{} {
 	return connection
 }
 
-func buildRabbitmqString(cred helpers.CredentialsAMQP) string {
+func buildDsn(cred helpers.CredentialsAMQP) string {
+	// TODO constant
 	return "amqp://" + cred.User + ":" + cred.Pass + "@" + cred.Host + ":" + strconv.Itoa(cred.Port) + "/"
 }
