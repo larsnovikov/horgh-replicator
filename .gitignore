@@ -7,4 +7,4 @@ build/
 .DS_Store
 src/.env
 src/vendor
-src/slave_models/*.json
+src/configs/*.json

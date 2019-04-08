@@ -21,7 +21,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Testing
 
-- Copy `examples/user.json` and `examples/post.json` to `src/slave_models`
+- Copy `examples/user.json` and `examples/post.json` to `src/configs`
 - Execute `sql/test.sql` in your MySQL master and see output.
 
   ##### OR 

@@ -6,5 +6,5 @@ const (
 	DBSlave            = "slave"
 	DBReplicator       = "replicator"
 	DBMaster           = "master"
-	ConfigPath         = "slave_models/%s.json"
+	ConfigPath         = "configs/%s.json"
 )
