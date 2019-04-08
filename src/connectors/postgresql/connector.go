@@ -13,11 +13,11 @@ import (
 
 const DSN = "host=%s port=%s user=%s password=%s dbname=%s sslmode=disable"
 
-type postgresqlConnection struct {
+type connect struct {
 	base *sql.DB
 }
 
-func (conn postgresqlConnection) Ping() bool {
+func (conn connect) Ping() bool {
 	if conn.base.Ping() == nil {
 		return true
 	}
@@ -25,7 +25,7 @@ func (conn postgresqlConnection) Ping() bool {
 	return false
 }
 
-func (conn postgresqlConnection) Exec(params map[string]interface{}) bool {
+func (conn connect) Exec(params map[string]interface{}) bool {
 	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
 		log.Warnf(constants.ErrorExecQuery, "postgresql", err)
@@ -42,7 +42,7 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 		if err != nil || conn.Ping() != nil {
 			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
 		} else {
-			connection = postgresqlConnection{conn}
+			connection = connect{conn}
 		}
 	}
 

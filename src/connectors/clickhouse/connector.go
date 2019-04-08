@@ -12,11 +12,11 @@ import (
 
 const DSN = "tcp://%s:%s?username=%s&password=%s&database=%s&read_timeout=10&write_timeout=20"
 
-type clickhouseConnection struct {
+type connect struct {
 	base *sqlx.DB
 }
 
-func (conn clickhouseConnection) Ping() bool {
+func (conn connect) Ping() bool {
 	if conn.base.Ping() == nil {
 		return true
 	}
@@ -24,7 +24,7 @@ func (conn clickhouseConnection) Ping() bool {
 	return false
 }
 
-func (conn clickhouseConnection) Exec(params map[string]interface{}) bool {
+func (conn connect) Exec(params map[string]interface{}) bool {
 	tx, _ := conn.base.Begin()
 	_, err := tx.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 
@@ -47,7 +47,7 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 		if err != nil || conn.Ping() != nil {
 			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
 		} else {
-			connection = clickhouseConnection{conn}
+			connection = connect{conn}
 		}
 	}
 

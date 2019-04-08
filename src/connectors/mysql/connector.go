@@ -12,11 +12,11 @@ import (
 
 const DSN = "%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local"
 
-type sqlConnection struct {
+type connect struct {
 	base *sql.DB
 }
 
-func (conn sqlConnection) Ping() bool {
+func (conn connect) Ping() bool {
 	if conn.base.Ping() == nil {
 		return true
 	}
@@ -24,7 +24,7 @@ func (conn sqlConnection) Ping() bool {
 	return false
 }
 
-func (conn sqlConnection) Exec(params map[string]interface{}) bool {
+func (conn connect) Exec(params map[string]interface{}) bool {
 	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
 		log.Warnf(constants.ErrorExecQuery, "mysql", err)
@@ -34,7 +34,7 @@ func (conn sqlConnection) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func (conn sqlConnection) Get(params map[string]interface{}) *sql.Rows {
+func (conn connect) Get(params map[string]interface{}) *sql.Rows {
 	rows, err := conn.base.Query(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
 		log.Fatal(err)
@@ -50,7 +50,7 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 		if err != nil || conn.Ping() != nil {
 			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
 		} else {
-			connection = sqlConnection{conn}
+			connection = connect{conn}
 		}
 	}
 
