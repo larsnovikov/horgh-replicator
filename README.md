@@ -9,6 +9,7 @@
 - MySQL
 - PostgreSQL
 - Yandex ClickHouse
+- HP Vertica
 
 ### Quick Start
 - Copy `/src/.env.dist` to `/src/.env` and set credentials.

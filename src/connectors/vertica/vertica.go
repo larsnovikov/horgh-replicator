@@ -2,8 +2,9 @@ package vertica
 
 import (
 	"fmt"
-	"go-binlog-replication/src/_vendor-20190326172913/github.com/jmoiron/sqlx"
-	"go-binlog-replication/src/_vendor-20190326172913/github.com/siddontang/go-log/log"
+	_ "github.com/alexbrainman/odbc"
+	"github.com/jmoiron/sqlx"
+	"github.com/siddontang/go-log/log"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"strconv"
@@ -47,6 +48,7 @@ func GetConnection(connection helpers.Storage, dbName string) interface{} {
 }
 
 func buildDSN(cred helpers.CredentialsDB) string {
-	driver := "/opt/vertica/lib64/libverticaodbc.so"
+	// TODO check tar
+	driver := "/opt/vertica/opt/vertica/lib64/libverticaodbc.so"
 	return "Driver=" + driver + ";ServerName=" + cred.Host + ";Database=" + cred.DBname + ";Port=" + strconv.Itoa(cred.Port) + ";uid=" + cred.User + ";pwd=" + cred.Pass + ";"
 }

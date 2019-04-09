@@ -11,6 +11,17 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:afbb670e13ded5ecb898186a37965c4580034849e88f63d48196e4f237c64265"
+  name = "github.com/alexbrainman/odbc"
+  packages = [
+    ".",
+    "api",
+  ]
+  pruneopts = "UT"
+  revision = "cf37ce29077901df2bcf307b80084697697fee26"
+
+[[projects]]
+  branch = "master"
   digest = "1:05756b73bf7eae03d6f6c5f0ae83de42ce296e7d83336563dd9ce2072106d5e6"
   name = "github.com/cloudflare/golz4"
   packages = ["."]
@@ -45,14 +56,6 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:f5a2051c55d05548d2d4fd23d244027b59fbd943217df8aa3b5e170ac2fd6e1b"
-  name = "github.com/json-iterator/go"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "0ff49de124c6f76f8494e194af75bde0f1a49a29"
-  version = "v1.1.6"
-
-[[projects]]
   digest = "1:18110843f1b123fd4368a5e441354a1a8f66f8823516e799c2610eead34f322d"
   name = "github.com/kshvakov/clickhouse"
   packages = [
@@ -81,22 +84,6 @@
   pruneopts = "UT"
   revision = "4ded0e9383f75c197b3a2aaa6d590ac52df6fd79"
   version = "v1.0.0"
-
-[[projects]]
-  digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
-  name = "github.com/modern-go/concurrent"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
-  version = "1.0.3"
-
-[[projects]]
-  digest = "1:e32bdbdb7c377a07a9a46378290059822efdce5c8d96fe71940d87cb4f918855"
-  name = "github.com/modern-go/reflect2"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
-  version = "1.0.1"
 
 [[projects]]
   digest = "1:7eefcb5ac6950b024564839227d2c33322cf924fa5a4931a9456e8423b417c35"
@@ -159,14 +146,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7ab9394e38507ed6c39d8843c40152198689e6ce81235a761784fdd7bfa29f37"
+  digest = "1:d6bb6f3240a488ffe5bb6952b513569d009927dcb20ff94885f87b76cef2b698"
   name = "github.com/streadway/amqp"
-  packages = [
-    ".",
-    "internal/proto",
-  ]
+  packages = ["."]
   pruneopts = "UT"
-  revision = "16ed540749f64417a42006ad795b01c0f5d4677a"
+  revision = "75d898a42a940fbc854dfd1a4199eabdc00cf024"
+
+[[projects]]
+  branch = "master"
+  digest = "1:12d62e2b2228aa9b389fe3c0e698921ac75141f10386eaaae77ee5844afa3688"
+  name = "golang.org/x/sys"
+  packages = ["windows"]
+  pruneopts = "UT"
+  revision = "4b34438f7a67ee5f45cc6132e2bad873a20324e9"
 
 [[projects]]
   digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
@@ -180,14 +172,13 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/alexbrainman/odbc",
     "github.com/go-sql-driver/mysql",
     "github.com/jmoiron/sqlx",
     "github.com/joho/godotenv",
-    "github.com/json-iterator/go",
     "github.com/kshvakov/clickhouse",
     "github.com/lib/pq",
     "github.com/siddontang/go-log/log",
-    "github.com/siddontang/go-log/loggers",
     "github.com/siddontang/go-mysql/canal",
     "github.com/siddontang/go-mysql/mysql",
     "github.com/siddontang/go-mysql/replication",
