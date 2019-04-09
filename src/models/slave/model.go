@@ -8,6 +8,7 @@ import (
 	"go-binlog-replication/src/connectors/clickhouse"
 	"go-binlog-replication/src/connectors/mysql"
 	"go-binlog-replication/src/connectors/postgresql"
+	"go-binlog-replication/src/connectors/vertica"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
 	"io/ioutil"
@@ -56,6 +57,8 @@ func getModel() AbstractConnector {
 		return &clickhouse.Model{}
 	case "postgresql":
 		return &postgresql.Model{}
+	case "vertica":
+		return &vertica.Model{}
 	}
 
 	return &mysql.Model{}

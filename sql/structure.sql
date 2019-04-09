@@ -65,3 +65,21 @@ ORDER BY id;
 CREATE TABLE test.post (id Int32, title FixedString(40), text FixedString(255), created DateTime) ENGINE = MergeTree()
 PARTITION BY id
 ORDER BY id;
+
+/* For Vertica slave */
+/* In bigdata_db */
+CREATE TABLE "user"
+(
+  id INT,
+  name VARCHAR,
+  status VARCHAR,
+  created TIMESTAMP NOT NULL
+);
+
+CREATE TABLE post
+(
+  id INT,
+  title VARCHAR,
+  text VARCHAR,
+  created TIMESTAMP NOT NULL
+);
