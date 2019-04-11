@@ -80,7 +80,9 @@ func MakeCredentials() {
 		os.Getenv("REPLICATOR_DBNAME"),
 	}
 
-	tables = strings.Split(os.Getenv("ALLOWED_TABLES"), ",")
+	for _, tableName := range strings.Split(os.Getenv("ALLOWED_TABLES"), ",") {
+		tables = append(tables, strings.TrimSpace(tableName))
+	}
 }
 
 func GetCredentials(storageType string) interface{} {

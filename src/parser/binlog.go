@@ -18,17 +18,21 @@ import (
 type binlogHandler struct {
 	canal.DummyEventHandler
 	BinlogParser
-	tableHash       string
 	positionNameKey string
 	positionPosKey  string
-	slave           slave.Slave
 }
 
 var curPosition mysql.Position
 var curCanal *canal.Canal
 
-func (h *binlogHandler) canOperate(tableSchema string, tableName string) bool {
-	return fmt.Sprintf("%s.%s", tableSchema, tableName) == h.tableHash
+func (h *binlogHandler) canOperate(logTableName string) bool {
+	for _, tableName := range helpers.GetTables() {
+		if tableName == logTableName {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (h *binlogHandler) prepareCanal() {
@@ -56,12 +60,11 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	}()
 
 	h.prepareCanal()
-
-	if h.canOperate(e.Table.Schema, e.Table.Name) == false {
+	if h.canOperate(e.Table.Name) == false {
 		return nil
 	}
 
-	h.slave.ClearParams()
+	slave.GetByName(e.Table.Name).ClearParams()
 
 	var n int
 	var k int
@@ -69,8 +72,8 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	switch e.Action {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
-			h.slave.GetConnector().ParseKey(row)
-			if h.slave.Delete(e.Header) {
+			slave.GetByName(e.Table.Name).GetConnector().ParseKey(row)
+			if slave.GetByName(e.Table.Name).Delete(e.Header) {
 				h.setMasterPosFromCanal(e)
 			}
 		}
@@ -85,15 +88,15 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	}
 
 	for i := n; i < len(e.Rows); i += k {
-		h.ParseBinLog(h.slave, e, i)
+		h.ParseBinLog(slave.GetByName(e.Table.Name), e, i)
 
 		//log.Fatal("debug stop")
 		if e.Action == canal.UpdateAction {
-			if h.slave.Update(e.Header) {
+			if slave.GetByName(e.Table.Name).Update(e.Header) {
 				h.setMasterPosFromCanal(e)
 			}
 		} else {
-			if h.slave.Insert(e.Header) {
+			if slave.GetByName(e.Table.Name).Insert(e.Header) {
 				h.setMasterPosFromCanal(e)
 			}
 		}
@@ -105,19 +108,18 @@ func (h *binlogHandler) String() string {
 	return "binlogHandler"
 }
 
-func BinlogListener(hash string, slave slave.Slave) {
+func BinlogListener() {
 	// set position keys
-	positionPosKey, positionNameKey := helpers.MakeTablePosKey(hash)
+	// TODO get min position key
+	positionPosKey, positionNameKey := helpers.MakeTablePosKey("test.user")
 
 	c, err := getDefaultCanal()
 	if err == nil {
 		coords, err := getMasterPosFromCanal(c, positionPosKey, positionNameKey, false)
 		if err == nil {
 			c.SetEventHandler(&binlogHandler{
-				tableHash:       hash,
 				positionNameKey: positionNameKey,
 				positionPosKey:  positionPosKey,
-				slave:           slave,
 			})
 			err = c.RunFrom(coords)
 		}

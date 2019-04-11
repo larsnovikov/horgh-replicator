@@ -13,6 +13,7 @@ import (
 	"go-binlog-replication/src/helpers"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type AbstractConnector interface {
@@ -46,7 +47,7 @@ type ConfigMaster struct {
 	Fields []string `json:"fields"`
 }
 
-var slave Slave
+var slavePool map[string]Slave
 
 func getModel() AbstractConnector {
 
@@ -64,9 +65,20 @@ func getModel() AbstractConnector {
 	return &mysql.Model{}
 }
 
+func GetByName(name string) Slave {
+	return slavePool[name]
+}
+
+func MakeSlavePool() {
+	slavePool = make(map[string]Slave)
+	for _, tableName := range helpers.GetTables() {
+		makeSlave(strings.TrimSpace(tableName))
+	}
+}
+
 // make model, read config by modelName, set var model
-func MakeSlave(modelName string) Slave {
-	slave = Slave{}
+func makeSlave(modelName string) {
+	slave := Slave{}
 
 	slave.connector = getModel()
 
@@ -90,7 +102,7 @@ func MakeSlave(modelName string) Slave {
 	// set model params from config
 	slave.connector.SetConfig(slave.config.Slave)
 
-	return slave
+	slavePool[modelName] = slave
 }
 
 func (slave Slave) GetBeforeSaveMethods() map[string]func(interface{}, []interface{}) interface{} {
