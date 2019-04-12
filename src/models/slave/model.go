@@ -35,6 +35,7 @@ type Slave struct {
 	config    Config
 	key       string
 	table     string
+	channel   chan func() bool
 }
 
 type Config struct {
@@ -65,14 +66,16 @@ func getModel() AbstractConnector {
 	return &mysql.Model{}
 }
 
-func GetByName(name string) Slave {
+func GetSlaveByName(name string) Slave {
+	// TODO check if exists
 	return slavePool[name]
 }
 
 func MakeSlavePool() {
 	slavePool = make(map[string]Slave)
 	for _, tableName := range helpers.GetTables() {
-		makeSlave(strings.TrimSpace(tableName))
+		table := strings.TrimSpace(tableName)
+		makeSlave(table)
 	}
 }
 
@@ -101,6 +104,10 @@ func makeSlave(modelName string) {
 
 	// set model params from config
 	slave.connector.SetConfig(slave.config.Slave)
+
+	// make channel
+	slave.channel = make(chan func() bool, 10) // TODO size of channel?
+	go save(slave.channel)
 
 	slavePool[modelName] = slave
 }
@@ -136,37 +143,43 @@ func (slave Slave) BeforeSave() bool {
 	return true
 }
 
-func (slave Slave) Insert(header *replication.EventHeader) bool {
-	if slave.BeforeSave() == true && slave.connector.Insert() == true {
-		log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
-		return true
+func (slave Slave) Insert(header *replication.EventHeader) {
+	slave.channel <- func() bool {
+		if slave.BeforeSave() == true && slave.connector.Insert() == true {
+			log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
+			return true
+		}
+
+		slave.logError("insert")
+
+		return false
 	}
-
-	slave.logError("insert")
-
-	return false
 }
 
-func (slave Slave) Update(header *replication.EventHeader) bool {
-	if slave.BeforeSave() == true && slave.connector.Update() == true {
-		log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
-		return true
+func (slave Slave) Update(header *replication.EventHeader) {
+	slave.channel <- func() bool {
+		if slave.BeforeSave() == true && slave.connector.Update() == true {
+			log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
+			return true
+		}
+
+		slave.logError("update")
+
+		return false
 	}
-
-	slave.logError("update")
-
-	return false
 }
 
-func (slave Slave) Delete(header *replication.EventHeader) bool {
-	if slave.connector.Delete() == true {
-		log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
-		return true
+func (slave Slave) Delete(header *replication.EventHeader) {
+	slave.channel <- func() bool {
+		if slave.connector.Delete() == true {
+			log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
+			return true
+		}
+
+		slave.logError("delete")
+
+		return false
 	}
-
-	slave.logError("delete")
-
-	return false
 }
 
 func (slave Slave) logError(operationType string) {

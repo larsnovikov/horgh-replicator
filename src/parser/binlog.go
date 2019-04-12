@@ -64,7 +64,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		return nil
 	}
 
-	slave.GetByName(e.Table.Name).ClearParams()
+	slave.GetSlaveByName(e.Table.Name).ClearParams()
 
 	var n int
 	var k int
@@ -72,10 +72,8 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	switch e.Action {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
-			slave.GetByName(e.Table.Name).GetConnector().ParseKey(row)
-			if slave.GetByName(e.Table.Name).Delete(e.Header) {
-				h.setMasterPosFromCanal(e)
-			}
+			slave.GetSlaveByName(e.Table.Name).GetConnector().ParseKey(row)
+			slave.GetSlaveByName(e.Table.Name).Delete(e.Header)
 		}
 
 		return nil
@@ -88,17 +86,12 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	}
 
 	for i := n; i < len(e.Rows); i += k {
-		h.ParseBinLog(slave.GetByName(e.Table.Name), e, i)
+		h.ParseBinLog(slave.GetSlaveByName(e.Table.Name), e, i)
 
-		//log.Fatal("debug stop")
 		if e.Action == canal.UpdateAction {
-			if slave.GetByName(e.Table.Name).Update(e.Header) {
-				h.setMasterPosFromCanal(e)
-			}
+			slave.GetSlaveByName(e.Table.Name).Update(e.Header)
 		} else {
-			if slave.GetByName(e.Table.Name).Insert(e.Header) {
-				h.setMasterPosFromCanal(e)
-			}
+			slave.GetSlaveByName(e.Table.Name).Insert(e.Header)
 		}
 	}
 	return nil
