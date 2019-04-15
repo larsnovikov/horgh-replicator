@@ -7,6 +7,7 @@ import (
 	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models/system"
 	"strconv"
+	"strings"
 )
 
 var curPosition mysql.Position
@@ -16,6 +17,10 @@ func makeHash(dbName string, table string) string {
 }
 
 func getMinPosition(position mysql.Position) mysql.Position {
+
+	// TODO handle error
+	tmpLogSuffix, _ := strconv.Atoi(strings.Replace(position.Name, constants.MasterLogNamePrefix, "", -1))
+	fmt.Println(tmpLogSuffix)
 	// build current position
 	if curPosition.Pos == 0 {
 		dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
@@ -30,10 +35,19 @@ func getMinPosition(position mysql.Position) mysql.Position {
 			tablePosition, _ := strconv.ParseUint(system.GetValue(pos), 10, 32)
 			tableLogFile := system.GetValue(name)
 
-			// TODO check by files, then check by position
-			if uint32(tablePosition) < curPosition.Pos || curPosition.Pos == 0 {
+			// TODO handle error
+			tableLogSuffix, _ := strconv.Atoi(strings.Replace(position.Name, constants.MasterLogNamePrefix, "", -1))
+
+			// if log file from storage lower than log file in master - set position from storage
+			if tableLogSuffix < tmpLogSuffix {
 				position.Pos = uint32(tablePosition)
 				position.Name = tableLogFile
+			} else {
+				// if log file from storage is greater or equal log file from master - check position
+				if uint32(tablePosition) < curPosition.Pos || curPosition.Pos == 0 {
+					position.Pos = uint32(tablePosition)
+					position.Name = tableLogFile
+				}
 			}
 		}
 		curPosition = position

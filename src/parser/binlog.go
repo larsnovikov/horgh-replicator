@@ -104,7 +104,9 @@ func BinlogListener() {
 
 	c, err := getDefaultCanal()
 	if err == nil {
-		coords := getMinPosition(c.SyncedPosition())
+		// TODO handle err
+		position, _ := c.GetMasterPos()
+		coords := getMinPosition(position)
 		c.SetEventHandler(&binlogHandler{})
 		err = c.RunFrom(coords)
 	}
