@@ -60,8 +60,10 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	var k int
 
 	positionSet := func() {
-		// TODO err handler
-		pos, _ := curCanal.GetMasterPos()
+		pos, err := curCanal.GetMasterPos()
+		if err != nil {
+			log.Fatalf(constants.ErrorParserPosition, err)
+		}
 		pos.Pos = e.Header.LogPos
 		SetPosition(e.Table.Name, pos)
 		return
@@ -104,8 +106,10 @@ func BinlogListener() {
 
 	c, err := getDefaultCanal()
 	if err == nil {
-		// TODO handle err
-		position, _ := c.GetMasterPos()
+		position, err := c.GetMasterPos()
+		if err != nil {
+			log.Fatalf(constants.ErrorParserPosition, err)
+		}
 		coords := getMinPosition(position)
 		c.SetEventHandler(&binlogHandler{})
 		err = c.RunFrom(coords)

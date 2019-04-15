@@ -68,8 +68,13 @@ func getModel() AbstractConnector {
 }
 
 func GetSlaveByName(name string) Slave {
-	// TODO check if exists
-	return slavePool[name]
+	if slave, ok := slavePool[name]; ok {
+		return slave
+	}
+
+	log.Fatalf(constants.ErrorUndefinedSlave)
+
+	return Slave{}
 }
 
 func MakeSlavePool() {

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/mysql"
 	"go-binlog-replication/src/constants"
 	"go-binlog-replication/src/helpers"
@@ -17,9 +18,10 @@ func makeHash(dbName string, table string) string {
 }
 
 func getMinPosition(position mysql.Position) mysql.Position {
-
-	// TODO handle error
-	tmpLogSuffix, _ := strconv.Atoi(strings.Replace(position.Name, constants.MasterLogNamePrefix, "", -1))
+	tmpLogSuffix, err := strconv.Atoi(strings.Replace(position.Name, constants.MasterLogNamePrefix, "", -1))
+	if err != nil {
+		log.Fatalf(constants.ErrorGetMinPosition, err)
+	}
 	fmt.Println(tmpLogSuffix)
 	// build current position
 	if curPosition.Pos == 0 {
@@ -31,13 +33,16 @@ func getMinPosition(position mysql.Position) mysql.Position {
 			hash := makeHash(dbName, table)
 			pos, name := helpers.MakeTablePosKey(hash)
 
-			// TODO handle error
-			tablePosition, _ := strconv.ParseUint(system.GetValue(pos), 10, 32)
+			tablePosition, err := strconv.ParseUint(system.GetValue(pos), 10, 32)
+			if err != nil {
+				log.Fatalf(constants.ErrorGetMinPosition, err)
+			}
 			tableLogFile := system.GetValue(name)
 
-			// TODO handle error
-			tableLogSuffix, _ := strconv.Atoi(strings.Replace(position.Name, constants.MasterLogNamePrefix, "", -1))
-
+			tableLogSuffix, err := strconv.Atoi(strings.Replace(position.Name, constants.MasterLogNamePrefix, "", -1))
+			if err != nil {
+				log.Fatalf(constants.ErrorGetMinPosition, err)
+			}
 			// if log file from storage lower than log file in master - set position from storage
 			if tableLogSuffix < tmpLogSuffix {
 				position.Pos = uint32(tablePosition)
