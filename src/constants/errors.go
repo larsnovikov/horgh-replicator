@@ -12,4 +12,5 @@ const (
 	ErrorParserPosition = "Catch error: \"%s\""
 	ErrorGetMinPosition = "Can't get min position. Error: \"%s\""
 	ErrorUndefinedSlave = "Can't get slave. Error: \"%s\""
+	ErrorCobraStarter   = "Catch cobra error: \"%s\""
 )

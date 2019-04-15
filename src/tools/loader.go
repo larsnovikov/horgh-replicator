@@ -1,4 +1,4 @@
-package main
+package tools
 
 import (
 	"github.com/siddontang/go-log/log"
@@ -18,7 +18,7 @@ const (
 
 var counters map[int]int
 
-func main() {
+func Load() {
 	log.Info("Start loader")
 	helpers.MakeCredentials()
 	counters = make(map[int]int)
