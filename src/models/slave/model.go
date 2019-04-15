@@ -112,7 +112,7 @@ func makeSlave(modelName string) {
 	slave.connector.SetConfig(slave.config.Slave)
 
 	// make channel
-	slave.channel = make(chan func() bool, 99999) // TODO size of channel?
+	slave.channel = make(chan func() bool, helpers.GetChannelSize())
 	go save(slave.channel)
 
 	slavePool[modelName] = slave

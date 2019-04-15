@@ -37,6 +37,7 @@ var slave interface{}
 var replicator CredentialsDB
 
 var tables []string
+var channelSize int
 
 func MakeCredentials() {
 	err := godotenv.Load()
@@ -83,6 +84,8 @@ func MakeCredentials() {
 	for _, tableName := range strings.Split(os.Getenv("ALLOWED_TABLES"), ",") {
 		tables = append(tables, strings.TrimSpace(tableName))
 	}
+
+	channelSize, _ = strconv.Atoi(os.Getenv("CHANNEL_SIZE"))
 }
 
 func GetCredentials(storageType string) interface{} {
@@ -112,6 +115,10 @@ func getReplicator() CredentialsDB {
 
 func GetTables() []string {
 	return tables
+}
+
+func GetChannelSize() int {
+	return channelSize
 }
 
 func ParseDBConfig() {
