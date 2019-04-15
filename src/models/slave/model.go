@@ -106,7 +106,7 @@ func makeSlave(modelName string) {
 	slave.connector.SetConfig(slave.config.Slave)
 
 	// make channel
-	slave.channel = make(chan func() bool, 10) // TODO size of channel?
+	slave.channel = make(chan func() bool, 99999) // TODO size of channel?
 	go save(slave.channel)
 
 	slavePool[modelName] = slave
@@ -143,10 +143,11 @@ func (slave Slave) BeforeSave() bool {
 	return true
 }
 
-func (slave Slave) Insert(header *replication.EventHeader) {
+func (slave Slave) Insert(header *replication.EventHeader, positionSet func()) {
 	slave.channel <- func() bool {
 		if slave.BeforeSave() == true && slave.connector.Insert() == true {
 			log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
+			positionSet()
 			return true
 		}
 
@@ -156,10 +157,11 @@ func (slave Slave) Insert(header *replication.EventHeader) {
 	}
 }
 
-func (slave Slave) Update(header *replication.EventHeader) {
+func (slave Slave) Update(header *replication.EventHeader, positionSet func()) {
 	slave.channel <- func() bool {
 		if slave.BeforeSave() == true && slave.connector.Update() == true {
 			log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
+			positionSet()
 			return true
 		}
 
@@ -169,10 +171,11 @@ func (slave Slave) Update(header *replication.EventHeader) {
 	}
 }
 
-func (slave Slave) Delete(header *replication.EventHeader) {
+func (slave Slave) Delete(header *replication.EventHeader, positionSet func()) {
 	slave.channel <- func() bool {
 		if slave.connector.Delete() == true {
 			log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
+			positionSet()
 			return true
 		}
 

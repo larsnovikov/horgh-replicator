@@ -1,10 +1,11 @@
 package constants
 
 const (
-	PositionPosPrefix  = "position_pos_%s"
-	PositionNamePrefix = "position_name_%s"
-	DBSlave            = "slave"
-	DBReplicator       = "replicator"
-	DBMaster           = "master"
-	ConfigPath         = "configs/%s.json"
+	PositionPosPrefix   = "position_pos_%s"
+	PositionNamePrefix  = "position_name_%s"
+	DBSlave             = "slave"
+	DBReplicator        = "replicator"
+	DBMaster            = "master"
+	ConfigPath          = "configs/%s.json"
+	MasterLogNamePrefix = "mysql-bin."
 )

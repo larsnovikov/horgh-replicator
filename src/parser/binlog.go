@@ -12,17 +12,13 @@ import (
 	"go-binlog-replication/src/models/system"
 	"math/rand"
 	"runtime/debug"
-	"strconv"
 )
 
 type binlogHandler struct {
 	canal.DummyEventHandler
 	BinlogParser
-	positionNameKey string
-	positionPosKey  string
 }
 
-var curPosition mysql.Position
 var curCanal *canal.Canal
 
 func (h *binlogHandler) canOperate(logTableName string) bool {
@@ -44,12 +40,6 @@ func (h *binlogHandler) prepareCanal() {
 		}
 		curCanal = canalTmp
 	}
-
-	// build current position
-	if curPosition.Pos == 0 {
-		// first row after start, try to get pos from storage
-		curPosition = h.getMasterPos(curCanal, false)
-	}
 }
 
 func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
@@ -69,11 +59,19 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	var n int
 	var k int
 
+	positionSet := func() {
+		// TODO err handler
+		pos, _ := curCanal.GetMasterPos()
+		pos.Pos = e.Header.LogPos
+		SetPosition(e.Table.Name, pos)
+		return
+	}
+
 	switch e.Action {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
 			slave.GetSlaveByName(e.Table.Name).GetConnector().ParseKey(row)
-			slave.GetSlaveByName(e.Table.Name).Delete(e.Header)
+			slave.GetSlaveByName(e.Table.Name).Delete(e.Header, positionSet)
 		}
 
 		return nil
@@ -89,9 +87,9 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		h.ParseBinLog(slave.GetSlaveByName(e.Table.Name), e, i)
 
 		if e.Action == canal.UpdateAction {
-			slave.GetSlaveByName(e.Table.Name).Update(e.Header)
+			slave.GetSlaveByName(e.Table.Name).Update(e.Header, positionSet)
 		} else {
-			slave.GetSlaveByName(e.Table.Name).Insert(e.Header)
+			slave.GetSlaveByName(e.Table.Name).Insert(e.Header, positionSet)
 		}
 	}
 	return nil
@@ -103,60 +101,13 @@ func (h *binlogHandler) String() string {
 
 func BinlogListener() {
 	// set position keys
-	// TODO get min position key
-	positionPosKey, positionNameKey := helpers.MakeTablePosKey("test.user")
 
 	c, err := getDefaultCanal()
 	if err == nil {
-		coords, err := getMasterPosFromCanal(c, positionPosKey, positionNameKey, false)
-		if err == nil {
-			c.SetEventHandler(&binlogHandler{
-				positionNameKey: positionNameKey,
-				positionPosKey:  positionPosKey,
-			})
-			err = c.RunFrom(coords)
-		}
+		coords := getMinPosition(c.SyncedPosition())
+		c.SetEventHandler(&binlogHandler{})
+		err = c.RunFrom(coords)
 	}
-}
-
-func getMasterPosFromCanal(c *canal.Canal, positionPosKey string, positionNameKey string, force bool) (mysql.Position, error) {
-	// try to get coords from storage
-	if force == false {
-		position, err := strconv.ParseUint(system.GetValue(positionPosKey), 10, 32)
-		if err == nil {
-			pos := mysql.Position{
-				system.GetValue(positionNameKey),
-				uint32(position),
-			}
-
-			if pos.Pos != 0 && pos.Name != "" {
-				showPos(pos, "Storage")
-				return pos, nil
-			}
-		}
-	}
-
-	// get coords from mysql
-	pos, err := c.GetMasterPos()
-	showPos(pos, "MySQL")
-
-	return pos, err
-}
-
-func (h *binlogHandler) setMasterPosFromCanal(event *canal.RowsEvent) {
-	curPosition.Pos = event.Header.LogPos
-	// save position
-	system.SetValue(h.positionPosKey, fmt.Sprint(curPosition.Pos))
-	system.SetValue(h.positionNameKey, curPosition.Name)
-}
-
-func (h *binlogHandler) getMasterPos(canal *canal.Canal, force bool) mysql.Position {
-	coords, err := getMasterPosFromCanal(canal, h.positionPosKey, h.positionNameKey, force)
-	if err != nil {
-		log.Fatal(constants.ErrorMysqlPosition)
-	}
-
-	return coords
 }
 
 func getDefaultCanal() (*canal.Canal, error) {
