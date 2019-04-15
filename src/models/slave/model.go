@@ -17,9 +17,10 @@ import (
 )
 
 type AbstractConnector interface {
-	Insert() bool
-	Update() bool
-	Delete() bool
+	GetInsert() map[string]interface{}
+	GetUpdate() map[string]interface{}
+	GetDelete() map[string]interface{}
+	Exec(map[string]interface{}) bool
 	GetConfigStruct() interface{}
 	SetConfig(interface{})
 	SetParams(map[string]interface{})
@@ -144,36 +145,46 @@ func (slave Slave) BeforeSave() bool {
 }
 
 func (slave Slave) Insert(header *replication.EventHeader, positionSet func()) {
-	slave.channel <- func() bool {
-		if slave.BeforeSave() == true && slave.connector.Insert() == true {
-			log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
-			positionSet()
-			return true
+	if slave.BeforeSave() == true {
+		params := slave.connector.GetInsert()
+
+		slave.channel <- func() bool {
+			if slave.connector.Exec(params) {
+				log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
+				positionSet()
+				return true
+			}
+
+			slave.logError("insert")
+
+			return false
 		}
-
-		slave.logError("insert")
-
-		return false
 	}
 }
 
 func (slave Slave) Update(header *replication.EventHeader, positionSet func()) {
-	slave.channel <- func() bool {
-		if slave.BeforeSave() == true && slave.connector.Update() == true {
-			log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
-			positionSet()
-			return true
+	if slave.BeforeSave() == true {
+		params := slave.connector.GetUpdate()
+
+		slave.channel <- func() bool {
+			if slave.connector.Exec(params) {
+				log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
+				positionSet()
+				return true
+			}
+
+			slave.logError("update")
+
+			return false
 		}
-
-		slave.logError("update")
-
-		return false
 	}
 }
 
 func (slave Slave) Delete(header *replication.EventHeader, positionSet func()) {
+	params := slave.connector.GetDelete()
+
 	slave.channel <- func() bool {
-		if slave.connector.Delete() == true {
+		if slave.connector.Exec(params) {
 			log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
 			positionSet()
 			return true
