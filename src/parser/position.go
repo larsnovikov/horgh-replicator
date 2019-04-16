@@ -33,11 +33,6 @@ func getMinPosition(position mysql.Position) mysql.Position {
 		log.Fatalf(constants.ErrorGetMinPosition, err)
 	}
 
-	PrevPosition = make(map[string]mysql.Position)
-
-	channel = make(chan func(), 99999)
-	go updatePrevPosition(channel)
-
 	// build current position
 	if curPosition.Pos == 0 {
 		dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
@@ -53,11 +48,6 @@ func getMinPosition(position mysql.Position) mysql.Position {
 				log.Fatalf(constants.ErrorGetMinPosition, err)
 			}
 			tableLogFile := system.GetValue(name)
-
-			PrevPosition[table] = mysql.Position{
-				Name: tableLogFile,
-				Pos:  uint32(tablePosition),
-			}
 
 			tableLogSuffix, err := strconv.Atoi(strings.Replace(position.Name, constants.MasterLogNamePrefix, "", -1))
 			if err != nil {
@@ -76,6 +66,14 @@ func getMinPosition(position mysql.Position) mysql.Position {
 			}
 		}
 		curPosition = position
+
+		PrevPosition = make(map[string]mysql.Position)
+		channel = make(chan func(), 99999)
+		go updatePrevPosition(channel)
+
+		for _, table := range helpers.GetTables() {
+			PrevPosition[table] = curPosition
+		}
 	}
 
 	return curPosition
