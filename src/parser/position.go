@@ -59,7 +59,7 @@ func getMinPosition(position mysql.Position) mysql.Position {
 				position.Name = tableLogFile
 			} else {
 				// if log file from storage is greater or equal log file from master - check position
-				if uint32(tablePosition) < curPosition.Pos || curPosition.Pos == 0 {
+				if uint32(tablePosition) < position.Pos || position.Pos == 0 {
 					position.Pos = uint32(tablePosition)
 					position.Name = tableLogFile
 				}
