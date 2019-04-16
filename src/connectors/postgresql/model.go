@@ -72,7 +72,7 @@ func (model *Model) GetInsert() map[string]interface{} {
 	i := 0
 	for _, value := range model.fields {
 		i++
-		fieldNames = append(fieldNames, value.Name)
+		fieldNames = append(fieldNames, "\""+value.Name+"\"")
 		fieldValues = append(fieldValues, "$"+strconv.Itoa(i))
 
 		params = append(params, model.params[value.Name])
@@ -93,7 +93,7 @@ func (model *Model) GetUpdate() map[string]interface{} {
 	i := 0
 	for _, value := range model.fields {
 		i++
-		fields = append(fields, value.Name+"=$"+strconv.Itoa(i))
+		fields = append(fields, "\""+value.Name+"\""+"=$"+strconv.Itoa(i))
 
 		params = append(params, model.params[value.Name])
 	}

@@ -69,7 +69,7 @@ func (model *Model) GetInsert() map[string]interface{} {
 	var fieldValues []string
 
 	for _, value := range model.fields {
-		fieldNames = append(fieldNames, value.Name)
+		fieldNames = append(fieldNames, "`"+value.Name+"`")
 		fieldValues = append(fieldValues, "?")
 
 		params = append(params, model.params[value.Name])
@@ -88,7 +88,7 @@ func (model *Model) GetUpdate() map[string]interface{} {
 	var fields []string
 
 	for _, value := range model.fields {
-		fields = append(fields, value.Name+"=?")
+		fields = append(fields, "`"+value.Name+"`"+"=?")
 
 		params = append(params, model.params[value.Name])
 	}
