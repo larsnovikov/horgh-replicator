@@ -12,9 +12,19 @@ import (
 )
 
 var curPosition mysql.Position
+var PrevPosition map[string]mysql.Position
+
+var channel chan func()
 
 func makeHash(dbName string, table string) string {
 	return dbName + "." + table
+}
+
+func updatePrevPosition(c chan func()) {
+	for {
+		method := <-c
+		method()
+	}
 }
 
 func getMinPosition(position mysql.Position) mysql.Position {
@@ -22,7 +32,12 @@ func getMinPosition(position mysql.Position) mysql.Position {
 	if err != nil {
 		log.Fatalf(constants.ErrorGetMinPosition, err)
 	}
-	fmt.Println(tmpLogSuffix)
+
+	PrevPosition = make(map[string]mysql.Position)
+
+	channel = make(chan func(), 99999)
+	go updatePrevPosition(channel)
+
 	// build current position
 	if curPosition.Pos == 0 {
 		dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
@@ -38,6 +53,11 @@ func getMinPosition(position mysql.Position) mysql.Position {
 				log.Fatalf(constants.ErrorGetMinPosition, err)
 			}
 			tableLogFile := system.GetValue(name)
+
+			PrevPosition[table] = mysql.Position{
+				Name: tableLogFile,
+				Pos:  uint32(tablePosition),
+			}
 
 			tableLogSuffix, err := strconv.Atoi(strings.Replace(position.Name, constants.MasterLogNamePrefix, "", -1))
 			if err != nil {
@@ -70,4 +90,8 @@ func SetPosition(table string, pos mysql.Position) {
 
 	system.SetValue(posKey, fmt.Sprint(pos.Pos))
 	system.SetValue(nameKey, pos.Name)
+
+	channel <- func() {
+		PrevPosition[table] = pos
+	}
 }

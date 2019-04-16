@@ -60,11 +60,17 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	var k int
 
 	positionSet := func() {
-		pos, err := curCanal.GetMasterPos()
-		if err != nil {
-			log.Fatalf(constants.ErrorParserPosition, err)
+		logFile := PrevPosition[e.Table.Name].Name
+		if e.Header.LogPos < PrevPosition[e.Table.Name].Pos {
+			// log file changed
+			// TODO! change logfile
+			log.Infof(constants.MessageLogFileChanged, e.Table, logFile)
 		}
-		pos.Pos = e.Header.LogPos
+		pos := mysql.Position{
+			Name: logFile,
+			Pos:  e.Header.LogPos,
+		}
+
 		SetPosition(e.Table.Name, pos)
 		return
 	}
