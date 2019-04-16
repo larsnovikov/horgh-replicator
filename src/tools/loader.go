@@ -2,6 +2,7 @@ package tools
 
 import (
 	"github.com/siddontang/go-log/log"
+	"github.com/spf13/cobra"
 	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models/system"
 	"math/rand"
@@ -13,8 +14,18 @@ const (
 	// goroutine count. WARNING if you set more 1, may be concurrency problems
 	ThreadCount = 1
 	// time to create queries in minutes
-	LoadTime = 1
+	LoadTime = 60
 )
+
+var CmdLoad = &cobra.Command{
+	Use:   "load",
+	Short: "Create queries to master",
+	Long:  `Create queries to master`,
+	Args:  cobra.MinimumNArgs(0),
+	Run: func(cmd *cobra.Command, args []string) {
+		Load()
+	},
+}
 
 var counters map[int]int
 
