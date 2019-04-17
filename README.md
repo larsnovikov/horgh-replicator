@@ -42,7 +42,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ```
 "beforeSave": {
-  "method": "user/<plugin_name>",
+  "handler": "user/<plugin_name>",
   "params": [
     "***"
   ]

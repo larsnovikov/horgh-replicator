@@ -40,11 +40,11 @@ func (m *BinlogParser) ParseBinLog(slave slave.Slave, e *canal.RowsEvent, n int)
 }
 
 func (m *BinlogParser) beforeSave(beforeSave connectors.ConfigBeforeSave, value interface{}) interface{} {
-	if beforeSave.Method == "" {
+	if beforeSave.Handler == "" {
 		return value
 	}
 
-	mod := fmt.Sprintf(constants.PluginPath, beforeSave.Method)
+	mod := fmt.Sprintf(constants.PluginPath, beforeSave.Handler)
 	plug, err := plugin.Open(mod)
 	if err != nil {
 		log.Fatalf(constants.ErrorCachePluginError, err)
