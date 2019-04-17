@@ -49,10 +49,8 @@ func getMinPosition(position mysql.Position) mysql.Position {
 			}
 			tableLogFile := system.GetValue(name)
 
-			tableLogSuffix, err := strconv.Atoi(strings.Replace(position.Name, constants.MasterLogNamePrefix, "", -1))
-			if err != nil {
-				log.Fatalf(constants.ErrorGetMinPosition, err)
-			}
+			tableLogSuffix := GetLogFileSuffix(position.Name)
+
 			// if log file from storage lower than log file in master - set position from storage
 			if tableLogSuffix < tmpLogSuffix {
 				position.Pos = uint32(tablePosition)
@@ -92,4 +90,13 @@ func SetPosition(table string, pos mysql.Position) {
 	channel <- func() {
 		PrevPosition[table] = pos
 	}
+}
+
+func GetLogFileSuffix(name string) int {
+	suff, err := strconv.Atoi(strings.Replace(name, constants.MasterLogNamePrefix, "", -1))
+	if err != nil {
+		log.Fatalf(constants.ErrorGetMinPosition, err)
+	}
+
+	return suff
 }

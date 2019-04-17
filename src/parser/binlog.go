@@ -11,6 +11,7 @@ import (
 	"go-binlog-replication/src/models/slave"
 	"go-binlog-replication/src/models/system"
 	"runtime/debug"
+	"strconv"
 )
 
 type binlogHandler struct {
@@ -62,7 +63,11 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		logFile := PrevPosition[e.Table.Name].Name
 		if e.Header.LogPos < PrevPosition[e.Table.Name].Pos {
 			// log file changed
-			// TODO! change logfile
+			newLog := strconv.Itoa(GetLogFileSuffix(logFile) + 1)
+			for len(newLog) < 6 {
+				newLog = "0" + newLog
+			}
+			newLog = constants.MasterLogNamePrefix + newLog
 			log.Infof(constants.MessageLogFileChanged, e.Table, logFile)
 		}
 		pos := mysql.Position{
