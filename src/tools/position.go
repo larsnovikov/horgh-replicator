@@ -9,9 +9,9 @@ import (
 
 var CmdSetPosition = &cobra.Command{
 	Use:   "set-position",
-	Short: "Set position for slave table",
-	Long:  "Set position for slave table",
-	Args:  cobra.MinimumNArgs(3),
+	Short: "Set position for slave table. Format: [table, name, position]",
+	Long:  "Set position for slave table. Format: [table, name, position]",
+	Args:  cobra.ExactArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
 		tableName := args[0]
 		name := args[1]

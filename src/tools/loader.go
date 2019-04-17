@@ -21,7 +21,7 @@ var CmdLoad = &cobra.Command{
 	Use:   "load",
 	Short: "Create queries to master",
 	Long:  `Create queries to master`,
-	Args:  cobra.MinimumNArgs(0),
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		Load()
 	},
