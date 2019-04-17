@@ -2,11 +2,14 @@ package parser
 
 import (
 	"fmt"
+	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/schema"
 	"go-binlog-replication/src/connectors"
 	"go-binlog-replication/src/constants"
+	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models/slave"
+	"plugin"
 	"time"
 )
 
@@ -26,7 +29,7 @@ func (m *BinlogParser) ParseBinLog(slave slave.Slave, e *canal.RowsEvent, n int)
 			row = e.Rows[1]
 		}
 		// prepare value before save
-		value = m.beforeSave(slaveFields[fieldName].BeforeSave, slave.GetBeforeSaveMethods(), row[key])
+		value = m.beforeSave(slaveFields[fieldName].BeforeSave, row[key])
 		// prepare value type
 		m.prepareType(fieldName, fieldType, value, params)
 		// set values to storage
@@ -36,12 +39,29 @@ func (m *BinlogParser) ParseBinLog(slave slave.Slave, e *canal.RowsEvent, n int)
 	return nil
 }
 
-func (m *BinlogParser) beforeSave(beforeSave connectors.ConfigBeforeSave, functionMap map[string]func(interface{}, []interface{}) interface{}, value interface{}) interface{} {
+func (m *BinlogParser) beforeSave(beforeSave connectors.ConfigBeforeSave, value interface{}) interface{} {
 	if beforeSave.Method == "" {
 		return value
 	}
 
-	return functionMap[beforeSave.Method](value, beforeSave.Params)
+	mod := fmt.Sprintf(constants.PluginPath, beforeSave.Method)
+	plug, err := plugin.Open(mod)
+	if err != nil {
+		log.Fatalf(constants.ErrorCachePluginError, err)
+	}
+
+	symHandler, err := plug.Lookup("Handler")
+	if err != nil {
+		log.Fatalf(constants.ErrorCachePluginError, err)
+	}
+
+	var handler helpers.Handler
+	handler, ok := symHandler.(helpers.Handler)
+	if !ok {
+		log.Fatalf(constants.ErrorCachePluginError, "unexpected type from module symbol")
+	}
+
+	return handler.Handle(value, beforeSave.Params)
 }
 
 func (m *BinlogParser) prepareType(fieldName string, fieldType string, value interface{}, params map[string]interface{}) {

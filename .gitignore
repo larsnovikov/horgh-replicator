@@ -8,3 +8,4 @@ build/
 src/.env
 src/vendor
 src/configs/*.json
+src/plugins/user/*
