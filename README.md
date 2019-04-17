@@ -48,3 +48,13 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
   ]
 }
 ```
+
+##### System handlers
+
+- Set field value as `param[0]`: `system/set_value`
+
+### Tools
+
+- Set start position of log: `go run main.go set-position <table> <name> <position>`
+- Loader for replication testing: `go run main.go load`
+
