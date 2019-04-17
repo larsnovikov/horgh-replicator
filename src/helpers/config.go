@@ -39,6 +39,7 @@ var replicator CredentialsDB
 var tables []string
 var channelSize int
 var slaveId int
+var masterLogFilePrefix string
 
 func MakeCredentials() {
 	err := godotenv.Load()
@@ -88,6 +89,7 @@ func MakeCredentials() {
 
 	channelSize, _ = strconv.Atoi(os.Getenv("CHANNEL_SIZE"))
 	slaveId, _ = strconv.Atoi(os.Getenv("SLAVE_ID"))
+	masterLogFilePrefix = os.Getenv("MASTER_LOG_FILE_PREFIX")
 }
 
 func GetCredentials(storageType string) interface{} {
@@ -125,6 +127,10 @@ func GetSlaveId() int {
 
 func GetChannelSize() int {
 	return channelSize
+}
+
+func GetMasterLogFilePrefix() string {
+	return masterLogFilePrefix
 }
 
 func ParseDBConfig() {

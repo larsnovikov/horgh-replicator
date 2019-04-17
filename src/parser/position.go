@@ -28,7 +28,7 @@ func updatePrevPosition(c chan func()) {
 }
 
 func getMinPosition(position mysql.Position) mysql.Position {
-	tmpLogSuffix, err := strconv.Atoi(strings.Replace(position.Name, constants.MasterLogNamePrefix, "", -1))
+	tmpLogSuffix, err := strconv.Atoi(strings.Replace(position.Name, helpers.GetMasterLogFilePrefix(), "", -1))
 	if err != nil {
 		log.Fatalf(constants.ErrorGetMinPosition, err)
 	}
@@ -93,7 +93,7 @@ func SetPosition(table string, pos mysql.Position) {
 }
 
 func GetLogFileSuffix(name string) int {
-	suff, err := strconv.Atoi(strings.Replace(name, constants.MasterLogNamePrefix, "", -1))
+	suff, err := strconv.Atoi(strings.Replace(name, helpers.GetMasterLogFilePrefix(), "", -1))
 	if err != nil {
 		log.Fatalf(constants.ErrorGetMinPosition, err)
 	}

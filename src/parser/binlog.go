@@ -67,7 +67,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 			for len(newLog) < 6 {
 				newLog = "0" + newLog
 			}
-			newLog = constants.MasterLogNamePrefix + newLog
+			newLog = helpers.GetMasterLogFilePrefix() + newLog
 			log.Infof(constants.MessageLogFileChanged, e.Table, logFile)
 		}
 		pos := mysql.Position{
