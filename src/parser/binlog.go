@@ -10,7 +10,6 @@ import (
 	"go-binlog-replication/src/helpers"
 	"go-binlog-replication/src/models/slave"
 	"go-binlog-replication/src/models/system"
-	"math/rand"
 	"runtime/debug"
 )
 
@@ -136,7 +135,7 @@ func getDefaultCanal() (*canal.Canal, error) {
 	cfg.User = master.User
 	cfg.Password = master.Pass
 	cfg.Flavor = master.Type
-	cfg.ServerID = uint32(rand.Intn(9999999999))
+	cfg.ServerID = uint32(helpers.GetSlaveId())
 
 	cfg.Dump.ExecutionPath = ""
 
