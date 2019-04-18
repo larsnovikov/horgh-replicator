@@ -11,8 +11,8 @@ func main() {
 	helpers.MakeCredentials()
 	slave.MakeSlavePool()
 
-	var rootCmd = &cobra.Command{Use: "go-bin-log-replication"}
-	rootCmd.AddCommand(tools.CmdListen, tools.CmdLoad, tools.CmdSetPosition)
+	var rootCmd = &cobra.Command{Use: "horgh-replicator"}
+	rootCmd.AddCommand(tools.CmdListen, tools.CmdLoad, tools.CmdSetPosition, tools.CmdModelCreator)
 	_ = rootCmd.Execute()
 	//if err != nil {
 	//	log.Fatalf(constants.ErrorCobraStarter, err)

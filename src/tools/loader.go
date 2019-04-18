@@ -23,13 +23,13 @@ var CmdLoad = &cobra.Command{
 	Long:  `Create queries to master`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		Load()
+		load()
 	},
 }
 
 var counters map[int]int
 
-func Load() {
+func load() {
 	log.Info("Start loader")
 	helpers.MakeCredentials()
 	counters = make(map[int]int)
@@ -37,7 +37,7 @@ func Load() {
 	for i := 0; i < ThreadCount; i++ {
 		log.Infof("Create goroutine #%s", strconv.Itoa(i+1))
 		counters[i] = 0
-		go load(i)
+		go makeQueries(i)
 	}
 
 	time.Sleep(LoadTime * time.Minute)
@@ -61,7 +61,7 @@ func randInt(min int, max int) int {
 	return min + rand.Intn(max-min)
 }
 
-func load(id int) {
+func makeQueries(id int) {
 	queries := []string{
 		"INSERT INTO test.user (`name`, `status`) VALUE ('Jack', 'active');",
 		"UPDATE test.user SET `name`='Tommy' ORDER BY RAND() LIMIT 1",

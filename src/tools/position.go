@@ -17,11 +17,11 @@ var CmdSetPosition = &cobra.Command{
 		name := args[1]
 		pos, _ := strconv.Atoi(args[2])
 
-		SetPosition(tableName, name, pos)
+		setPosition(tableName, name, pos)
 	},
 }
 
-func SetPosition(table string, name string, pos int) {
+func setPosition(table string, name string, pos int) {
 	position := mysql.Position{
 		Name: name,
 		Pos:  uint32(pos),
