@@ -3,7 +3,7 @@ package tools
 import (
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/spf13/cobra"
-	"go-binlog-replication/src/parser"
+	"horgh-replicator/src/parser"
 	"strconv"
 )
 

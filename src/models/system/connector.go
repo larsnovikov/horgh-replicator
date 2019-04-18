@@ -2,9 +2,9 @@ package system
 
 import (
 	"database/sql"
-	"go-binlog-replication/src/connectors/mysql"
-	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/helpers"
+	"horgh-replicator/src/connectors/mysql"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
 )
 
 //type ConnectionPool struct {

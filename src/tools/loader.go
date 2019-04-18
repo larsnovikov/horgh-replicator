@@ -3,8 +3,8 @@ package tools
 import (
 	"github.com/siddontang/go-log/log"
 	"github.com/spf13/cobra"
-	"go-binlog-replication/src/helpers"
-	"go-binlog-replication/src/models/system"
+	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/models/system"
 	"math/rand"
 	"strconv"
 	"time"

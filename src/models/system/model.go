@@ -1,7 +1,7 @@
 package system
 
 import (
-	"go-binlog-replication/src/constants"
+	"horgh-replicator/src/constants"
 )
 
 type replicator struct {

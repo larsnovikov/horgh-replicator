@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/spf13/cobra"
-	"go-binlog-replication/src/helpers"
-	"go-binlog-replication/src/models/slave"
-	"go-binlog-replication/src/tools"
+	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/models/slave"
+	"horgh-replicator/src/tools"
 )
 
 func main() {

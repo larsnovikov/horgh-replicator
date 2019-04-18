@@ -2,9 +2,9 @@ package mysql
 
 import (
 	"fmt"
-	"go-binlog-replication/src/connectors"
-	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/helpers"
+	"horgh-replicator/src/connectors"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
 	"strings"
 )
 

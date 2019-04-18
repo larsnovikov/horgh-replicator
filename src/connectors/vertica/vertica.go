@@ -5,8 +5,8 @@ import (
 	_ "github.com/alexbrainman/odbc"
 	"github.com/jmoiron/sqlx"
 	"github.com/siddontang/go-log/log"
-	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/helpers"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
 	"strconv"
 )
 

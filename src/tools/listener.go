@@ -2,7 +2,7 @@ package tools
 
 import (
 	"github.com/spf13/cobra"
-	"go-binlog-replication/src/parser"
+	"horgh-replicator/src/parser"
 )
 
 var CmdListen = &cobra.Command{

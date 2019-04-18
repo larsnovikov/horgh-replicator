@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/mysql"
-	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/helpers"
-	"go-binlog-replication/src/models/system"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/models/system"
 	"strconv"
 	"strings"
 )

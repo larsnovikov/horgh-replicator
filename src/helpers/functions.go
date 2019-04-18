@@ -3,7 +3,7 @@ package helpers
 import (
 	"fmt"
 	"github.com/siddontang/go-log/log"
-	"go-binlog-replication/src/constants"
+	"horgh-replicator/src/constants"
 	"os"
 	"reflect"
 )
