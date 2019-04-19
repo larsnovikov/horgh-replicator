@@ -59,7 +59,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	var n int
 	var k int
 
-	positionSet := func() {
+	getCalculatedPos := func() mysql.Position {
 		logFile := PrevPosition[e.Table.Name].Name
 		if e.Header.LogPos < PrevPosition[e.Table.Name].Pos {
 			// log file changed
@@ -70,12 +70,14 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 			newLog = helpers.GetMasterLogFilePrefix() + newLog
 			log.Infof(constants.MessageLogFileChanged, e.Table, logFile)
 		}
-		pos := mysql.Position{
+		return mysql.Position{
 			Name: logFile,
 			Pos:  e.Header.LogPos,
 		}
+	}
 
-		SetPosition(e.Table.Name, pos)
+	positionSet := func() {
+		SetPosition(e.Table.Name, getCalculatedPos())
 		return
 	}
 
@@ -83,7 +85,12 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
 			slave.GetSlaveByName(e.Table.Name).GetConnector().ParseKey(row)
-			slave.GetSlaveByName(e.Table.Name).Delete(e.Header, positionSet)
+			if canSave(getCalculatedPos(), e.Table.Name) {
+				slave.GetSlaveByName(e.Table.Name).Delete(e.Header, positionSet)
+			} else {
+				log.Infof(constants.MessageIgnoreDelete, e.Header.Timestamp, e.Table.Name, e.Header.LogPos)
+				return nil
+			}
 		}
 
 		return nil
@@ -99,12 +106,38 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		h.ParseBinLog(slave.GetSlaveByName(e.Table.Name), e, i)
 
 		if e.Action == canal.UpdateAction {
-			slave.GetSlaveByName(e.Table.Name).Update(e.Header, positionSet)
+			if canSave(getCalculatedPos(), e.Table.Name) {
+				slave.GetSlaveByName(e.Table.Name).Update(e.Header, positionSet)
+			} else {
+				log.Infof(constants.MessageIgnoreUpdate, e.Header.Timestamp, e.Table.Name, e.Header.LogPos)
+				return nil
+			}
 		} else {
-			slave.GetSlaveByName(e.Table.Name).Insert(e.Header, positionSet)
+			if canSave(getCalculatedPos(), e.Table.Name) {
+				slave.GetSlaveByName(e.Table.Name).Insert(e.Header, positionSet)
+			} else {
+				log.Infof(constants.MessageIgnoreInsert, e.Header.Timestamp, e.Table.Name, e.Header.LogPos)
+				return nil
+			}
 		}
 	}
 	return nil
+}
+
+func canSave(pos mysql.Position, table string) bool {
+	saved := GetSavedPos(table)
+	lowPosition := GetLowPosition(pos, saved)
+
+	if pos.Name == saved.Name && pos.Pos == saved.Pos {
+		return false
+	}
+	if lowPosition.Name == saved.Name && lowPosition.Pos == saved.Pos {
+		// low == saved => write
+		return true
+	} else {
+		// low == calculated => no!
+		return false
+	}
 }
 
 func (h *binlogHandler) String() string {

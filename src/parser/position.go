@@ -27,6 +27,23 @@ func updatePrevPosition(c chan func()) {
 	}
 }
 
+func GetSavedPos(table string) mysql.Position {
+	dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
+	hash := makeHash(dbName, table)
+	pos, name := helpers.MakeTablePosKey(hash)
+
+	tablePosition, err := strconv.ParseUint(system.GetValue(pos), 10, 32)
+	if err != nil {
+		log.Fatalf(constants.ErrorGetMinPosition, err)
+	}
+	tableLogFile := system.GetValue(name)
+
+	return mysql.Position{
+		Name: tableLogFile,
+		Pos:  uint32(tablePosition),
+	}
+}
+
 func getMinPosition(position mysql.Position) mysql.Position {
 	tmpLogSuffix, err := strconv.Atoi(strings.Replace(position.Name, helpers.GetMasterLogFilePrefix(), "", -1))
 	if err != nil {
@@ -35,20 +52,14 @@ func getMinPosition(position mysql.Position) mysql.Position {
 
 	// build current position
 	if curPosition.Pos == 0 {
-		dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
-
 		// get all saved positions for operated tables and fin with min pos
 		// WARNING! if it is first start for table, replicate it from min pos of another tables
 		for _, table := range helpers.GetTables() {
-			hash := makeHash(dbName, table)
-			pos, name := helpers.MakeTablePosKey(hash)
+			savedPos := GetSavedPos(table)
+			tablePosition := savedPos.Pos
+			tableLogFile := savedPos.Name
 
-			tablePosition, err := strconv.ParseUint(system.GetValue(pos), 10, 32)
-			if err != nil {
-				log.Fatalf(constants.ErrorGetMinPosition, err)
-			}
-			tableLogFile := system.GetValue(name)
-
+			// TODO переписать на GetlowPosition()
 			tableLogSuffix := GetLogFileSuffix(position.Name)
 
 			// if log file from storage lower than log file in master - set position from storage
@@ -84,12 +95,34 @@ func SetPosition(table string, pos mysql.Position) {
 
 	posKey, nameKey := helpers.MakeTablePosKey(hash)
 
-	system.SetValue(posKey, fmt.Sprint(pos.Pos))
-	system.SetValue(nameKey, pos.Name)
-
 	channel <- func() {
+		system.SetValue(posKey, fmt.Sprint(pos.Pos))
+		system.SetValue(nameKey, pos.Name)
 		PrevPosition[table] = pos
 	}
+}
+
+func GetLowPosition(pos1 mysql.Position, pos2 mysql.Position) mysql.Position {
+	position := mysql.Position{}
+	pos1Suffix := GetLogFileSuffix(pos1.Name)
+	pos2Suffix := GetLogFileSuffix(pos2.Name)
+
+	// if log file from storage lower than log file in master - set position from storage
+	if pos1Suffix < pos2Suffix {
+		position.Pos = uint32(pos1.Pos)
+		position.Name = pos1.Name
+	} else {
+		// if log file from storage is greater or equal log file from master - check position
+		if uint32(pos1.Pos) < pos2.Pos {
+			position.Pos = uint32(pos1.Pos)
+			position.Name = pos1.Name
+		} else {
+			position.Pos = uint32(pos2.Pos)
+			position.Name = pos2.Name
+		}
+	}
+
+	return position
 }
 
 func GetLogFileSuffix(name string) int {

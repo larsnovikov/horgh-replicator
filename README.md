@@ -31,7 +31,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Add tables to replicator
 
-- Create json config for your table like `examples/user.json` or `examples.post.json`.
+- Create json config for your table like `examples/user.json` or `examples/post.json`.
 - Create table on slave.
 
 ### Custom handlers for field value

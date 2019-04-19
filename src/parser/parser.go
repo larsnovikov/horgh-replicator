@@ -44,6 +44,7 @@ func (m *BinlogParser) beforeSave(beforeSave connectors.ConfigBeforeSave, value 
 		return value
 	}
 
+	// TODO move it to plugin directory
 	mod := fmt.Sprintf(constants.PluginPath, beforeSave.Handler)
 	plug, err := plugin.Open(mod)
 	if err != nil {
