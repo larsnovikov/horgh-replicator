@@ -13,6 +13,7 @@ import (
 
 var curPosition mysql.Position
 var PrevPosition map[string]mysql.Position
+var SaveLocks map[string]bool
 
 var channel chan func()
 
@@ -77,11 +78,14 @@ func getMinPosition(position mysql.Position) mysql.Position {
 		curPosition = position
 
 		PrevPosition = make(map[string]mysql.Position)
+		SaveLocks = make(map[string]bool)
+
 		channel = make(chan func())
 		go updatePrevPosition(channel)
 
 		for _, table := range helpers.GetTables() {
 			PrevPosition[table] = curPosition
+			SaveLocks[table] = true
 		}
 	}
 
