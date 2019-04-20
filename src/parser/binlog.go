@@ -10,6 +10,7 @@ import (
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/models/system"
+	"runtime"
 	"runtime/debug"
 	"strconv"
 )
@@ -24,9 +25,6 @@ var AllowHandling = true
 var curCanal *canal.Canal
 
 func (h *binlogHandler) canOperate(logTableName string) bool {
-	if AllowHandling == false {
-		return false
-	}
 	for _, tableName := range helpers.GetTables() {
 		if tableName == logTableName {
 			return true
@@ -48,6 +46,10 @@ func (h *binlogHandler) prepareCanal() {
 }
 
 func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
+	if AllowHandling == false {
+		runtime.Goexit()
+	}
+
 	defer func() {
 		if r := recover(); r != nil {
 			log.Info(r, " ", string(debug.Stack()))

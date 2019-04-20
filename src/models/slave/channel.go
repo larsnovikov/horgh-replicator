@@ -1,5 +1,9 @@
 package slave
 
+import (
+	"runtime"
+)
+
 var AllowHandling = true
 
 func save(c chan func() bool) {
@@ -7,6 +11,8 @@ func save(c chan func() bool) {
 		if AllowHandling == true {
 			method := <-c
 			method()
+		} else {
+			runtime.Goexit()
 		}
 	}
 }
