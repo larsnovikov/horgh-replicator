@@ -60,7 +60,6 @@ func getMinPosition(position mysql.Position) mysql.Position {
 			tablePosition := savedPos.Pos
 			tableLogFile := savedPos.Name
 
-			// TODO переписать на GetlowPosition()
 			tableLogSuffix := GetLogFileSuffix(position.Name)
 
 			// if log file from storage lower than log file in master - set position from storage
@@ -112,9 +111,9 @@ func GetLowPosition(pos1 mysql.Position, pos2 mysql.Position) mysql.Position {
 	pos2Suffix := GetLogFileSuffix(pos2.Name)
 
 	// if log file from storage lower than log file in master - set position from storage
-	if pos1Suffix < pos2Suffix {
-		position.Pos = uint32(pos1.Pos)
-		position.Name = pos1.Name
+	if pos1Suffix > pos2Suffix {
+		position.Pos = uint32(pos2.Pos)
+		position.Name = pos2.Name
 	} else {
 		// if log file from storage is greater or equal log file from master - check position
 		if uint32(pos1.Pos) < pos2.Pos {
