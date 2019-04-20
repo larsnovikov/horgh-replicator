@@ -19,9 +19,14 @@ type binlogHandler struct {
 	BinlogParser
 }
 
+var AllowHandling = true
+
 var curCanal *canal.Canal
 
 func (h *binlogHandler) canOperate(logTableName string) bool {
+	if AllowHandling == false {
+		return false
+	}
 	for _, tableName := range helpers.GetTables() {
 		if tableName == logTableName {
 			return true

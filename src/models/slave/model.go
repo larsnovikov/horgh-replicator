@@ -143,6 +143,7 @@ func (slave Slave) Insert(header *replication.EventHeader, positionSet func()) {
 		params := slave.connector.GetInsert()
 
 		slave.channel <- func() bool {
+			// fmt.Println(params["params"])
 			if slave.connector.Exec(params) {
 				log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
 				positionSet()
@@ -161,6 +162,7 @@ func (slave Slave) Update(header *replication.EventHeader, positionSet func()) {
 		params := slave.connector.GetUpdate()
 
 		slave.channel <- func() bool {
+			// fmt.Println(params["params"])
 			if slave.connector.Exec(params) {
 				log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
 				positionSet()
@@ -178,6 +180,7 @@ func (slave Slave) Delete(header *replication.EventHeader, positionSet func()) {
 	params := slave.connector.GetDelete()
 
 	slave.channel <- func() bool {
+		// fmt.Println(params["params"])
 		if slave.connector.Exec(params) {
 			log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
 			positionSet()

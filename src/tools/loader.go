@@ -14,7 +14,7 @@ const (
 	// goroutine count. WARNING if you set more 1, may be concurrency problems
 	ThreadCount = 1
 	// time to create queries in minutes
-	LoadTime = 60
+	LoadTime = 5
 )
 
 var CmdLoad = &cobra.Command{

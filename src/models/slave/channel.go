@@ -1,8 +1,12 @@
 package slave
 
+var AllowHandling = true
+
 func save(c chan func() bool) {
 	for {
-		method := <-c
-		method()
+		if AllowHandling == true {
+			method := <-c
+			method()
+		}
 	}
 }
