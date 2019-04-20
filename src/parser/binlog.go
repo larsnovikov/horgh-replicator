@@ -91,6 +91,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	switch e.Action {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
+			slave.GetSlaveByName(e.Table.Name).GetConnector().ParseKey(row)
 			if SaveLocks[e.Table.Name] == false {
 				slave.GetSlaveByName(e.Table.Name).Delete(e.Header, positionSet)
 			}

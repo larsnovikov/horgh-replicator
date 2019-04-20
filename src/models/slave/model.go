@@ -180,7 +180,6 @@ func (slave Slave) Delete(header *replication.EventHeader, positionSet func()) {
 	params := slave.connector.GetDelete()
 
 	slave.channel <- func() bool {
-		// fmt.Println(params["params"])
 		if slave.connector.Exec(params) {
 			log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
 			positionSet()
