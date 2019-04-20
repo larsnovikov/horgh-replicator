@@ -77,7 +77,7 @@ func getMinPosition(position mysql.Position) mysql.Position {
 		curPosition = position
 
 		PrevPosition = make(map[string]mysql.Position)
-		channel = make(chan func(), 99999)
+		channel = make(chan func())
 		go updatePrevPosition(channel)
 
 		for _, table := range helpers.GetTables() {
