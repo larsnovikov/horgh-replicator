@@ -183,7 +183,7 @@
   name = "golang.org/x/sys"
   packages = ["windows"]
   pruneopts = "UT"
-  revision = "f0ce4c0180bef7e9c51babed693a6e47fdd8962f"
+  revision = "e8e3143a4f4a00f1fafef0dd82ba78223281b01b"
 
 [[projects]]
   digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
