@@ -3,7 +3,7 @@ package helpers
 import (
 	"fmt"
 	"github.com/siddontang/go-log/log"
-	"go-binlog-replication/src/constants"
+	"horgh-replicator/src/constants"
 	"os"
 	"reflect"
 )
@@ -28,6 +28,10 @@ func MakeTablePosKey(hash string) (pos string, name string) {
 	name = fmt.Sprintf(constants.PositionNamePrefix, hash)
 
 	return pos, name
+}
+
+func MakeHash(dbName string, table string) string {
+	return dbName + "." + table
 }
 
 func ReadConfig(configName string) *os.File {

@@ -4,21 +4,23 @@ import (
 	"encoding/json"
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/replication"
-	"go-binlog-replication/src/connectors"
-	"go-binlog-replication/src/connectors/clickhouse"
-	"go-binlog-replication/src/connectors/mysql"
-	"go-binlog-replication/src/connectors/postgresql"
-	"go-binlog-replication/src/connectors/vertica"
-	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/helpers"
+	"horgh-replicator/src/connectors"
+	"horgh-replicator/src/connectors/clickhouse"
+	"horgh-replicator/src/connectors/mysql"
+	"horgh-replicator/src/connectors/postgresql"
+	"horgh-replicator/src/connectors/vertica"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type AbstractConnector interface {
-	Insert() bool
-	Update() bool
-	Delete() bool
+	GetInsert() map[string]interface{}
+	GetUpdate() map[string]interface{}
+	GetDelete() map[string]interface{}
+	Exec(map[string]interface{}) bool
 	GetConfigStruct() interface{}
 	SetConfig(interface{})
 	SetParams(map[string]interface{})
@@ -34,6 +36,7 @@ type Slave struct {
 	config    Config
 	key       string
 	table     string
+	channel   chan func() bool
 }
 
 type Config struct {
@@ -46,7 +49,7 @@ type ConfigMaster struct {
 	Fields []string `json:"fields"`
 }
 
-var slave Slave
+var slavePool map[string]Slave
 
 func getModel() AbstractConnector {
 
@@ -64,9 +67,27 @@ func getModel() AbstractConnector {
 	return &mysql.Model{}
 }
 
+func GetSlaveByName(name string) Slave {
+	if slave, ok := slavePool[name]; ok {
+		return slave
+	}
+
+	log.Fatalf(constants.ErrorUndefinedSlave)
+
+	return Slave{}
+}
+
+func MakeSlavePool() {
+	slavePool = make(map[string]Slave)
+	for _, tableName := range helpers.GetTables() {
+		table := strings.TrimSpace(tableName)
+		makeSlave(table)
+	}
+}
+
 // make model, read config by modelName, set var model
-func MakeSlave(modelName string) Slave {
-	slave = Slave{}
+func makeSlave(modelName string) {
+	slave := Slave{}
 
 	slave.connector = getModel()
 
@@ -90,18 +111,11 @@ func MakeSlave(modelName string) Slave {
 	// set model params from config
 	slave.connector.SetConfig(slave.config.Slave)
 
-	return slave
-}
+	// make channel
+	slave.channel = make(chan func() bool, helpers.GetChannelSize())
+	go save(slave.channel)
 
-func (slave Slave) GetBeforeSaveMethods() map[string]func(interface{}, []interface{}) interface{} {
-	// TODO fix violent pornography
-	functions := map[string]func(interface{}, []interface{}) interface{}{
-		"SetValue": func(value interface{}, params []interface{}) interface{} {
-			return helpers.SetValue(value, params)
-		},
-	}
-
-	return functions
+	slavePool[modelName] = slave
 }
 
 func (slave Slave) GetConfig() Config {
@@ -124,37 +138,58 @@ func (slave Slave) BeforeSave() bool {
 	return true
 }
 
-func (slave Slave) Insert(header *replication.EventHeader) bool {
-	if slave.BeforeSave() == true && slave.connector.Insert() == true {
-		log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
-		return true
+func (slave Slave) Insert(header *replication.EventHeader, positionSet func()) {
+	if slave.BeforeSave() == true {
+		params := slave.connector.GetInsert()
+
+		slave.channel <- func() bool {
+			// fmt.Println(params["params"])
+			if slave.connector.Exec(params) {
+				log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
+				positionSet()
+				return true
+			}
+
+			slave.logError("insert")
+
+			return false
+		}
 	}
-
-	slave.logError("insert")
-
-	return false
 }
 
-func (slave Slave) Update(header *replication.EventHeader) bool {
-	if slave.BeforeSave() == true && slave.connector.Update() == true {
-		log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
-		return true
+func (slave Slave) Update(header *replication.EventHeader, positionSet func()) {
+	if slave.BeforeSave() == true {
+		params := slave.connector.GetUpdate()
+
+		slave.channel <- func() bool {
+			// fmt.Println(params["params"])
+			if slave.connector.Exec(params) {
+				log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
+				positionSet()
+				return true
+			}
+
+			slave.logError("update")
+
+			return false
+		}
 	}
-
-	slave.logError("update")
-
-	return false
 }
 
-func (slave Slave) Delete(header *replication.EventHeader) bool {
-	if slave.connector.Delete() == true {
-		log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
-		return true
+func (slave Slave) Delete(header *replication.EventHeader, positionSet func()) {
+	params := slave.connector.GetDelete()
+
+	slave.channel <- func() bool {
+		if slave.connector.Exec(params) {
+			log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
+			positionSet()
+			return true
+		}
+
+		slave.logError("delete")
+
+		return false
 	}
-
-	slave.logError("delete")
-
-	return false
 }
 
 func (slave Slave) logError(operationType string) {

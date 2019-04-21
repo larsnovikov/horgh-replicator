@@ -2,9 +2,9 @@ package postgresql
 
 import (
 	"fmt"
-	"go-binlog-replication/src/connectors"
-	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/helpers"
+	"horgh-replicator/src/connectors"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
 	"strconv"
 	"strings"
 )
@@ -64,7 +64,7 @@ func (model *Model) SetParams(params map[string]interface{}) {
 	model.params = params
 }
 
-func (model *Model) Insert() bool {
+func (model *Model) GetInsert() map[string]interface{} {
 	var params []interface{}
 	var fieldNames []string
 	var fieldValues []string
@@ -72,7 +72,7 @@ func (model *Model) Insert() bool {
 	i := 0
 	for _, value := range model.fields {
 		i++
-		fieldNames = append(fieldNames, value.Name)
+		fieldNames = append(fieldNames, "\""+value.Name+"\"")
 		fieldValues = append(fieldValues, "$"+strconv.Itoa(i))
 
 		params = append(params, model.params[value.Name])
@@ -80,20 +80,20 @@ func (model *Model) Insert() bool {
 
 	query := fmt.Sprintf(Insert, model.table, strings.Join(fieldNames, ","), strings.Join(fieldValues, ","))
 
-	return model.Connection().Exec(map[string]interface{}{
+	return map[string]interface{}{
 		"query":  query,
 		"params": params,
-	})
+	}
 }
 
-func (model *Model) Update() bool {
+func (model *Model) GetUpdate() map[string]interface{} {
 	var params []interface{}
 	var fields []string
 
 	i := 0
 	for _, value := range model.fields {
 		i++
-		fields = append(fields, value.Name+"=$"+strconv.Itoa(i))
+		fields = append(fields, "\""+value.Name+"\""+"=$"+strconv.Itoa(i))
 
 		params = append(params, model.params[value.Name])
 	}
@@ -104,22 +104,26 @@ func (model *Model) Update() bool {
 	i++
 	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key, "$"+strconv.Itoa(i))
 
-	return model.Connection().Exec(map[string]interface{}{
+	return map[string]interface{}{
 		"query":  query,
 		"params": params,
-	})
+	}
 }
 
-func (model *Model) Delete() bool {
+func (model *Model) GetDelete() map[string]interface{} {
 	var params []interface{}
 	query := fmt.Sprintf(Delete, model.table, model.key)
 
 	params = append(params, model.params[model.key])
 
-	return model.Connection().Exec(map[string]interface{}{
+	return map[string]interface{}{
 		"query":  query,
 		"params": params,
-	})
+	}
+}
+
+func (model *Model) Exec(params map[string]interface{}) bool {
+	return model.Connection().Exec(params)
 }
 
 func (model *Model) Connection() helpers.Storage {

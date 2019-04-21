@@ -1,9 +1,10 @@
-package main
+package tools
 
 import (
 	"github.com/siddontang/go-log/log"
-	"go-binlog-replication/src/helpers"
-	"go-binlog-replication/src/models/system"
+	"github.com/spf13/cobra"
+	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/models/system"
 	"math/rand"
 	"strconv"
 	"time"
@@ -13,12 +14,22 @@ const (
 	// goroutine count. WARNING if you set more 1, may be concurrency problems
 	ThreadCount = 1
 	// time to create queries in minutes
-	LoadTime = 1
+	LoadTime = 5
 )
+
+var CmdLoad = &cobra.Command{
+	Use:   "load",
+	Short: "Create queries to master",
+	Long:  `Create queries to master`,
+	Args:  cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		load()
+	},
+}
 
 var counters map[int]int
 
-func main() {
+func load() {
 	log.Info("Start loader")
 	helpers.MakeCredentials()
 	counters = make(map[int]int)
@@ -26,7 +37,7 @@ func main() {
 	for i := 0; i < ThreadCount; i++ {
 		log.Infof("Create goroutine #%s", strconv.Itoa(i+1))
 		counters[i] = 0
-		go load(i)
+		go makeQueries(i)
 	}
 
 	time.Sleep(LoadTime * time.Minute)
@@ -50,14 +61,14 @@ func randInt(min int, max int) int {
 	return min + rand.Intn(max-min)
 }
 
-func load(id int) {
+func makeQueries(id int) {
 	queries := []string{
 		"INSERT INTO test.user (`name`, `status`) VALUE ('Jack', 'active');",
-		"UPDATE test.user SET `name`='Tommy' ORDER BY RAND() LIMIT 1",
-		"DELETE FROM test.user LIMIT 1;",
+		"UPDATE test.user SET `name`='Tommy', status='dead' ORDER BY RAND() LIMIT 1",
+		"DELETE FROM test.user ORDER BY RAND() LIMIT 1;",
 		"INSERT INTO test.post (`title`, `text`) VALUE ('Title', 'London is the capital of Great Britain');",
 		"UPDATE test.post SET title='New title' ORDER BY RAND() LIMIT 1;",
-		"DELETE FROM test.post LIMIT 1;",
+		"DELETE FROM test.post ORDER BY RAND() LIMIT 1;",
 	}
 
 	rand.Seed(time.Now().UTC().UnixNano())

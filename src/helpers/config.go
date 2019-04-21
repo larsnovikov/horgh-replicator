@@ -3,7 +3,7 @@ package helpers
 import (
 	"github.com/joho/godotenv"
 	"github.com/siddontang/go-log/log"
-	"go-binlog-replication/src/constants"
+	"horgh-replicator/src/constants"
 	"os"
 	"strconv"
 	"strings"
@@ -37,6 +37,9 @@ var slave interface{}
 var replicator CredentialsDB
 
 var tables []string
+var channelSize int
+var slaveId int
+var masterLogFilePrefix string
 
 func MakeCredentials() {
 	err := godotenv.Load()
@@ -80,7 +83,13 @@ func MakeCredentials() {
 		os.Getenv("REPLICATOR_DBNAME"),
 	}
 
-	tables = strings.Split(os.Getenv("ALLOWED_TABLES"), ",")
+	for _, tableName := range strings.Split(os.Getenv("ALLOWED_TABLES"), ",") {
+		tables = append(tables, strings.TrimSpace(tableName))
+	}
+
+	channelSize, _ = strconv.Atoi(os.Getenv("CHANNEL_SIZE"))
+	slaveId, _ = strconv.Atoi(os.Getenv("SLAVE_ID"))
+	masterLogFilePrefix = os.Getenv("MASTER_LOG_FILE_PREFIX")
 }
 
 func GetCredentials(storageType string) interface{} {
@@ -110,6 +119,18 @@ func getReplicator() CredentialsDB {
 
 func GetTables() []string {
 	return tables
+}
+
+func GetSlaveId() int {
+	return slaveId
+}
+
+func GetChannelSize() int {
+	return channelSize
+}
+
+func GetMasterLogFilePrefix() string {
+	return masterLogFilePrefix
 }
 
 func ParseDBConfig() {

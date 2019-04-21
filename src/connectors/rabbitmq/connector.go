@@ -3,8 +3,8 @@ package rabbitmq
 import (
 	"github.com/siddontang/go-log/log"
 	"github.com/streadway/amqp"
-	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/helpers"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
 	"strconv"
 )
 

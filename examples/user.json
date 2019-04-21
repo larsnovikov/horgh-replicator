@@ -26,7 +26,7 @@
         "key": false,
         "mode": "string",
         "beforeSave": {
-          "method": "SetValue",
+          "handler": "system/set_value",
           "params": [
             "***"
           ]

@@ -6,8 +6,8 @@ import (
 	_ "github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/siddontang/go-log/log"
-	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/helpers"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
 	"strconv"
 )
 

@@ -1,9 +1,9 @@
 version: '3'
 services:
-  go-binlog-replicator:
-    container_name: go_binlog_replicator
+  horgh-replicator:
+    container_name: horgh_replicator
     build:
       context: ./
     tty: true
     volumes:
-      - .:/go/src/go-binlog-replication
+      - .:/go/src/horgh-replicator

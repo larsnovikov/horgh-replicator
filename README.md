@@ -18,7 +18,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 - Execute `sql/structure.sql` in your MySQL master and slave.
 - Execute `sql/replicator.sql` in your MySQL. It will create database for system values.
 - Start Docker as `docker-compose up -d --build`
-- Run as `cd src` and `go run replicator.go` in docker container.
+- Run as `cd src` and `go run main.go listen` in docker container.
 
 ### Testing
 
@@ -27,9 +27,34 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
   ##### OR 
 
-- Execute `cd src` and `go run loader.go`
+- Execute `cd src` and `go run main.go load`
 
 ### Add tables to replicator
 
-- Create json config for your table like `examples/user.json` or `examples.post.json`.
+- Create json config for your table like `examples/user.json` or `examples/post.json`.
 - Create table on slave.
+
+### Custom handlers for field value
+
+- Create `plugins/user/<plugin_name>/handler.go` like `create plugins/system/set_value/handler.go`
+- Execute `go build -buildmode=plugin -o plugins/user/<plugin_name>/handler.so plugins/user/<plugin_name>/handler.go`
+- Add to field description in your `<model>.json`
+
+```
+"beforeSave": {
+  "handler": "user/<plugin_name>",
+  "params": [
+    "***"
+  ]
+}
+```
+
+##### System handlers
+
+- Set field value as `param[0]`: `system/set_value`
+
+### Tools
+
+- Set start position of log: `go run main.go set-position <table> <name> <position>`
+- Loader for replication testing: `go run main.go load`
+

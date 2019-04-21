@@ -7,4 +7,5 @@ const (
 	DBReplicator       = "replicator"
 	DBMaster           = "master"
 	ConfigPath         = "configs/%s.json"
+	PluginPath         = "plugins/%s/handler.so"
 )

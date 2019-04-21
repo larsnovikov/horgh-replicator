@@ -47,7 +47,7 @@
 
 [[constraint]]
   name = "github.com/lib/pq"
-  version = "1.0.0"
+  version = "1.1.0"
 
 [[constraint]]
   branch = "master"
@@ -56,6 +56,10 @@
 [[constraint]]
   branch = "master"
   name = "github.com/siddontang/go-mysql"
+
+[[constraint]]
+  name = "github.com/spf13/cobra"
+  version = "0.0.3"
 
 [[constraint]]
   branch = "master"

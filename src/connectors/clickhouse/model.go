@@ -2,9 +2,9 @@ package clickhouse
 
 import (
 	"fmt"
-	"go-binlog-replication/src/connectors"
-	"go-binlog-replication/src/constants"
-	"go-binlog-replication/src/helpers"
+	"horgh-replicator/src/connectors"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
 	"strings"
 )
 
@@ -65,13 +65,13 @@ func (model *Model) SetParams(params map[string]interface{}) {
 	model.params = params
 }
 
-func (model *Model) Insert() bool {
+func (model *Model) GetInsert() map[string]interface{} {
 	var params []interface{}
 	var fieldNames []string
 	var fieldValues []string
 
 	for _, value := range model.fields {
-		fieldNames = append(fieldNames, value.Name)
+		fieldNames = append(fieldNames, "`"+value.Name+"`")
 		fieldValues = append(fieldValues, "?")
 
 		params = append(params, model.params[value.Name])
@@ -79,19 +79,19 @@ func (model *Model) Insert() bool {
 
 	query := fmt.Sprintf(Insert, model.schema, model.table, strings.Join(fieldNames, ","), strings.Join(fieldValues, ","))
 
-	return model.Connection().Exec(map[string]interface{}{
+	return map[string]interface{}{
 		"query":  query,
 		"params": params,
-	})
+	}
 }
 
-func (model *Model) Update() bool {
+func (model *Model) GetUpdate() map[string]interface{} {
 	var params []interface{}
 	var fields []string
 
 	for _, value := range model.fields {
 		if value.Name != model.key {
-			fields = append(fields, value.Name+"=?")
+			fields = append(fields, "`"+value.Name+"`"+"=?")
 			params = append(params, model.params[value.Name])
 		}
 	}
@@ -101,22 +101,26 @@ func (model *Model) Update() bool {
 
 	query := fmt.Sprintf(Update, model.schema, model.table, strings.Join(fields, ", "), model.key)
 
-	return model.Connection().Exec(map[string]interface{}{
+	return map[string]interface{}{
 		"query":  query,
 		"params": params,
-	})
+	}
 }
 
-func (model *Model) Delete() bool {
+func (model *Model) GetDelete() map[string]interface{} {
 	var params []interface{}
 	query := fmt.Sprintf(Delete, model.schema, model.table, model.key)
 
 	params = append(params, model.params[model.key])
 
-	return model.Connection().Exec(map[string]interface{}{
+	return map[string]interface{}{
 		"query":  query,
 		"params": params,
-	})
+	}
+}
+
+func (model *Model) Exec(params map[string]interface{}) bool {
+	return model.Connection().Exec(params)
 }
 
 func (model *Model) Connection() helpers.Storage {
