@@ -51,7 +51,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ##### System handlers
 
-- Set field value as `param[0]`: `system/set_value`
+- If you want to set custom field value use `system/set_value` as `handler` param. Don't forget to set `params: ["<value>"]`
 
 ### Tools
 
