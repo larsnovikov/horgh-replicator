@@ -1,8 +1,14 @@
 package tools
 
 import (
+	"github.com/siddontang/go-log/log"
 	"github.com/spf13/cobra"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/parser"
+	"horgh-replicator/src/tools/system"
+	"strconv"
+	"time"
 )
 
 var CmdListen = &cobra.Command{
@@ -11,6 +17,18 @@ var CmdListen = &cobra.Command{
 	Long:  `Listen master binlog`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
+		system.BeforeExit = func() {
+			// stop handle binlog
+			log.Infof(constants.MessageStopHandlingBinlog)
+			parser.AllowHandling = false
+
+			// stop handle saving
+			log.Infof(constants.MessageStopHandlingSave)
+			slave.AllowHandling = false
+
+			log.Infof(constants.MessageWait, strconv.Itoa(10), "seconds")
+			time.Sleep(10 * time.Second)
+		}
 		parser.BinlogListener()
 	},
 }
