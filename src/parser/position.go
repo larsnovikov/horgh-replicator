@@ -17,10 +17,6 @@ var SaveLocks map[string]bool
 
 var channel chan func()
 
-func makeHash(dbName string, table string) string {
-	return dbName + "." + table
-}
-
 func updatePrevPosition(c chan func()) {
 	for {
 		method := <-c
@@ -30,7 +26,7 @@ func updatePrevPosition(c chan func()) {
 
 func GetSavedPos(table string) mysql.Position {
 	dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
-	hash := makeHash(dbName, table)
+	hash := helpers.MakeHash(dbName, table)
 	pos, name := helpers.MakeTablePosKey(hash)
 
 	tablePosition, err := strconv.ParseUint(system.GetValue(pos), 10, 32)
@@ -89,7 +85,7 @@ func getMinPosition(position mysql.Position) mysql.Position {
 // set position for table
 func SetPosition(table string, pos mysql.Position) {
 	dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
-	hash := makeHash(dbName, table)
+	hash := helpers.MakeHash(dbName, table)
 
 	posKey, nameKey := helpers.MakeTablePosKey(hash)
 

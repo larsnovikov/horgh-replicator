@@ -1,9 +1,12 @@
 package tools
 
 import (
+	"fmt"
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/spf13/cobra"
-	"horgh-replicator/src/parser"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/models/system"
 	"strconv"
 )
 
@@ -27,5 +30,11 @@ func setPosition(table string, name string, pos int) {
 		Pos:  uint32(pos),
 	}
 
-	parser.SetPosition(table, position)
+	dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
+	hash := helpers.MakeHash(dbName, table)
+
+	posKey, nameKey := helpers.MakeTablePosKey(hash)
+
+	system.SetValue(posKey, fmt.Sprint(position.Pos))
+	system.SetValue(nameKey, position.Name)
 }

@@ -30,6 +30,10 @@ func MakeTablePosKey(hash string) (pos string, name string) {
 	return pos, name
 }
 
+func MakeHash(dbName string, table string) string {
+	return dbName + "." + table
+}
+
 func ReadConfig(configName string) *os.File {
 	fileName := fmt.Sprintf(constants.ConfigPath, configName)
 	if _, err := os.Stat(fileName); os.IsNotExist(err) {
