@@ -74,7 +74,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 			for len(newLog) < 6 {
 				newLog = "0" + newLog
 			}
-			newLog = helpers.GetMasterLogFilePrefix() + newLog
+			logFile = helpers.GetMasterLogFilePrefix() + newLog
 			log.Infof(constants.MessageLogFileChanged, e.Table, logFile)
 		}
 		return mysql.Position{
@@ -165,8 +165,6 @@ func (h *binlogHandler) String() string {
 }
 
 func BinlogListener() {
-	// set position keys
-
 	c, err := getDefaultCanal()
 	if err == nil {
 		position, err := c.GetMasterPos()

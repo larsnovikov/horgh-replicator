@@ -46,21 +46,16 @@ func GetSavedPos(table string) mysql.Position {
 }
 
 func getMinPosition(position mysql.Position) mysql.Position {
-	tmpLogSuffix, err := strconv.Atoi(strings.Replace(position.Name, helpers.GetMasterLogFilePrefix(), "", -1))
-	if err != nil {
-		log.Fatalf(constants.ErrorGetMinPosition, err)
-	}
 
 	// build current position
 	if curPosition.Pos == 0 {
-		// get all saved positions for operated tables and fin with min pos
-		// WARNING! if it is first start for table, replicate it from min pos of another tables
 		for _, table := range helpers.GetTables() {
 			savedPos := GetSavedPos(table)
 			tablePosition := savedPos.Pos
 			tableLogFile := savedPos.Name
 
-			tableLogSuffix := GetLogFileSuffix(position.Name)
+			tmpLogSuffix := GetLogFileSuffix(position.Name)
+			tableLogSuffix := GetLogFileSuffix(savedPos.Name)
 
 			// if log file from storage lower than log file in master - set position from storage
 			if tableLogSuffix < tmpLogSuffix {
