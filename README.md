@@ -58,3 +58,9 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 - Set start position of log: `go run main.go set-position <table> <name> <position>`
 - Loader for replication testing: `go run main.go load`
 
+### Container mode
+
+Where are 2 modes of docker container in Dockerfile:
+
+- Prod mode: build app and execute app as supervisor process
+- Dev mode: provides the opportunity for manual start and debug

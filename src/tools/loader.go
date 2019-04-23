@@ -14,7 +14,7 @@ const (
 	// goroutine count. WARNING if you set more 1, may be concurrency problems
 	ThreadCount = 1
 	// time to create queries in minutes
-	LoadTime = 5
+	LoadTime = 1
 )
 
 var CmdLoad = &cobra.Command{
@@ -63,8 +63,8 @@ func randInt(min int, max int) int {
 
 func makeQueries(id int) {
 	queries := []string{
-		"INSERT INTO test.user (`name`, `status`) VALUE ('Jack', 'active');",
-		"UPDATE test.user SET `name`='Tommy', status='dead' ORDER BY RAND() LIMIT 1",
+		"INSERT INTO test.user (`name`, `status`, `active`) VALUE ('Jack', 'active', false);",
+		"UPDATE test.user SET `name`='Tommy', status='dead', active=true ORDER BY RAND() LIMIT 1",
 		"DELETE FROM test.user ORDER BY RAND() LIMIT 1;",
 		"INSERT INTO test.post (`title`, `text`) VALUE ('Title', 'London is the capital of Great Britain');",
 		"UPDATE test.post SET title='New title' ORDER BY RAND() LIMIT 1;",

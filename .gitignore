@@ -10,3 +10,4 @@ src/vendor
 src/configs/*.json
 src/plugins/user/*.go
 src/plugins/user/*.so
+src/horgh-replicator

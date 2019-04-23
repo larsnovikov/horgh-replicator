@@ -7,3 +7,4 @@ services:
     tty: true
     volumes:
       - .:/go/src/horgh-replicator
+      - ./supervisor:/etc/supervisor/conf.d

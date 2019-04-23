@@ -6,6 +6,7 @@ CREATE TABLE test.user
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(40),
   status VARCHAR(255),
+  active bool,
   created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
 ) engine=InnoDB;
 
@@ -23,6 +24,7 @@ CREATE TABLE test.user
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(40),
   status VARCHAR(255),
+  active bool,
   created TIMESTAMP NOT NULL
 ) engine=InnoDB;
 
@@ -44,6 +46,7 @@ CREATE TABLE public."user"
   id BIGSERIAL PRIMARY KEY,
   name VARCHAR(40),
   status VARCHAR(255),
+  active bool,
   created TIMESTAMP DEFAULT NULL
 );
 
@@ -58,7 +61,7 @@ CREATE TABLE public.post
 /*For ClickHouse Slave*/
 CREATE DATABASE test;
 
-CREATE TABLE test.user (id Int32, name FixedString(40), status FixedString(255), created DateTime) ENGINE = MergeTree()
+CREATE TABLE test.user (id Int32, name FixedString(40), status FixedString(255), active UInt8, created DateTime) ENGINE = MergeTree()
 PARTITION BY id
 ORDER BY id;
 
@@ -73,6 +76,7 @@ CREATE TABLE "user"
   id INT,
   name VARCHAR,
   status VARCHAR,
+  active bool,
   created TIMESTAMP NOT NULL
 );
 

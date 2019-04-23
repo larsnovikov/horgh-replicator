@@ -5,6 +5,7 @@
       "id",
       "name",
       "status",
+      "active",
       "created"
     ]
   },
@@ -31,6 +32,11 @@
             "***"
           ]
         }
+      },
+      {
+        "name": "active",
+        "key": false,
+        "mode": "bool"
       },
       {
         "name": "created",

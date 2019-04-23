@@ -68,7 +68,11 @@ func (m *BinlogParser) beforeSave(beforeSave connectors.ConfigBeforeSave, value 
 func (m *BinlogParser) prepareType(fieldName string, fieldType string, value interface{}, params map[string]interface{}) {
 	switch fieldType {
 	case "bool":
-		params[fieldName] = value.(bool)
+		if value.(int8) == 1 {
+			params[fieldName] = true
+		} else {
+			params[fieldName] = false
+		}
 	case "int":
 		params[fieldName] = value.(int32)
 	case "string":
@@ -136,15 +140,6 @@ func (m *BinlogParser) floatHelper(e *canal.RowsEvent, n int, columnName string)
 		return float64(e.Rows[n][columnId].(float64))
 	}
 	return float64(0)
-}
-
-func (m *BinlogParser) boolHelper(e *canal.RowsEvent, n int, columnName string) bool {
-
-	val := m.intHelper(e, n, columnName)
-	if val == 1 {
-		return true
-	}
-	return false
 }
 
 func (m *BinlogParser) stringHelper(e *canal.RowsEvent, n int, columnName string) string {
