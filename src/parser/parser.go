@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/canal"
-	"github.com/siddontang/go-mysql/schema"
 	"horgh-replicator/src/connectors"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
@@ -74,100 +73,54 @@ func (m *BinlogParser) prepareType(fieldName string, fieldType string, value int
 			params[fieldName] = false
 		}
 	case "int":
-		params[fieldName] = value.(int32)
+		switch value.(type) {
+		case int8:
+			params[fieldName] = int64(value.(int8))
+		case int32:
+			params[fieldName] = int64(value.(int32))
+		case int64:
+			params[fieldName] = value.(int64)
+		case int:
+			params[fieldName] = int64(value.(int))
+		case uint8:
+			params[fieldName] = int64(value.(uint8))
+		case uint16:
+			params[fieldName] = int64(value.(uint16))
+		case uint32:
+			params[fieldName] = int64(value.(uint32))
+		case uint64:
+			params[fieldName] = int64(value.(uint64))
+		case uint:
+			params[fieldName] = int64(value.(uint))
+		default:
+			params[fieldName] = 0
+		}
 	case "string":
-		params[fieldName] = value.(string)
+		if value == nil {
+			params[fieldName] = ""
+		} else {
+			switch value := value.(type) {
+			case []byte:
+				params[fieldName] = string(value)
+			case string:
+				params[fieldName] = value
+			default:
+				params[fieldName] = value
+			}
+		}
 	case "float":
-		params[fieldName] = value.(float64)
+		switch value.(type) {
+		case float32:
+			params[fieldName] = float64(value.(float32))
+		case float64:
+			params[fieldName] = float64(value.(float64))
+		default:
+			params[fieldName] = float64(0)
+		}
 	case "timestamp":
 		t, _ := time.Parse("2006-01-02 15:04:05", value.(string))
 		params[fieldName] = t
 	}
-}
-
-func (m *BinlogParser) dateTimeHelper(e *canal.RowsEvent, n int, columnName string) time.Time {
-
-	columnId := m.getBinlogIdByName(e, columnName)
-	if e.Table.Columns[columnId].Type != schema.TYPE_TIMESTAMP {
-		panic("Not dateTime type")
-	}
-	t, _ := time.Parse("2006-01-02 15:04:05", e.Rows[n][columnId].(string))
-
-	return t
-}
-
-func (m *BinlogParser) intHelper(e *canal.RowsEvent, n int, columnName string) int64 {
-
-	columnId := m.getBinlogIdByName(e, columnName)
-	if e.Table.Columns[columnId].Type != schema.TYPE_NUMBER {
-		return 0
-	}
-
-	switch e.Rows[n][columnId].(type) {
-	case int8:
-		return int64(e.Rows[n][columnId].(int8))
-	case int32:
-		return int64(e.Rows[n][columnId].(int32))
-	case int64:
-		return e.Rows[n][columnId].(int64)
-	case int:
-		return int64(e.Rows[n][columnId].(int))
-	case uint8:
-		return int64(e.Rows[n][columnId].(uint8))
-	case uint16:
-		return int64(e.Rows[n][columnId].(uint16))
-	case uint32:
-		return int64(e.Rows[n][columnId].(uint32))
-	case uint64:
-		return int64(e.Rows[n][columnId].(uint64))
-	case uint:
-		return int64(e.Rows[n][columnId].(uint))
-	}
-	return 0
-}
-
-func (m *BinlogParser) floatHelper(e *canal.RowsEvent, n int, columnName string) float64 {
-
-	columnId := m.getBinlogIdByName(e, columnName)
-	if e.Table.Columns[columnId].Type != schema.TYPE_FLOAT {
-		panic("Not float type")
-	}
-
-	switch e.Rows[n][columnId].(type) {
-	case float32:
-		return float64(e.Rows[n][columnId].(float32))
-	case float64:
-		return float64(e.Rows[n][columnId].(float64))
-	}
-	return float64(0)
-}
-
-func (m *BinlogParser) stringHelper(e *canal.RowsEvent, n int, columnName string) string {
-
-	columnId := m.getBinlogIdByName(e, columnName)
-	if e.Table.Columns[columnId].Type == schema.TYPE_ENUM {
-
-		values := e.Table.Columns[columnId].EnumValues
-		if len(values) == 0 {
-			return ""
-		}
-		if e.Rows[n][columnId] == nil {
-			//Если в енум лежит нуул ставим пустую строку
-			return ""
-		}
-
-		return values[e.Rows[n][columnId].(int64)-1]
-	}
-
-	value := e.Rows[n][columnId]
-
-	switch value := value.(type) {
-	case []byte:
-		return string(value)
-	case string:
-		return value
-	}
-	return ""
 }
 
 func (m *BinlogParser) getBinlogIdByName(e *canal.RowsEvent, name string) int {
