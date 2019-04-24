@@ -7,15 +7,10 @@ import (
 	"horgh-replicator/src/helpers"
 )
 
-//type ConnectionPool struct {
-//	master     Storage // used only for loader
-//	replicator ConnectionReplicator
-//}
-
 func Exec(mode string, params map[string]interface{}) bool {
 	switch mode {
 	case constants.DBMaster:
-		helpers.ConnPool.Master = mysql.GetConnection(helpers.ConnPool.Master, constants.DBMaster).(helpers.Storage)
+		helpers.ConnPool.Master = mysql.GetConnection(helpers.ConnPool.Master, constants.DBMaster).(helpers.ConnectionMaster)
 		return helpers.ConnPool.Master.Exec(params)
 	case constants.DBReplicator:
 		helpers.ConnPool.Replicator = mysql.GetConnection(helpers.ConnPool.Replicator, constants.DBReplicator).(helpers.ConnectionReplicator)
@@ -25,7 +20,13 @@ func Exec(mode string, params map[string]interface{}) bool {
 	return false
 }
 
-func Get(params map[string]interface{}) *sql.Rows {
-	helpers.ConnPool.Replicator = mysql.GetConnection(helpers.ConnPool.Replicator, constants.DBReplicator).(helpers.ConnectionReplicator)
-	return helpers.ConnPool.Replicator.Get(params)
+func Get(mode string, params map[string]interface{}) *sql.Rows {
+	switch mode {
+	case constants.DBMaster:
+		helpers.ConnPool.Master = mysql.GetConnection(helpers.ConnPool.Master, constants.DBMaster).(helpers.ConnectionMaster)
+		return helpers.ConnPool.Master.Get(params)
+	default:
+		helpers.ConnPool.Replicator = mysql.GetConnection(helpers.ConnPool.Replicator, constants.DBReplicator).(helpers.ConnectionReplicator)
+		return helpers.ConnPool.Replicator.Get(params)
+	}
 }

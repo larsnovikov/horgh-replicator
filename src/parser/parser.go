@@ -2,13 +2,11 @@ package parser
 
 import (
 	"fmt"
-	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/canal"
 	"horgh-replicator/src/connectors"
 	"horgh-replicator/src/constants"
-	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/slave"
-	"plugin"
+	"horgh-replicator/src/plugins"
 	"time"
 )
 
@@ -43,25 +41,7 @@ func (m *BinlogParser) beforeSave(beforeSave connectors.ConfigBeforeSave, value 
 		return value
 	}
 
-	// TODO move it to plugin directory
-	mod := fmt.Sprintf(constants.PluginPath, beforeSave.Handler)
-	plug, err := plugin.Open(mod)
-	if err != nil {
-		log.Fatalf(constants.ErrorCachePluginError, err)
-	}
-
-	symHandler, err := plug.Lookup("Handler")
-	if err != nil {
-		log.Fatalf(constants.ErrorCachePluginError, err)
-	}
-
-	var handler helpers.Handler
-	handler, ok := symHandler.(helpers.Handler)
-	if !ok {
-		log.Fatalf(constants.ErrorCachePluginError, "unexpected type from module symbol")
-	}
-
-	return handler.Handle(value, beforeSave.Params)
+	return plugins.Handle(beforeSave, value)
 }
 
 func (m *BinlogParser) prepareType(fieldName string, fieldType string, value interface{}, params map[string]interface{}) {

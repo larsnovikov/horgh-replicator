@@ -1,8 +1,9 @@
-package tools
+package system
 
 import (
 	"github.com/siddontang/go-log/log"
 	"github.com/spf13/cobra"
+	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/system"
 	"math/rand"
@@ -63,8 +64,8 @@ func randInt(min int, max int) int {
 
 func makeQueries(id int) {
 	queries := []string{
-		"INSERT INTO test.user (`name`, `status`, `active`) VALUE ('Jack', 'active', false);",
-		"UPDATE test.user SET `name`='Tommy', status='dead', active=true ORDER BY RAND() LIMIT 1",
+		"INSERT INTO test.user (`name`, `status`, `active`, `balance`) VALUE ('Jack', 'active', false, 5.56);",
+		"UPDATE test.user SET `name`='Tommy', status='dead', active=true, balance=7.62 ORDER BY RAND() LIMIT 1",
 		"DELETE FROM test.user ORDER BY RAND() LIMIT 1;",
 		"INSERT INTO test.post (`title`, `text`) VALUE ('Title', 'London is the capital of Great Britain');",
 		"UPDATE test.post SET title='New title' ORDER BY RAND() LIMIT 1;",
@@ -80,7 +81,7 @@ func makeQueries(id int) {
 	for {
 		query = queries[randInt(0, len(queries))]
 
-		result = system.Exec("master", map[string]interface{}{
+		result = system.Exec(constants.DBMaster, map[string]interface{}{
 			"query":  query,
 			"params": []interface{}{},
 		})

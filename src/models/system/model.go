@@ -15,7 +15,7 @@ func GetValue(key string) string {
 		key,
 	}
 
-	res := Get(map[string]interface{}{
+	res := Get(constants.DBReplicator, map[string]interface{}{
 		"query":  query,
 		"params": params,
 	})

@@ -4,13 +4,17 @@ import (
 	"database/sql"
 )
 
-type ConnectionReplicator interface {
+type ConnectionMaster interface {
 	Storage
 	Get(map[string]interface{}) *sql.Rows
 }
 
+type ConnectionReplicator interface {
+	ConnectionMaster
+}
+
 type ConnectionPool struct {
-	Master     Storage // used only for loader
+	Master     ConnectionMaster
 	Slave      Storage
 	Replicator ConnectionReplicator
 }

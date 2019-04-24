@@ -17,16 +17,12 @@
 Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 - Execute `sql/structure.sql` in your MySQL master and slave.
 - Execute `sql/replicator.sql` in your MySQL. It will create database for system values.
-- Start Docker as `docker-compose up -d --build`
+- Start Docker as `cd docker` and `docker-compose up -d --build`
 - Run as `cd src` and `go run main.go listen` in docker container.
 
 ### Testing
 
 - Copy `examples/user.json` and `examples/post.json` to `src/configs`
-- Execute `sql/test.sql` in your MySQL master and see output.
-
-  ##### OR 
-
 - Execute `cd src` and `go run main.go load`
 
 ### Add tables to replicator
@@ -57,6 +53,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 - Set start position of log: `go run main.go set-position <table> <name> <position>`
 - Loader for replication testing: `go run main.go load`
+- Create model json-file by master table structure: `go run main.go create-model <table>`
 
 ### Container mode
 

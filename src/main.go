@@ -11,9 +11,9 @@ import (
 func main() {
 	helpers.MakeCredentials()
 	slave.MakeSlavePool()
-	system.MakeHandler()
+	tools.MakeHandler()
 
 	var rootCmd = &cobra.Command{Use: "horgh-replicator"}
-	rootCmd.AddCommand(tools.CmdListen, tools.CmdLoad, tools.CmdSetPosition, tools.CmdModelCreator)
+	rootCmd.AddCommand(system.CmdListen, system.CmdLoad, system.CmdSetPosition, system.CmdModelCreator)
 	_ = rootCmd.Execute()
 }

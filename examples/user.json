@@ -6,6 +6,7 @@
       "name",
       "status",
       "active",
+      "balance",
       "created"
     ]
   },
@@ -37,6 +38,11 @@
         "name": "active",
         "key": false,
         "mode": "bool"
+      },
+      {
+        "name": "balance",
+        "key": false,
+        "mode": "float"
       },
       {
         "name": "created",

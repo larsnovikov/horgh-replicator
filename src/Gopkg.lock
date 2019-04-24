@@ -183,7 +183,7 @@
   name = "golang.org/x/sys"
   packages = ["windows"]
   pruneopts = "UT"
-  revision = "e8e3143a4f4a00f1fafef0dd82ba78223281b01b"
+  revision = "953cdadca894cdc07be76fc99f95b40c28f06623"
 
 [[projects]]
   digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
@@ -207,7 +207,6 @@
     "github.com/siddontang/go-mysql/canal",
     "github.com/siddontang/go-mysql/mysql",
     "github.com/siddontang/go-mysql/replication",
-    "github.com/siddontang/go-mysql/schema",
     "github.com/spf13/cobra",
     "github.com/streadway/amqp",
   ]

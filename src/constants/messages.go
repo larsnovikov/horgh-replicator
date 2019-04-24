@@ -13,4 +13,5 @@ const (
 	MessageStopHandlingBinlog = "Stopping binlog handling..."
 	MessageStopHandlingSave   = "Stopping replication handling..."
 	MessageWait               = "Waiting %s %s..."
+	MessageConfigCreated      = "Model config for table %s created. File: \"%s\""
 )
