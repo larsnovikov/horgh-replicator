@@ -51,7 +51,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Tools
 
-- Set start position of log: `go run main.go set-position <table> <name> <position>`
+- Set start position of log: `go run main.go set-position <table> <binlog_name> <binlog_position>`
 - Loader for replication testing: `go run main.go load`
 - Create model json-file by master table structure: `go run main.go create-model <table>`
 
