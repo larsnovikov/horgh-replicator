@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/slave"
@@ -40,4 +41,6 @@ func SetPosition() {
 
 	system.SetValue(posKey, fmt.Sprint(Position.Pos))
 	system.SetValue(nameKey, Position.Name)
+
+	log.Infof(constants.MessagePositionSaved, Table)
 }

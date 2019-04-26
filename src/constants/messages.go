@@ -22,5 +22,6 @@ const (
 	MessageDumpParsed         = "Dump for table \"%s\" parsed"
 	MessageStopTableBuild     = "Can't stop table build"
 	MessageStopTableDestroy   = "Can't stop table destroy"
-	MessageTableDestroed      = "Table: \"%s\" destroyed"
+	MessageTableDestroyed     = "Table: \"%s\" destroyed"
+	MessagePositionSaved      = "Position for table \"%s\" saved"
 )

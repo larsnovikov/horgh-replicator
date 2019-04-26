@@ -36,5 +36,5 @@ func destroyModel(tableName string) {
 
 	helpers.Wait()
 
-	log.Infof(constants.MessageTableDestroed, helpers.Table)
+	log.Infof(constants.MessageTableDestroyed, helpers.Table)
 }

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/siddontang/go-log/log"
+	"github.com/siddontang/go-mysql/mysql"
 	"github.com/spf13/cobra"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
@@ -19,9 +20,10 @@ import (
 )
 
 const (
-	CreateDump   = "mysqldump --extended-insert=FALSE --no-create-info --master-data=1 --port=%s -u%s -p%s -h %s %s %s > %s"
-	OutputFile   = "/tmp/dump.sql"
-	InsertRegexp = `VALUES \([A-Za-z0-9,\s,\S]+\)`
+	CreateDump     = "mysqldump --extended-insert=FALSE --no-create-info --master-data=1 --port=%s -u%s -p%s -h %s %s %s > %s"
+	OutputFile     = "/tmp/dump.sql"
+	InsertRegexp   = `VALUES \([A-Za-z0-9,\s,\S]+\)`
+	PositionRegexp = `MASTER_LOG_FILE=\'([a-zA-Z\-\.0-9]+)\', MASTER_LOG_POS=([0-9]+)`
 )
 
 var CmdBuildTable = &cobra.Command{
@@ -123,7 +125,7 @@ func parseLine(line string) map[string]interface{} {
 		for i := range params {
 			interfaceParams[i] = params[i]
 		}
-		err := parser.ParseRow(slave.GetSlaveByName("user"), interfaceParams)
+		err := parser.ParseRow(slave.GetSlaveByName(helpers2.Table), interfaceParams)
 		if err != nil {
 			log.Fatalf(constants.ErrorParseDump, OutputFile, err)
 		}
@@ -131,8 +133,21 @@ func parseLine(line string) map[string]interface{} {
 		header, positionSet := helpers2.GetHeader()
 
 		slave.GetSlaveByName(helpers2.Table).Insert(&header, positionSet)
-	} else {
-		// todo parse position
+		return out
+	}
+
+	// parse position
+	re = regexp.MustCompile(PositionRegexp)
+	match = re.FindStringSubmatch(line)
+
+	if len(match) > 0 {
+		pos, _ := strconv.Atoi(match[2])
+		helpers2.Position = mysql.Position{
+			Name: match[1],
+			Pos:  uint32(pos),
+		}
+
+		helpers2.SetPosition()
 	}
 
 	return out
