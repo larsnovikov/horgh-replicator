@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	Type   = "clickhouse"
-	Insert = `INSERT INTO %s.%s(%s) VALUES(%s);`
-	Update = `ALTER TABLE %s.%s UPDATE %s WHERE %s=?;`
-	Delete = `ALTER TABLE %s.%s DELETE WHERE %s=?;`
+	Type      = "clickhouse"
+	Insert    = `INSERT INTO %s.%s(%s) VALUES(%s);`
+	Update    = `ALTER TABLE %s.%s UPDATE %s WHERE %s=?;`
+	Delete    = `ALTER TABLE %s.%s DELETE WHERE %s=?;`
+	DeleteAll = `ALTER TABLE %s.%s DELETE WHERE 1;`
 )
 
 type Model struct {
@@ -107,12 +108,15 @@ func (model *Model) GetUpdate() map[string]interface{} {
 	}
 }
 
-func (model *Model) GetDelete() map[string]interface{} {
+func (model *Model) GetDelete(all bool) map[string]interface{} {
 	var params []interface{}
-	query := fmt.Sprintf(Delete, model.schema, model.table, model.key)
-
-	params = append(params, model.params[model.key])
-
+	var query string
+	if all == true {
+		query = fmt.Sprintf(DeleteAll, model.schema, model.table)
+	} else {
+		query = fmt.Sprintf(Delete, model.schema, model.table, model.key)
+		params = append(params, model.params[model.key])
+	}
 	return map[string]interface{}{
 		"query":  query,
 		"params": params,

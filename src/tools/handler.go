@@ -6,7 +6,9 @@ import (
 	"syscall"
 )
 
-var BeforeExit = func() {}
+var BeforeExit = func() bool {
+	return true
+}
 
 func MakeHandler() {
 	c := make(chan os.Signal, 1)
@@ -17,7 +19,8 @@ func MakeHandler() {
 func handle(c chan os.Signal) {
 	for {
 		<-c
-		BeforeExit()
-		os.Exit(1)
+		if BeforeExit() == true {
+			os.Exit(1)
+		}
 	}
 }
