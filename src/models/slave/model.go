@@ -3,7 +3,6 @@ package slave
 import (
 	"encoding/json"
 	"github.com/siddontang/go-log/log"
-	"github.com/siddontang/go-mysql/replication"
 	"horgh-replicator/src/connectors"
 	"horgh-replicator/src/connectors/clickhouse"
 	"horgh-replicator/src/connectors/mysql"
@@ -19,7 +18,7 @@ import (
 type AbstractConnector interface {
 	GetInsert() map[string]interface{}
 	GetUpdate() map[string]interface{}
-	GetDelete() map[string]interface{}
+	GetDelete(all bool) map[string]interface{}
 	Exec(map[string]interface{}) bool
 	GetConfigStruct() interface{}
 	SetConfig(interface{})
@@ -47,6 +46,11 @@ type Config struct {
 type ConfigMaster struct {
 	Table  string   `json:"table"`
 	Fields []string `json:"fields"`
+}
+
+type Header struct {
+	Timestamp uint32
+	LogPos    uint32
 }
 
 var slavePool map[string]Slave
@@ -138,12 +142,15 @@ func (slave Slave) BeforeSave() bool {
 	return true
 }
 
-func (slave Slave) Insert(header *replication.EventHeader, positionSet func()) {
+func (slave Slave) GetChannelLen() int {
+	return len(slave.channel)
+}
+
+func (slave Slave) Insert(header *Header, positionSet func()) {
 	if slave.BeforeSave() == true {
 		params := slave.connector.GetInsert()
 
 		slave.channel <- func() bool {
-			// fmt.Println(params["params"])
 			if slave.connector.Exec(params) {
 				log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
 				positionSet()
@@ -157,7 +164,7 @@ func (slave Slave) Insert(header *replication.EventHeader, positionSet func()) {
 	}
 }
 
-func (slave Slave) Update(header *replication.EventHeader, positionSet func()) {
+func (slave Slave) Update(header *Header, positionSet func()) {
 	if slave.BeforeSave() == true {
 		params := slave.connector.GetUpdate()
 
@@ -176,12 +183,28 @@ func (slave Slave) Update(header *replication.EventHeader, positionSet func()) {
 	}
 }
 
-func (slave Slave) Delete(header *replication.EventHeader, positionSet func()) {
-	params := slave.connector.GetDelete()
+func (slave Slave) Delete(header *Header, positionSet func()) {
+	params := slave.connector.GetDelete(false)
 
 	slave.channel <- func() bool {
 		if slave.connector.Exec(params) {
 			log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
+			positionSet()
+			return true
+		}
+
+		slave.logError("delete")
+
+		return false
+	}
+}
+
+func (slave Slave) DeleteAll(header *Header, positionSet func()) {
+	params := slave.connector.GetDelete(true)
+
+	slave.channel <- func() bool {
+		if slave.connector.Exec(params) {
+			log.Infof(constants.MessageDeletedAll, header.Timestamp, slave.TableName())
 			positionSet()
 			return true
 		}

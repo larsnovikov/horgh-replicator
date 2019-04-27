@@ -14,6 +14,13 @@ func main() {
 	tools.MakeHandler()
 
 	var rootCmd = &cobra.Command{Use: "horgh-replicator"}
-	rootCmd.AddCommand(system.CmdListen, system.CmdLoad, system.CmdSetPosition, system.CmdModelCreator)
+	rootCmd.AddCommand(
+		system.CmdListen,
+		system.CmdLoad,
+		system.CmdSetPosition,
+		system.CmdModelCreator,
+		system.CmdBuildTable,
+		system.CmdDestroyTable,
+	)
 	_ = rootCmd.Execute()
 }

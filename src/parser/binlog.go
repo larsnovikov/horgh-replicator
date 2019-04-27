@@ -88,15 +88,20 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		return
 	}
 
+	header := slave.Header{
+		Timestamp: e.Header.Timestamp,
+		LogPos:    e.Header.LogPos,
+	}
+
 	switch e.Action {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
 			slave.GetSlaveByName(e.Table.Name).GetConnector().ParseKey(row)
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				slave.GetSlaveByName(e.Table.Name).Delete(e.Header, positionSet)
+				slave.GetSlaveByName(e.Table.Name).Delete(&header, positionSet)
 				SaveLocks[e.Table.Name] = false
 			} else {
-				log.Infof(constants.MessageIgnoreDelete, e.Header.Timestamp, e.Table.Name, e.Header.LogPos)
+				log.Infof(constants.MessageIgnoreDelete, &header.Timestamp, e.Table.Name, &header.LogPos)
 				return nil
 			}
 		}
@@ -115,18 +120,18 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 
 		if e.Action == canal.UpdateAction {
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				slave.GetSlaveByName(e.Table.Name).Update(e.Header, positionSet)
+				slave.GetSlaveByName(e.Table.Name).Update(&header, positionSet)
 				SaveLocks[e.Table.Name] = false
 			} else {
-				log.Infof(constants.MessageIgnoreUpdate, e.Header.Timestamp, e.Table.Name, e.Header.LogPos)
+				log.Infof(constants.MessageIgnoreUpdate, &header.Timestamp, e.Table.Name, &header.LogPos)
 				return nil
 			}
 		} else {
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				slave.GetSlaveByName(e.Table.Name).Insert(e.Header, positionSet)
+				slave.GetSlaveByName(e.Table.Name).Insert(&header, positionSet)
 				SaveLocks[e.Table.Name] = false
 			} else {
-				log.Infof(constants.MessageIgnoreInsert, e.Header.Timestamp, e.Table.Name, e.Header.LogPos)
+				log.Infof(constants.MessageIgnoreInsert, &header.Timestamp, e.Table.Name, &header.LogPos)
 				return nil
 			}
 		}

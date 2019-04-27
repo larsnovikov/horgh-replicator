@@ -51,9 +51,11 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Tools
 
-- Set start position of log: `go run main.go set-position <table> <binlog_name> <binlog_position>`
-- Loader for replication testing: `go run main.go load`
-- Create model json-file by master table structure: `go run main.go create-model <table>`
+- `set-position <table> <binlog_name> <binlog_position>` set start position of log for table listener
+- `load` start loader for replication testing (for default tables user and post)
+- `create-model <table>` create model json-file by master table structure
+- `build-table <table>` create master table dump, restore this dump in slave, set start position of log for table listener
+- `destroy-table <table>` truncate table, set empty position of log for table listener
 
 ### Container mode
 
