@@ -4,7 +4,7 @@ services:
     container_name: horgh_replicator
     build:
       context: ../
-      dockerfile: ./docker/Dockerfile
+      dockerfile: ./docker/Dockerfile_dev
     tty: true
     volumes:
       - ../:/go/src/horgh-replicator

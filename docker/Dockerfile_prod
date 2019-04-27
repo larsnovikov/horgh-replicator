@@ -12,12 +12,8 @@ RUN tar -xvf /vertica-client.tar.gz -C /
 #installing dep and vendors
 RUN go get -u github.com/golang/dep/...
 
-# dev mode
-CMD ["sh", "-c", "cd /go/src/horgh-replicator/src && dep ensure -update && /bin/bash"]
-
-# prod mode
-# CMD ["sh", "-c", "cd /go/src/horgh-replicator/src \
-#    && dep ensure -update \
-#    && go build main.go \
-#    && mv main horgh-replicator \
-#    && /usr/bin/supervisord"]
+CMD ["sh", "-c", "cd /go/src/horgh-replicator/src \
+    && dep ensure -update \
+    && go build main.go \
+    && mv main horgh-replicator \
+    && /usr/bin/supervisord"]
