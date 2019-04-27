@@ -23,5 +23,5 @@ const (
 	MessageStopTableBuild     = "Can't stop table build"
 	MessageStopTableDestroy   = "Can't stop table destroy"
 	MessageTableDestroyed     = "Table: \"%s\" destroyed"
-	MessagePositionSaved      = "Position for table \"%s\" saved"
+	MessagePositionUpdated    = "Position for table \"%s\" updated"
 )

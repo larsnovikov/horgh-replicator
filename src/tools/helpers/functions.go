@@ -42,5 +42,5 @@ func SetPosition() {
 	system.SetValue(posKey, fmt.Sprint(Position.Pos))
 	system.SetValue(nameKey, Position.Name)
 
-	log.Infof(constants.MessagePositionSaved, Table)
+	log.Infof(constants.MessagePositionUpdated, Table)
 }

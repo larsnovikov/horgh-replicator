@@ -21,4 +21,5 @@ const (
 	ErrorRemoveDump          = "Can't remove dump file %s. Error: \"%s\""
 	ErrorCreateDump          = "Can't create dump file %s. Error: \"%s\""
 	ErrorParseDump           = "Can't parse dump file %s. Error: \"%s\""
+	ErrorTableBuilt          = "Table \"%s\" already built. Use \"destroy-table %s\" before build"
 )

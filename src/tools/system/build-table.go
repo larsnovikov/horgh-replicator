@@ -56,7 +56,13 @@ func buildModel(tableName string) {
 
 func canHandle() bool {
 	// todo check if position exists and not 0
-	return true
+	savedPos := parser.GetSavedPos(helpers2.Table)
+	if savedPos.Name == "" && savedPos.Pos == 0 {
+		return true
+	}
+
+	log.Fatalf(constants.ErrorTableBuilt, helpers2.Table, helpers2.Table)
+	return false
 }
 
 func removeOutputFile() {
