@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	Type   = "mysql"
-	Insert = `INSERT INTO %s(%s) VALUES(%s);`
-	Update = `UPDATE %s SET %s WHERE %s=?;`
-	Delete = `DELETE FROM %s WHERE %s=?;`
+	Type      = "mysql"
+	Insert    = `INSERT INTO %s(%s) VALUES(%s);`
+	Update    = `UPDATE %s SET %s WHERE %s=?;`
+	Delete    = `DELETE FROM %s WHERE %s=?;`
+	DeleteAll = `TRUNCATE TABLE %s`
 )
 
 type Model struct {
@@ -104,12 +105,15 @@ func (model *Model) GetUpdate() map[string]interface{} {
 	}
 }
 
-func (model *Model) GetDelete() map[string]interface{} {
+func (model *Model) GetDelete(all bool) map[string]interface{} {
 	var params []interface{}
-	query := fmt.Sprintf(Delete, model.table, model.key)
-
-	params = append(params, model.params[model.key])
-
+	var query string
+	if all == true {
+		query = fmt.Sprintf(DeleteAll, model.table)
+	} else {
+		query = fmt.Sprintf(Delete, model.table, model.key)
+		params = append(params, model.params[model.key])
+	}
 	return map[string]interface{}{
 		"query":  query,
 		"params": params,
