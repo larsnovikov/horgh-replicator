@@ -112,6 +112,7 @@ func parseLine(line string) map[string]interface{} {
 	re := regexp.MustCompile(InsertRegexp)
 	match := re.FindStringSubmatch(line)
 	if len(match) > 0 {
+		// TODO fix me
 		r := strings.NewReplacer("VALUES", "",
 			"'", "",
 			"(", "",
