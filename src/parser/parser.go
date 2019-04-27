@@ -1,18 +1,26 @@
 package parser
 
 import (
-	"fmt"
 	"github.com/siddontang/go-mysql/canal"
 	"horgh-replicator/src/connectors"
-	"horgh-replicator/src/constants"
 	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/plugins"
+	"strconv"
 	"time"
 )
 
 type BinlogParser struct{}
 
 func (m *BinlogParser) ParseBinLog(slave slave.Slave, e *canal.RowsEvent, n int) error {
+	row := e.Rows[0]
+	if len(e.Rows) > 1 {
+		row = e.Rows[1]
+	}
+
+	return ParseRow(slave, row)
+}
+
+func ParseRow(slave slave.Slave, row []interface{}) error {
 	masterFields := slave.GetConfig().Master.Fields
 	slaveFields := slave.GetConnector().GetFields()
 
@@ -21,14 +29,10 @@ func (m *BinlogParser) ParseBinLog(slave slave.Slave, e *canal.RowsEvent, n int)
 	var value interface{}
 	for key, fieldName := range masterFields {
 		fieldType = slaveFields[fieldName].Mode
-		row := e.Rows[0]
-		if len(e.Rows) > 1 {
-			row = e.Rows[1]
-		}
 		// prepare value before save
-		value = m.beforeSave(slaveFields[fieldName].BeforeSave, row[key])
+		value = beforeSave(slaveFields[fieldName].BeforeSave, row[key])
 		// prepare value type
-		m.prepareType(fieldName, fieldType, value, params)
+		prepareType(fieldName, fieldType, value, params)
 		// set values to storage
 		slave.GetConnector().SetParams(params)
 	}
@@ -36,7 +40,7 @@ func (m *BinlogParser) ParseBinLog(slave slave.Slave, e *canal.RowsEvent, n int)
 	return nil
 }
 
-func (m *BinlogParser) beforeSave(beforeSave connectors.ConfigBeforeSave, value interface{}) interface{} {
+func beforeSave(beforeSave connectors.ConfigBeforeSave, value interface{}) interface{} {
 	if beforeSave.Handler == "" {
 		return value
 	}
@@ -44,16 +48,27 @@ func (m *BinlogParser) beforeSave(beforeSave connectors.ConfigBeforeSave, value 
 	return plugins.Handle(beforeSave, value)
 }
 
-func (m *BinlogParser) prepareType(fieldName string, fieldType string, value interface{}, params map[string]interface{}) {
+func prepareType(fieldName string, fieldType string, value interface{}, params map[string]interface{}) {
 	switch fieldType {
 	case "bool":
-		if value.(int8) == 1 {
-			params[fieldName] = true
-		} else {
-			params[fieldName] = false
+		switch value.(type) {
+		case int8:
+			if value.(int8) == 1 {
+				params[fieldName] = true
+			} else {
+				params[fieldName] = false
+			}
+		case string:
+			if value.(string) == "1" || value.(string) == "true" {
+				params[fieldName] = true
+			} else {
+				params[fieldName] = false
+			}
 		}
 	case "int":
 		switch value.(type) {
+		case string:
+			params[fieldName], _ = strconv.Atoi(value.(string))
 		case int8:
 			params[fieldName] = int64(value.(int8))
 		case int32:
@@ -90,6 +105,9 @@ func (m *BinlogParser) prepareType(fieldName string, fieldType string, value int
 		}
 	case "float":
 		switch value.(type) {
+		case string:
+			f, _ := strconv.ParseFloat(value.(string), 64)
+			params[fieldName] = float64(f)
 		case float32:
 			params[fieldName] = float64(value.(float32))
 		case float64:
@@ -98,16 +116,12 @@ func (m *BinlogParser) prepareType(fieldName string, fieldType string, value int
 			params[fieldName] = float64(0)
 		}
 	case "timestamp":
-		t, _ := time.Parse("2006-01-02 15:04:05", value.(string))
-		params[fieldName] = t
-	}
-}
-
-func (m *BinlogParser) getBinlogIdByName(e *canal.RowsEvent, name string) int {
-	for id, value := range e.Table.Columns {
-		if value.Name == name {
-			return id
+		switch value.(type) {
+		case string:
+			params[fieldName] = value.(string)
+		default:
+			t, _ := time.Parse("2006-01-02 15:04:05", value.(string))
+			params[fieldName] = t
 		}
 	}
-	panic(fmt.Sprintf(constants.ErrorNoColumn, name, e.Table.Schema, e.Table.Name))
 }

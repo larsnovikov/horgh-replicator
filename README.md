@@ -17,7 +17,7 @@
 Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 - Execute `sql/structure.sql` in your MySQL master and slave.
 - Execute `sql/replicator.sql` in your MySQL. It will create database for system values.
-- Start Docker as `cd docker` and `docker-compose up -d --build`
+- Start Docker as `make start-dev`
 - Run as `cd src` and `go run main.go listen` in docker container.
 
 ### Testing
@@ -51,13 +51,17 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Tools
 
-- Set start position of log: `go run main.go set-position <table> <binlog_name> <binlog_position>`
-- Loader for replication testing: `go run main.go load`
-- Create model json-file by master table structure: `go run main.go create-model <table>`
+- `set-position <table> <binlog_name> <binlog_position>` set start position of log for table listener
+- `load` start loader for replication testing (for default tables user and post)
+- `create-model <table>` create model json-file by master table structure
+- `build-table <table>` create master table dump, restore this dump in slave, set start position of log for table listener
+- `destroy-table <table>` truncate table, set empty position of log for table listener
 
 ### Container mode
 
-Where are 2 modes of docker container in Dockerfile:
-
-- Prod mode: build app and execute app as supervisor process
-- Dev mode: provides the opportunity for manual start and debug
+- Prod mode: build app and execute app as supervisor process. 
+  
+  Use `make build-prod` and `make start-prod` to start and `make stop-prod` to stop.
+- Dev mode: provides the opportunity for manual start and debug. 
+  
+  Use `make start-dev` to start and `make stop-dev` to stop.

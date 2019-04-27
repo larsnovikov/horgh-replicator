@@ -18,4 +18,8 @@ const (
 	ErrorTableStructure      = "Can't read structure of table %s. Error : \"%s\""
 	ErrorFieldTypeConversion = "Can't convert field type %s"
 	ErrorBuildModelConfig    = "Can't build model config. Error: \"%s\""
+	ErrorRemoveDump          = "Can't remove dump file %s. Error: \"%s\""
+	ErrorCreateDump          = "Can't create dump file %s. Error: \"%s\""
+	ErrorParseDump           = "Can't parse dump file %s. Error: \"%s\""
+	ErrorTableBuilt          = "Table \"%s\" already built. Use \"destroy-table %s\" before build"
 )

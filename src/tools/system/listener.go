@@ -17,7 +17,7 @@ var CmdListen = &cobra.Command{
 	Long:  `Listen master binlog`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		tools.BeforeExit = func() {
+		tools.BeforeExit = func() bool {
 			// stop handle binlog
 			log.Infof(constants.MessageStopHandlingBinlog)
 			parser.AllowHandling = false
@@ -28,6 +28,8 @@ var CmdListen = &cobra.Command{
 
 			log.Infof(constants.MessageWait, strconv.Itoa(10), "seconds")
 			time.Sleep(10 * time.Second)
+
+			return true
 		}
 		parser.BinlogListener()
 	},
