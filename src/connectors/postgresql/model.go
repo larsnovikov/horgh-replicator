@@ -14,7 +14,7 @@ const (
 	Insert    = `INSERT INTO "%s"(%s) VALUES(%s);`
 	Update    = `UPDATE "%s" SET %s WHERE %s=%s;`
 	Delete    = `DELETE FROM "%s" WHERE %s=$1;`
-	DeleteAll = `DELETE FROM "%s";`
+	DeleteAll = `TRUNCATE TABLE "%s";`
 )
 
 type Model struct {
