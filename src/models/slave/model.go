@@ -216,7 +216,5 @@ func (slave Slave) DeleteAll(header *Header, positionSet func()) {
 }
 
 func (slave Slave) logError(operationType string) {
-	out, _ := json.Marshal(slave)
-
-	log.Warnf(constants.ErrorSave, operationType, slave.TableName(), string(out))
+	log.Warnf(constants.ErrorSave, operationType, slave.TableName())
 }

@@ -116,12 +116,7 @@ func prepareType(fieldName string, fieldType string, value interface{}, params m
 			params[fieldName] = float64(0)
 		}
 	case "timestamp":
-		switch value.(type) {
-		case string:
-			params[fieldName] = value.(string)
-		default:
-			t, _ := time.Parse("2006-01-02 15:04:05", value.(string))
-			params[fieldName] = t
-		}
+		t, _ := time.Parse("2006-01-02 15:04:05", value.(string))
+		params[fieldName] = t
 	}
 }

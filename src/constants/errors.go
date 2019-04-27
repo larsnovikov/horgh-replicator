@@ -6,7 +6,7 @@ const (
 	ErrorSliceCreation       = "InterfaceSlice() given a non-slice type"
 	ErrorNoColumn            = "There is no column %s in %s.%s"
 	ErrorDBConnect           = "Can't connect to \"%s\""
-	ErrorSave                = "Can't %s model in \"%s\" data: %v"
+	ErrorSave                = "Can't %s model in \"%s\""
 	ErrorExecQuery           = "Can't exec query. Type: \"%s\" error: \"%v\""
 	ErrorNoModelFile         = "Model file \"%s\" not exists"
 	ErrorModelFileExists     = "Model file \"%s\" already exists"
