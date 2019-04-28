@@ -12,18 +12,18 @@ import (
 	"horgh-replicator/src/parser"
 	"horgh-replicator/src/tools"
 	helpers2 "horgh-replicator/src/tools/helpers"
-	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
-	CreateDump     = "mysqldump --extended-insert=FALSE --no-create-info --master-data=1 --port=%s -u%s -p%s -h %s %s %s > %s"
-	OutputFile     = "/tmp/dump.sql"
-	InsertRegexp   = `VALUES \([A-Za-z0-9,\s,\S]+\)`
-	PositionRegexp = `MASTER_LOG_FILE=\'([a-zA-Z\-\.0-9]+)\', MASTER_LOG_POS=([0-9]+)`
+	CreateDump      = "mysqldump --extended-insert=FALSE --no-create-info --master-data=1 --port=%s -u%s -p%s -h %s %s %s"
+	InsertRegexp    = `VALUES \([A-Za-z0-9,\s,\S]+\)`
+	PositionRegexp  = `MASTER_LOG_FILE=\'([a-zA-Z\-\.0-9]+)\', MASTER_LOG_POS=([0-9]+)`
+	ParseStringSize = 9999999
 )
 
 var CmdBuildTable = &cobra.Command{
@@ -44,18 +44,16 @@ var CmdBuildTable = &cobra.Command{
 func buildModel(tableName string) {
 	helpers2.Table = tableName
 	if canHandle() == true {
-		removeOutputFile()
-		makeDump()
-		parseDump()
+		helpers2.ParseStrings = make(chan string, ParseStringSize)
+		go parseLine(helpers2.ParseStrings)
 
-		helpers2.Wait()
-	} else {
+		readDump()
 
+		helpers2.WaitParsing()
 	}
 }
 
 func canHandle() bool {
-	// todo check if position exists and not 0
 	savedPos := parser.GetSavedPos(helpers2.Table)
 	if savedPos.Name == "" && savedPos.Pos == 0 {
 		return true
@@ -65,97 +63,88 @@ func canHandle() bool {
 	return false
 }
 
-func removeOutputFile() {
-	if _, err := os.Stat(OutputFile); os.IsExist(err) {
-		err := os.Remove(OutputFile)
-		if err != nil {
-			log.Fatalf(constants.ErrorRemoveDump, OutputFile, err)
-		}
-	}
-}
-
-func makeDump() {
-	log.Infof(constants.MessageStartCreateDump, helpers2.Table)
+func readDump() {
+	log.Infof(constants.MessageStartReadDump, helpers2.Table)
 	cred := helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB)
 
-	dumpCmd := fmt.Sprintf(CreateDump, strconv.Itoa(cred.Port), cred.User, cred.Pass, cred.Host, cred.DBname, helpers2.Table, OutputFile)
-
-	_, err := exec.Command("sh", "-c", dumpCmd).Output()
+	dumpCmd := fmt.Sprintf(CreateDump, strconv.Itoa(cred.Port), cred.User, cred.Pass, cred.Host, cred.DBname, helpers2.Table)
+	cmdArgs := strings.Fields(dumpCmd)
+	cmd := exec.Command(cmdArgs[0], cmdArgs[1:len(cmdArgs)]...)
+	// create a pipe for the output of the script
+	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Fatalf(constants.ErrorCreateDump, OutputFile, err)
+		log.Fatalf(constants.ErrorDumpRead, err)
 	}
 
-	log.Infof(constants.MessageDumpCreated, helpers2.Table)
-}
+	scanner := bufio.NewScanner(cmdReader)
 
-func parseDump() {
-	log.Infof(constants.MessageStartParseDump, helpers2.Table)
-	file, err := os.Open(OutputFile)
-	defer func() {
-		err = file.Close()
+	go func() {
+		for scanner.Scan() {
+			// secure channel (overflow)
+			if len(helpers2.ParseStrings) > ParseStringSize-5 {
+				time.Sleep(5 * time.Second)
+			}
+			helpers2.ParseStrings <- scanner.Text()
+		}
 	}()
 
+	err = cmd.Start()
 	if err != nil {
-		log.Fatalf(constants.ErrorParseDump, helpers2.Table)
+		log.Fatalf(constants.ErrorDumpRead, err)
 	}
 
-	reader := bufio.NewReader(file)
-	for {
-		line, err := reader.ReadString('\n')
-
-		if err != nil {
-			break
-		}
-
-		_ = parseLine(line)
+	err = cmd.Wait()
+	if err != nil {
+		log.Fatalf(constants.ErrorDumpRead, err)
 	}
-	log.Infof(constants.MessageDumpParsed, helpers2.Table)
+
+	log.Infof(constants.MessageDumpRead, helpers2.Table)
 }
 
-func parseLine(line string) map[string]interface{} {
-	out := make(map[string]interface{})
+func parseLine(c chan string) {
+	for {
+		line := <-c
 
-	re := regexp.MustCompile(InsertRegexp)
-	match := re.FindStringSubmatch(line)
-	if len(match) > 0 {
-		// TODO fix me
-		r := strings.NewReplacer("VALUES", "",
-			"'", "",
-			"(", "",
-			")", "")
+		re := regexp.MustCompile(InsertRegexp)
+		match := re.FindStringSubmatch(line)
+		if len(match) > 0 {
+			// TODO fix me
+			r := strings.NewReplacer("VALUES", "",
+				"'", "",
+				"(", "",
+				")", "")
 
-		params := strings.Split(strings.TrimSpace(r.Replace(match[0])), ",")
+			params := strings.Split(strings.TrimSpace(r.Replace(match[0])), ",")
 
-		slave.GetSlaveByName(helpers2.Table).ClearParams()
+			slave.GetSlaveByName(helpers2.Table).ClearParams()
 
-		interfaceParams := make([]interface{}, len(params))
-		for i := range params {
-			interfaceParams[i] = params[i]
+			interfaceParams := make([]interface{}, len(params))
+			for i := range params {
+				interfaceParams[i] = params[i]
+			}
+			err := parser.ParseRow(slave.GetSlaveByName(helpers2.Table), interfaceParams)
+			if err != nil {
+				log.Fatalf(constants.ErrorParseLine, line, err)
+			}
+
+			header, positionSet := helpers2.GetHeader()
+
+			slave.GetSlaveByName(helpers2.Table).Insert(&header, positionSet)
+		} else {
+			// parse position
+			re = regexp.MustCompile(PositionRegexp)
+			match = re.FindStringSubmatch(line)
+
+			if len(match) > 0 {
+				pos, _ := strconv.Atoi(match[2])
+				helpers2.Position = mysql.Position{
+					Name: match[1],
+					Pos:  uint32(pos),
+				}
+
+				helpers2.SetPosition()
+				log.Infof(constants.MessageDumpPositionSaved, helpers2.Table)
+			}
 		}
-		err := parser.ParseRow(slave.GetSlaveByName(helpers2.Table), interfaceParams)
-		if err != nil {
-			log.Fatalf(constants.ErrorParseDump, OutputFile, err)
-		}
-
-		header, positionSet := helpers2.GetHeader()
-
-		slave.GetSlaveByName(helpers2.Table).Insert(&header, positionSet)
-		return out
 	}
-
-	// parse position
-	re = regexp.MustCompile(PositionRegexp)
-	match = re.FindStringSubmatch(line)
-
-	if len(match) > 0 {
-		pos, _ := strconv.Atoi(match[2])
-		helpers2.Position = mysql.Position{
-			Name: match[1],
-			Pos:  uint32(pos),
-		}
-
-		helpers2.SetPosition()
-	}
-
-	return out
 }

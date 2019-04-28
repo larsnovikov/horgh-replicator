@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+const (
+	Timeout = 10
+)
+
 func GetHeader() (header slave.Header, positionSet func()) {
 	t := time.Now()
 	header = slave.Header{
@@ -26,10 +30,18 @@ func GetHeader() (header slave.Header, positionSet func()) {
 }
 
 func Wait() {
-	time.Sleep(1 * time.Second)
+	time.Sleep(Timeout * time.Second)
 	for ok := true; ok; ok = slave.GetSlaveByName(Table).GetChannelLen() != 0 {
 		// waiting until save.channel is empty
-		time.Sleep(1 * time.Second)
+		time.Sleep(Timeout * time.Second)
+	}
+}
+
+func WaitParsing() {
+	time.Sleep(Timeout * time.Second)
+	for ok := true; ok; ok = slave.GetSlaveByName(Table).GetChannelLen() != 0 || len(ParseStrings) != 0 {
+		// waiting until save.channel and ParseString is empty
+		time.Sleep(Timeout * time.Second)
 	}
 }
 
