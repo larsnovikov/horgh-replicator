@@ -88,11 +88,6 @@ func readDump() {
 		log.Fatalf(constants.ErrorDumpRead, err)
 	}
 
-	err = cmd.Wait()
-	if err != nil {
-		log.Fatalf(constants.ErrorDumpRead, err)
-	}
-
 	log.Infof(constants.MessageDumpRead, helpers2.Table)
 }
 
