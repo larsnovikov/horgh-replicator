@@ -27,8 +27,9 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Add tables to replicator
 
-- Create json config for your table like `examples/user.json` or `examples/post.json`.
+- Use `create-model <table>` to create json config for your table.
 - Create table on slave.
+- Use `build-table <table>` to copy table data from master and set start position of log for table listener.
 
 ### Custom handlers for field value
 
@@ -57,7 +58,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 - `build-table <table>` create master table dump, restore this dump in slave, set start position of log for table listener
 - `destroy-table <table>` truncate table, set empty position of log for table listener
 
-### Container mode
+### Modes
 
 - Prod mode: build app and execute app as supervisor process. 
   
