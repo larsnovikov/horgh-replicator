@@ -97,45 +97,66 @@ func parseLine(c chan string) {
 	for {
 		line := <-c
 
-		re := regexp.MustCompile(InsertRegexp)
-		match := re.FindStringSubmatch(line)
-		if len(match) > 0 {
-			// TODO fix me
-			r := strings.NewReplacer("VALUES", "",
-				"'", "",
-				"(", "",
-				")", "")
+		// try to parse like insert
+		if parseInsert(line) == true {
+			continue
+		}
 
-			params := strings.Split(strings.TrimSpace(r.Replace(match[0])), ",")
-
-			slave.GetSlaveByName(helpers2.Table).ClearParams()
-
-			interfaceParams := make([]interface{}, len(params))
-			for i := range params {
-				interfaceParams[i] = params[i]
-			}
-			err := parser.ParseRow(slave.GetSlaveByName(helpers2.Table), interfaceParams)
-			if err != nil {
-				log.Fatalf(constants.ErrorParseLine, line, err)
-			}
-
-			header, positionSet := helpers2.GetHeader()
-
-			slave.GetSlaveByName(helpers2.Table).Insert(&header, positionSet)
-		} else {
-			// parse position
-			re = regexp.MustCompile(PositionRegexp)
-			match = re.FindStringSubmatch(line)
-
-			if len(match) > 0 {
-				pos, _ := strconv.Atoi(match[2])
-				helpers2.Position = mysql.Position{
-					Name: match[1],
-					Pos:  uint32(pos),
-				}
-
-				helpers2.SetPosition()
-			}
+		// try to parse like position setter
+		if parsePosition(line) == true {
+			continue
 		}
 	}
+}
+
+func parseInsert(line string) bool {
+	re := regexp.MustCompile(InsertRegexp)
+	match := re.FindStringSubmatch(line)
+	if len(match) > 0 {
+		// TODO fix me
+		r := strings.NewReplacer("VALUES", "",
+			"'", "",
+			"(", "",
+			")", "")
+
+		params := strings.Split(strings.TrimSpace(r.Replace(match[0])), ",")
+
+		slave.GetSlaveByName(helpers2.Table).ClearParams()
+
+		interfaceParams := make([]interface{}, len(params))
+		for i := range params {
+			interfaceParams[i] = params[i]
+		}
+		err := parser.ParseRow(slave.GetSlaveByName(helpers2.Table), interfaceParams)
+		if err != nil {
+			log.Fatalf(constants.ErrorParseLine, line, err)
+		}
+
+		header, positionSet := helpers2.GetHeader()
+
+		slave.GetSlaveByName(helpers2.Table).Insert(&header, positionSet)
+
+		return true
+	}
+
+	return false
+}
+
+func parsePosition(line string) bool {
+	re := regexp.MustCompile(PositionRegexp)
+	match := re.FindStringSubmatch(line)
+
+	if len(match) > 0 {
+		pos, _ := strconv.Atoi(match[2])
+		helpers2.Position = mysql.Position{
+			Name: match[1],
+			Pos:  uint32(pos),
+		}
+
+		helpers2.SetPosition()
+
+		return true
+	}
+
+	return false
 }
