@@ -16,14 +16,13 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
 	CreateDump      = "mysqldump --extended-insert=FALSE --no-create-info --master-data=1 --port=%s -u%s -p%s -h %s %s %s"
 	InsertRegexp    = `VALUES \([A-Za-z0-9,\s,\S]+\)`
 	PositionRegexp  = `MASTER_LOG_FILE=\'([a-zA-Z\-\.0-9]+)\', MASTER_LOG_POS=([0-9]+)`
-	ParseStringSize = 9999999
+	ParseStringSize = 99999999
 )
 
 var CmdBuildTable = &cobra.Command{
@@ -80,10 +79,6 @@ func readDump() {
 
 	go func() {
 		for scanner.Scan() {
-			// secure channel (overflow)
-			if len(helpers2.ParseStrings) > ParseStringSize-5 {
-				time.Sleep(5 * time.Second)
-			}
 			helpers2.ParseStrings <- scanner.Text()
 		}
 	}()
@@ -143,7 +138,6 @@ func parseLine(c chan string) {
 				}
 
 				helpers2.SetPosition()
-				log.Infof(constants.MessageDumpPositionSaved, helpers2.Table)
 			}
 		}
 	}
