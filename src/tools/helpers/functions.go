@@ -29,21 +29,11 @@ func GetHeader() (header slave.Header, positionSet func()) {
 	return header, positionSet
 }
 
-func Wait() {
+func Wait(cond func() bool) {
 	for {
 		// waiting until save.channel is empty
 		time.Sleep(Timeout * time.Second)
-		if slave.GetSlaveByName(Table).GetChannelLen() == 0 {
-			break
-		}
-	}
-}
-
-func WaitParsing() {
-	for {
-		// waiting until save.channel and ParseString is empty
-		time.Sleep(Timeout * time.Second)
-		if slave.GetSlaveByName(Table).GetChannelLen() == 0 && len(ParseStrings) == 0 {
+		if cond() {
 			break
 		}
 	}

@@ -34,7 +34,9 @@ func destroyModel(tableName string) {
 	// delete position in db
 	helpers.SetPosition()
 
-	helpers.Wait()
+	helpers.Wait(func() bool {
+		return slave.GetSlaveByName(helpers.Table).GetChannelLen() == 0
+	})
 
 	log.Infof(constants.MessageTableDestroyed, helpers.Table)
 }

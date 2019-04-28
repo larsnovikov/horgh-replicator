@@ -48,7 +48,9 @@ func buildModel(tableName string) {
 
 		readDump()
 
-		helpers2.WaitParsing()
+		helpers2.Wait(func() bool {
+			return slave.GetSlaveByName(helpers2.Table).GetChannelLen() == 0 && len(helpers2.ParseStrings) == 0
+		})
 	}
 }
 
