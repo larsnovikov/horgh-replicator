@@ -83,8 +83,10 @@ func MakeCredentials() {
 		os.Getenv("REPLICATOR_DBNAME"),
 	}
 
-	for _, tableName := range strings.Split(os.Getenv("ALLOWED_TABLES"), ",") {
-		tables = append(tables, strings.TrimSpace(tableName))
+	if os.Getenv("ALLOWED_TABLES") != "" {
+		for _, tableName := range strings.Split(os.Getenv("ALLOWED_TABLES"), ",") {
+			tables = append(tables, strings.TrimSpace(tableName))
+		}
 	}
 
 	channelSize, _ = strconv.Atoi(os.Getenv("CHANNEL_SIZE"))

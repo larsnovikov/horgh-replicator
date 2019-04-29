@@ -29,7 +29,11 @@ func GetSavedPos(table string) mysql.Position {
 	hash := helpers.MakeHash(dbName, table)
 	pos, name := helpers.MakeTablePosKey(hash)
 
-	tablePosition, err := strconv.ParseUint(system.GetValue(pos), 10, 32)
+	position := system.GetValue(pos)
+	if position == "" {
+		log.Fatalf(constants.ErrorEmptyPosition, table, table)
+	}
+	tablePosition, err := strconv.ParseUint(position, 10, 32)
 	if err != nil {
 		log.Fatalf(constants.ErrorGetMinPosition, err)
 	}

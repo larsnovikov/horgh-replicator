@@ -7,6 +7,9 @@
       "status",
       "active",
       "balance",
+      "time",
+      "date",
+      "datetime",
       "created"
     ]
   },
@@ -16,12 +19,20 @@
       {
         "name": "id",
         "key": true,
-        "mode": "int"
+        "mode": "int",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
       },
       {
         "name": "name",
         "key": false,
-        "mode": "string"
+        "mode": "string",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
       },
       {
         "name": "status",
@@ -37,17 +48,56 @@
       {
         "name": "active",
         "key": false,
-        "mode": "bool"
+        "mode": "bool",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
       },
       {
         "name": "balance",
         "key": false,
-        "mode": "float"
+        "mode": "float",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
+      },
+      {
+        "name": "time",
+        "key": false,
+        "mode": "time",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
+      },
+      {
+        "name": "date",
+        "key": false,
+        "mode": "date",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
+      },
+      {
+        "name": "datetime",
+        "key": false,
+        "mode": "datetime",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
       },
       {
         "name": "created",
         "key": false,
-        "mode": "timestamp"
+        "mode": "timestamp",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
       }
     ]
   }

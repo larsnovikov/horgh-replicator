@@ -26,7 +26,7 @@ const (
 )
 
 var CmdBuildTable = &cobra.Command{
-	Use:   "build-table",
+	Use:   "build-slave",
 	Short: "Build slave table from master. Format: [table]",
 	Long:  "Build slave table from master. Format: [table]",
 	Args:  cobra.ExactArgs(1),
@@ -60,7 +60,7 @@ func canHandle() bool {
 		return true
 	}
 
-	log.Fatalf(constants.ErrorTableBuilt, helpers2.Table, helpers2.Table)
+	log.Fatalf(constants.ErrorSlaveBuilt, helpers2.Table, helpers2.Table)
 	return false
 }
 

@@ -58,7 +58,7 @@ CREATE TABLE public."user"
   balance float,
   time time,
   date date,
-  datetime datetime,
+  datetime VARCHAR(255),
   created TIMESTAMP DEFAULT NULL
 );
 
