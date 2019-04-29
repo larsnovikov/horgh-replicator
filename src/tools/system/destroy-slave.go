@@ -10,7 +10,7 @@ import (
 )
 
 var CmdDestroyTable = &cobra.Command{
-	Use:   "destroy-table",
+	Use:   "destroy-slave",
 	Short: "Destroy slave table from master. Format: [table]",
 	Long:  "Destroy slave table from master. Format: [table]",
 	Args:  cobra.ExactArgs(1),

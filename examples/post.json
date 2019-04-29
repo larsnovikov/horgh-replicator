@@ -14,22 +14,38 @@
       {
         "name": "id",
         "key": true,
-        "mode": "int"
+        "mode": "int",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
       },
       {
         "name": "title",
         "key": false,
-        "mode": "string"
+        "mode": "string",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
       },
       {
         "name": "text",
         "key": false,
-        "mode": "string"
+        "mode": "string",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
       },
       {
         "name": "created",
         "key": false,
-        "mode": "timestamp"
+        "mode": "timestamp",
+        "beforeSave": {
+          "handler": "",
+          "params": null
+        }
       }
     ]
   }

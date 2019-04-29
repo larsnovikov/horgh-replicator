@@ -12,6 +12,7 @@ const (
 	ErrorModelFileExists     = "Model file \"%s\" already exists"
 	ErrorParserPosition      = "Catch error: \"%s\""
 	ErrorGetMinPosition      = "Can't get min position. Error: \"%s\""
+	ErrorEmptyPosition       = "Can't get position. Use \"destroy-slave %s\" and \"build-slave %s\""
 	ErrorUndefinedSlave      = "Can't get slave. Error: \"%s\""
 	ErrorCobraStarter        = "Catch cobra error: \"%s\""
 	ErrorCachePluginError    = "Catch plugin error: \"%s\""
@@ -20,5 +21,5 @@ const (
 	ErrorBuildModelConfig    = "Can't build model config. Error: \"%s\""
 	ErrorDumpRead            = "Can't read dump. Error: \"%s\""
 	ErrorParseLine           = "Can't parse line \"%s\". Error: \"%s\""
-	ErrorTableBuilt          = "Table \"%s\" already built. Use \"destroy-table %s\" before build"
+	ErrorSlaveBuilt          = "Slave table \"%s\" already built. Use \"destroy-slave %s\" before build"
 )
