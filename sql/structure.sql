@@ -8,6 +8,9 @@ CREATE TABLE test.user
   status VARCHAR(255),
   active bool,
   balance float,
+  time time,
+  date date,
+  datetime datetime,
   created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
 ) engine=InnoDB;
 
@@ -27,6 +30,9 @@ CREATE TABLE test.user
   status VARCHAR(255),
   active bool,
   balance float,
+  time time,
+  date date,
+  datetime datetime,
   created TIMESTAMP NOT NULL
 ) engine=InnoDB;
 
@@ -50,6 +56,9 @@ CREATE TABLE public."user"
   status VARCHAR(255),
   active bool,
   balance float,
+  time time,
+  date date,
+  datetime datetime,
   created TIMESTAMP DEFAULT NULL
 );
 
@@ -64,11 +73,28 @@ CREATE TABLE public.post
 /*For ClickHouse Slave*/
 CREATE DATABASE test;
 
-CREATE TABLE test.user (id Int32, name FixedString(40), status FixedString(255), active UInt8, balance Float32, created DateTime) ENGINE = MergeTree()
+CREATE TABLE test.user
+(
+  id Int32,
+  name FixedString(40),
+  status FixedString(255),
+  active UInt8,
+  balance Float32,
+  time FixedString(255),
+  date FixedString(255),
+  datetime DateTime,
+  created DateTime
+) ENGINE = MergeTree()
 PARTITION BY id
 ORDER BY id;
 
-CREATE TABLE test.post (id Int32, title FixedString(40), text FixedString(255), created DateTime) ENGINE = MergeTree()
+CREATE TABLE test.post
+(
+  id Int32,
+  title FixedString(40),
+  text FixedString(255),
+  created DateTime
+) ENGINE = MergeTree()
 PARTITION BY id
 ORDER BY id;
 
@@ -81,6 +107,9 @@ CREATE TABLE "user"
   status VARCHAR,
   active bool,
   balance FLOAT,
+  time TIME,
+  date DATE,
+  datetime DATETIME,
   created TIMESTAMP NOT NULL
 );
 

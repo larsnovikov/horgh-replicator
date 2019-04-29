@@ -134,6 +134,12 @@ func getType(definition FieldDefinition) string {
 		return "float"
 	case "decimal":
 		return "float"
+	case "time":
+		return "time"
+	case "date":
+		return "date"
+	case "datetime":
+		return "datetime"
 	default:
 		log.Fatalf(constants.ErrorFieldTypeConversion, defType)
 	}
