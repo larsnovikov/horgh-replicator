@@ -1,14 +1,12 @@
 package tools
 
 import (
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/tools/exit"
 	"os"
 	"os/signal"
 	"syscall"
 )
-
-var BeforeExit = func() bool {
-	return true
-}
 
 func MakeHandler() {
 	c := make(chan os.Signal, 1)
@@ -19,8 +17,6 @@ func MakeHandler() {
 func handle(c chan os.Signal) {
 	for {
 		<-c
-		if BeforeExit() == true {
-			os.Exit(1)
-		}
+		exit.Fatal(constants.MessageSysCallStop)
 	}
 }

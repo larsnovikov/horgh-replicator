@@ -10,7 +10,7 @@ import (
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/parser"
-	"horgh-replicator/src/tools"
+	"horgh-replicator/src/tools/exit"
 	helpers2 "horgh-replicator/src/tools/helpers"
 	"os/exec"
 	"regexp"
@@ -31,10 +31,12 @@ var CmdBuildTable = &cobra.Command{
 	Long:  "Build slave table from master. Format: [table]",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		tools.BeforeExit = func() bool {
+		beforeExit := func() bool {
 			log.Infof(constants.MessageStopTableBuild)
 			return false
 		}
+		exit.BeforeExitPool = append(exit.BeforeExitPool, beforeExit)
+
 		tableName := args[0]
 		buildModel(tableName)
 	},
@@ -134,7 +136,7 @@ func parseInsert(line string) bool {
 
 		header, positionSet := helpers2.GetHeader()
 
-		slave.GetSlaveByName(helpers2.Table).Insert(&header, positionSet, func() {})
+		slave.GetSlaveByName(helpers2.Table).Insert(&header, positionSet)
 
 		return true
 	}

@@ -21,11 +21,13 @@ func save(c chan func() bool) {
 	}
 }
 
-func Stop() {
+func Stop() bool {
 	// stop handle saving
 	log.Infof(constants.MessageStopHandlingSave)
 	AllowHandling = false
 
 	log.Infof(constants.MessageWait, strconv.Itoa(5), "seconds")
 	time.Sleep(5 * time.Second)
+
+	return true
 }

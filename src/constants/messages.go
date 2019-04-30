@@ -20,4 +20,5 @@ const (
 	MessageStopTableDestroy   = "Can't stop table destroy"
 	MessageTableDestroyed     = "Table: \"%s\" destroyed"
 	MessagePositionUpdated    = "Position for table \"%s\" updated"
+	MessageSysCallStop        = "Stopped by syscall"
 )

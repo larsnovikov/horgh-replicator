@@ -98,7 +98,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		for _, row := range e.Rows {
 			slave.GetSlaveByName(e.Table.Name).GetConnector().ParseKey(row)
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				slave.GetSlaveByName(e.Table.Name).Delete(&header, positionSet, StopListen)
+				slave.GetSlaveByName(e.Table.Name).Delete(&header, positionSet)
 				SaveLocks[e.Table.Name] = false
 			} else {
 				log.Infof(constants.MessageIgnoreDelete, header.Timestamp, e.Table.Name, header.LogPos)
@@ -120,7 +120,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 
 		if e.Action == canal.UpdateAction {
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				slave.GetSlaveByName(e.Table.Name).Update(&header, positionSet, StopListen)
+				slave.GetSlaveByName(e.Table.Name).Update(&header, positionSet)
 				SaveLocks[e.Table.Name] = false
 			} else {
 				log.Infof(constants.MessageIgnoreUpdate, header.Timestamp, e.Table.Name, header.LogPos)
@@ -128,7 +128,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 			}
 		} else {
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				slave.GetSlaveByName(e.Table.Name).Insert(&header, positionSet, StopListen)
+				slave.GetSlaveByName(e.Table.Name).Insert(&header, positionSet)
 				SaveLocks[e.Table.Name] = false
 			} else {
 				log.Infof(constants.MessageIgnoreInsert, header.Timestamp, e.Table.Name, header.LogPos)

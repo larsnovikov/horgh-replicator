@@ -130,11 +130,13 @@ func prepareType(fieldName string, fieldType string, value interface{}, params m
 	}
 }
 
-func Stop() {
+func Stop() bool {
 	// stop handle binlog
 	log.Infof(constants.MessageStopHandlingBinlog)
 	AllowHandling = false
 
 	log.Infof(constants.MessageWait, strconv.Itoa(5), "seconds")
 	time.Sleep(5 * time.Second)
+
+	return true
 }
