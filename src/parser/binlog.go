@@ -40,7 +40,7 @@ func (h *binlogHandler) prepareCanal() {
 	if curCanal == nil {
 		canalTmp, err := getDefaultCanal()
 		if err != nil {
-			log.Fatal(constants.ErrorMysqlCanal)
+			exit.Fatal(constants.ErrorMysqlCanal)
 		}
 		curCanal = canalTmp
 	}

@@ -110,7 +110,7 @@ func makeSlave(modelName string) {
 		_ = file.Close()
 	}()
 	if err != nil {
-		log.Fatal(err)
+		exit.Fatal(err.Error())
 	}
 
 	// set model params from config

@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/tools/exit"
 	"os"
@@ -44,7 +43,7 @@ func ReadConfig(configName string) *os.File {
 	jsonFile, err := os.Open(fileName)
 
 	if err != nil {
-		log.Fatal(err)
+		exit.Fatal(err.Error())
 	}
 
 	return jsonFile

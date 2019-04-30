@@ -38,7 +38,7 @@ func (conn connect) Exec(params map[string]interface{}) bool {
 func (conn connect) Get(params map[string]interface{}) *sql.Rows {
 	rows, err := conn.base.Query(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
-		log.Fatal(err)
+		exit.Fatal(err.Error())
 	}
 
 	return rows
