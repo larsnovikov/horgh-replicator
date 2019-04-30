@@ -29,7 +29,7 @@ func destroyModel(tableName string) {
 	header, positionSet := helpers.GetHeader()
 
 	// delete all from table
-	slave.GetSlaveByName(helpers.Table).DeleteAll(&header, positionSet)
+	slave.GetSlaveByName(helpers.Table).DeleteAll(&header, positionSet, func() {})
 
 	// delete position in db
 	helpers.SetPosition()

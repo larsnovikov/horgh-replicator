@@ -134,7 +134,7 @@ func parseInsert(line string) bool {
 
 		header, positionSet := helpers2.GetHeader()
 
-		slave.GetSlaveByName(helpers2.Table).Insert(&header, positionSet)
+		slave.GetSlaveByName(helpers2.Table).Insert(&header, positionSet, func() {})
 
 		return true
 	}

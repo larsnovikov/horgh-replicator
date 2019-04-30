@@ -146,7 +146,7 @@ func (slave Slave) GetChannelLen() int {
 	return len(slave.channel)
 }
 
-func (slave Slave) Insert(header *Header, positionSet func()) {
+func (slave Slave) Insert(header *Header, positionSet func(), onError func()) {
 	if slave.BeforeSave() == true {
 		params := slave.connector.GetInsert()
 
@@ -157,6 +157,7 @@ func (slave Slave) Insert(header *Header, positionSet func()) {
 				return true
 			}
 
+			onError()
 			slave.logError("insert")
 
 			return false
@@ -164,7 +165,7 @@ func (slave Slave) Insert(header *Header, positionSet func()) {
 	}
 }
 
-func (slave Slave) Update(header *Header, positionSet func()) {
+func (slave Slave) Update(header *Header, positionSet func(), onError func()) {
 	if slave.BeforeSave() == true {
 		params := slave.connector.GetUpdate()
 
@@ -176,6 +177,7 @@ func (slave Slave) Update(header *Header, positionSet func()) {
 				return true
 			}
 
+			onError()
 			slave.logError("update")
 
 			return false
@@ -183,7 +185,7 @@ func (slave Slave) Update(header *Header, positionSet func()) {
 	}
 }
 
-func (slave Slave) Delete(header *Header, positionSet func()) {
+func (slave Slave) Delete(header *Header, positionSet func(), onError func()) {
 	params := slave.connector.GetDelete(false)
 
 	slave.channel <- func() bool {
@@ -193,13 +195,14 @@ func (slave Slave) Delete(header *Header, positionSet func()) {
 			return true
 		}
 
+		onError()
 		slave.logError("delete")
 
 		return false
 	}
 }
 
-func (slave Slave) DeleteAll(header *Header, positionSet func()) {
+func (slave Slave) DeleteAll(header *Header, positionSet func(), onError func()) {
 	params := slave.connector.GetDelete(true)
 
 	slave.channel <- func() bool {
@@ -209,6 +212,7 @@ func (slave Slave) DeleteAll(header *Header, positionSet func()) {
 			return true
 		}
 
+		onError()
 		slave.logError("delete")
 
 		return false
@@ -216,5 +220,5 @@ func (slave Slave) DeleteAll(header *Header, positionSet func()) {
 }
 
 func (slave Slave) logError(operationType string) {
-	log.Warnf(constants.ErrorSave, operationType, slave.TableName())
+	log.Fatalf(constants.ErrorSave, operationType, slave.TableName())
 }

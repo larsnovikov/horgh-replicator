@@ -1,8 +1,10 @@
 package parser
 
 import (
+	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/canal"
 	"horgh-replicator/src/connectors"
+	"horgh-replicator/src/constants"
 	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/plugins"
 	"strconv"
@@ -126,4 +128,13 @@ func prepareType(fieldName string, fieldType string, value interface{}, params m
 		t, _ := time.Parse("2006-01-02 15:04:05", value.(string))
 		params[fieldName] = t
 	}
+}
+
+func Stop() {
+	// stop handle binlog
+	log.Infof(constants.MessageStopHandlingBinlog)
+	AllowHandling = false
+
+	log.Infof(constants.MessageWait, strconv.Itoa(5), "seconds")
+	time.Sleep(5 * time.Second)
 }
