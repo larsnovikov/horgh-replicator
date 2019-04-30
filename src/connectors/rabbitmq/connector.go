@@ -5,6 +5,7 @@ import (
 	"github.com/streadway/amqp"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/tools/exit"
 	"strconv"
 )
 
@@ -42,9 +43,9 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		helpers.ParseAMQPConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsAMQP)
-		conn, err := amqp.Dial(buildRabbitmqString(cred))
+		conn, err := amqp.Dial(buildDsn(cred))
 		if err != nil {
-			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
+			exit.Fatal(constants.ErrorDBConnect, storageType)
 		} else {
 			connection = rabbitmqConnection{conn}
 		}

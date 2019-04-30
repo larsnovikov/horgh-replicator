@@ -7,6 +7,7 @@ import (
 	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/tools/exit"
 	"strconv"
 )
 
@@ -37,7 +38,7 @@ func (conn connect) Exec(params map[string]interface{}) bool {
 func (conn connect) Get(params map[string]interface{}) *sql.Rows {
 	rows, err := conn.base.Query(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 	if err != nil {
-		log.Fatal(err)
+		exit.Fatal(err.Error())
 	}
 
 	return rows
@@ -48,7 +49,7 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sql.Open("mysql", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
+			exit.Fatal(constants.ErrorDBConnect, storageType)
 		} else {
 			connection = connect{conn}
 		}

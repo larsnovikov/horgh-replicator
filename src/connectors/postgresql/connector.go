@@ -8,6 +8,7 @@ import (
 	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/tools/exit"
 	"strconv"
 )
 
@@ -40,7 +41,7 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sql.Open("postgres", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
+			exit.Fatal(constants.ErrorDBConnect, storageType)
 		} else {
 			connection = connect{conn}
 		}

@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/models/slave"
-	"horgh-replicator/src/tools"
+	"horgh-replicator/src/tools/exit"
 	"horgh-replicator/src/tools/helpers"
 )
 
@@ -15,10 +15,12 @@ var CmdDestroyTable = &cobra.Command{
 	Long:  "Destroy slave table from master. Format: [table]",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		tools.BeforeExit = func() bool {
+		beforeExit := func() bool {
 			log.Infof(constants.MessageStopTableDestroy)
 			return false
 		}
+		exit.BeforeExitPool = append(exit.BeforeExitPool, beforeExit)
+
 		tableName := args[0]
 		destroyModel(tableName)
 	},

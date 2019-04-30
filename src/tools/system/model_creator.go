@@ -9,6 +9,7 @@ import (
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/models/system"
+	"horgh-replicator/src/tools/exit"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -53,7 +54,7 @@ func getStructure(table string) []FieldDefinition {
 		field := FieldDefinition{}
 		err := rows.Scan(&field.Field, &field.Type, &field.Null, &field.Key, &field.Default, &field.Extra)
 		if err != nil {
-			log.Fatalf(constants.ErrorTableStructure, table, err)
+			exit.Fatal(constants.ErrorTableStructure, table, err)
 		}
 
 		fields = append(fields, field)
@@ -61,7 +62,7 @@ func getStructure(table string) []FieldDefinition {
 
 	err := rows.Err()
 	if err != nil {
-		log.Fatalf(constants.ErrorTableStructure, table, err)
+		exit.Fatal(constants.ErrorTableStructure, table, err)
 	}
 
 	return fields
@@ -107,7 +108,7 @@ func getJson(table string, fields []FieldDefinition) string {
 
 	jsonOut, err := json.MarshalIndent(&config, "", "\t")
 	if err != nil {
-		log.Fatalf(constants.ErrorBuildModelConfig, err)
+		exit.Fatal(constants.ErrorBuildModelConfig, err)
 	}
 
 	return string(jsonOut)
@@ -141,7 +142,7 @@ func getType(definition FieldDefinition) string {
 	case "datetime":
 		return "datetime"
 	default:
-		log.Fatalf(constants.ErrorFieldTypeConversion, defType)
+		exit.Fatal(constants.ErrorFieldTypeConversion, defType)
 	}
 
 	return ""
@@ -152,10 +153,10 @@ func build(table string, data string) string {
 	if _, err := os.Stat(fileName); os.IsNotExist(err) {
 		err := ioutil.WriteFile(fileName, []byte(data), 0644)
 		if err != nil {
-			log.Fatalf(constants.ErrorBuildModelConfig, err)
+			exit.Fatal(constants.ErrorBuildModelConfig, err)
 		}
 	} else {
-		log.Fatalf(constants.ErrorModelFileExists, fileName)
+		exit.Fatal(constants.ErrorModelFileExists, fileName)
 	}
 
 	return fileName

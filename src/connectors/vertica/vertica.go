@@ -7,6 +7,7 @@ import (
 	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/tools/exit"
 	"strconv"
 )
 
@@ -33,12 +34,12 @@ func (conn verticaConnection) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func GetConnection(connection helpers.Storage, dbName string) interface{} {
+func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
-		cred := helpers.GetCredentials(dbName).(helpers.CredentialsDB)
+		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sqlx.Open("odbc", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = helpers.Retry(dbName, cred.Credentials, connection, GetConnection).(helpers.Storage)
+			exit.Fatal(constants.ErrorDBConnect, storageType)
 		} else {
 			connection = verticaConnection{conn}
 		}

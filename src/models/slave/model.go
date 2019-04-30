@@ -10,6 +10,7 @@ import (
 	"horgh-replicator/src/connectors/vertica"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/tools/exit"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -76,7 +77,7 @@ func GetSlaveByName(name string) Slave {
 		return slave
 	}
 
-	log.Fatalf(constants.ErrorUndefinedSlave)
+	exit.Fatal(constants.ErrorUndefinedSlave)
 
 	return Slave{}
 }
@@ -109,7 +110,7 @@ func makeSlave(modelName string) {
 		_ = file.Close()
 	}()
 	if err != nil {
-		log.Fatal(err)
+		exit.Fatal(err.Error())
 	}
 
 	// set model params from config
@@ -216,5 +217,5 @@ func (slave Slave) DeleteAll(header *Header, positionSet func()) {
 }
 
 func (slave Slave) logError(operationType string) {
-	log.Warnf(constants.ErrorSave, operationType, slave.TableName())
+	exit.Fatal(constants.ErrorSave, operationType, slave.TableName())
 }
