@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"fmt"
 	"github.com/siddontang/go-log/log"
 	"github.com/streadway/amqp"
 	"horgh-replicator/src/constants"
@@ -42,9 +43,9 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		helpers.ParseAMQPConfig()
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsAMQP)
-		conn, err := amqp.Dial(buildRabbitmqString(cred))
+		conn, err := amqp.Dial(buildDsn(cred))
 		if err != nil {
-			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
+			log.Fatal(fmt.Sprintf(constants.ErrorDBConnect, storageType))
 		} else {
 			connection = rabbitmqConnection{conn}
 		}

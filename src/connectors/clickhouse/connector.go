@@ -45,7 +45,7 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
 		conn, err := sqlx.Open("clickhouse", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
-			connection = helpers.Retry(storageType, cred.Credentials, connection, GetConnection).(helpers.Storage)
+			log.Fatal(fmt.Sprintf(constants.ErrorDBConnect, storageType))
 		} else {
 			connection = connect{conn}
 		}
