@@ -10,6 +10,7 @@ import (
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/models/system"
+	"horgh-replicator/src/tools/exit"
 	"runtime"
 	"runtime/debug"
 	"strconv"
@@ -164,7 +165,7 @@ func BinlogListener() {
 	if err == nil {
 		position, err := c.GetMasterPos()
 		if err != nil {
-			log.Fatalf(constants.ErrorParserPosition, err)
+			exit.Fatal(constants.ErrorParserPosition, err)
 		}
 		coords := getMinPosition(position)
 		c.SetEventHandler(&binlogHandler{})

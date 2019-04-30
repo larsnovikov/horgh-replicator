@@ -2,11 +2,11 @@ package parser
 
 import (
 	"fmt"
-	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/mysql"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/system"
+	"horgh-replicator/src/tools/exit"
 	"strconv"
 	"strings"
 )
@@ -31,11 +31,11 @@ func GetSavedPos(table string) mysql.Position {
 
 	position := system.GetValue(pos)
 	if position == "" {
-		log.Fatalf(constants.ErrorEmptyPosition, table, table)
+		exit.Fatal(constants.ErrorEmptyPosition, table, table)
 	}
 	tablePosition, err := strconv.ParseUint(position, 10, 32)
 	if err != nil {
-		log.Fatalf(constants.ErrorGetMinPosition, err)
+		exit.Fatal(constants.ErrorGetMinPosition, err)
 	}
 	tableLogFile := system.GetValue(name)
 
@@ -126,7 +126,7 @@ func GetLowPosition(pos1 mysql.Position, pos2 mysql.Position) mysql.Position {
 func GetLogFileSuffix(name string) int {
 	suff, err := strconv.Atoi(strings.Replace(name, helpers.GetMasterLogFilePrefix(), "", -1))
 	if err != nil {
-		log.Fatalf(constants.ErrorGetMinPosition, err)
+		exit.Fatal(constants.ErrorGetMinPosition, err)
 	}
 
 	return suff

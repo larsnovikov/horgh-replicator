@@ -2,8 +2,8 @@ package helpers
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
+	"horgh-replicator/src/tools/exit"
 	"os"
 	"strconv"
 	"strings"
@@ -43,7 +43,7 @@ func MakeCredentials() {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		exit.Fatal("Error loading .env file")
 	}
 
 	masterPort, _ := strconv.Atoi(os.Getenv("MASTER_PORT"))

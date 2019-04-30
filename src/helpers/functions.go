@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
+	"horgh-replicator/src/tools/exit"
 	"os"
 	"reflect"
 )
@@ -11,7 +12,7 @@ import (
 func MakeSlice(input interface{}) []interface{} {
 	s := reflect.ValueOf(input)
 	if s.Kind() != reflect.Slice {
-		log.Fatal(constants.ErrorSliceCreation)
+		exit.Fatal(constants.ErrorSliceCreation)
 	}
 
 	ret := make([]interface{}, s.Len())
@@ -37,7 +38,7 @@ func MakeHash(dbName string, table string) string {
 func ReadConfig(configName string) *os.File {
 	fileName := fmt.Sprintf(constants.ConfigPath, configName)
 	if _, err := os.Stat(fileName); os.IsNotExist(err) {
-		log.Fatalf(constants.ErrorNoModelFile, fileName)
+		exit.Fatal(constants.ErrorNoModelFile, fileName)
 	}
 
 	jsonFile, err := os.Open(fileName)

@@ -62,7 +62,7 @@ func canHandle() bool {
 		return true
 	}
 
-	log.Fatalf(constants.ErrorSlaveBuilt, helpers2.Table, helpers2.Table)
+	exit.Fatal(constants.ErrorSlaveBuilt, helpers2.Table, helpers2.Table)
 	return false
 }
 
@@ -76,7 +76,7 @@ func readDump() {
 	// create a pipe for the output of the script
 	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Fatalf(constants.ErrorDumpRead, err)
+		exit.Fatal(constants.ErrorDumpRead, err)
 	}
 
 	scanner := bufio.NewScanner(cmdReader)
@@ -89,7 +89,7 @@ func readDump() {
 
 	err = cmd.Start()
 	if err != nil {
-		log.Fatalf(constants.ErrorDumpRead, err)
+		exit.Fatal(constants.ErrorDumpRead, err)
 	}
 
 	log.Infof(constants.MessageDumpRead, helpers2.Table)
@@ -131,7 +131,7 @@ func parseInsert(line string) bool {
 		}
 		err := parser.ParseRow(slave.GetSlaveByName(helpers2.Table), interfaceParams)
 		if err != nil {
-			log.Fatalf(constants.ErrorParseLine, line, err)
+			exit.Fatal(constants.ErrorParseLine, line, err)
 		}
 
 		header, positionSet := helpers2.GetHeader()
