@@ -9,14 +9,9 @@ type ConnectionMaster interface {
 	Get(map[string]interface{}) *sql.Rows
 }
 
-type ConnectionReplicator interface {
-	ConnectionMaster
-}
-
 type ConnectionPool struct {
-	Master     ConnectionMaster
-	Slave      Storage
-	Replicator ConnectionReplicator
+	Master ConnectionMaster
+	Slave  Storage
 }
 
 var ConnPool ConnectionPool

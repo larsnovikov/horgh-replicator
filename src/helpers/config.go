@@ -32,7 +32,6 @@ type CredentialsAMQP struct {
 
 var master CredentialsDB
 var slave interface{}
-var replicator CredentialsDB
 
 var tables []string
 var channelSize int
@@ -58,18 +57,6 @@ func MakeCredentials() {
 		os.Getenv("MASTER_DBNAME"),
 	}
 
-	replicationPort, _ := strconv.Atoi(os.Getenv("REPLICATOR_PORT"))
-	replicator = CredentialsDB{
-		Credentials{
-			"mysql",
-		},
-		os.Getenv("REPLICATOR_HOST"),
-		replicationPort,
-		os.Getenv("REPLICATOR_USER"),
-		os.Getenv("REPLICATOR_PASS"),
-		os.Getenv("REPLICATOR_DBNAME"),
-	}
-
 	if os.Getenv("ALLOWED_TABLES") != "" {
 		for _, tableName := range strings.Split(os.Getenv("ALLOWED_TABLES"), ",") {
 			tables = append(tables, strings.TrimSpace(tableName))
@@ -87,8 +74,6 @@ func GetCredentials(storageType string) interface{} {
 		return getMaster()
 	case constants.DBSlave:
 		return getSlave()
-	case constants.DBReplicator:
-		return getReplicator()
 	default:
 		return Credentials{}
 	}
@@ -100,10 +85,6 @@ func getMaster() CredentialsDB {
 
 func getSlave() interface{} {
 	return slave
-}
-
-func getReplicator() CredentialsDB {
-	return replicator
 }
 
 func GetTables() []string {
