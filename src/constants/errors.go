@@ -2,7 +2,7 @@ package constants
 
 const (
 	ErrorMysqlCanal          = "Invalid canal"
-	ErrorMysqlPosition       = "Invalid position"
+	ErrorGetPosition         = "Invalid position. Error: \"%s\""
 	ErrorSliceCreation       = "InterfaceSlice() given a non-slice type"
 	ErrorNoColumn            = "There is no column %s in %s.%s"
 	ErrorDBConnect           = "Can't connect to \"%s\""

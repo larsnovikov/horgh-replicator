@@ -8,6 +8,7 @@ build/
 src/.env
 src/vendor
 src/configs/*.json
+src/positions/*.txt
 src/plugins/user/*.go
 src/plugins/user/*.so
 src/horgh-replicator

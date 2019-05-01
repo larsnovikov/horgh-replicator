@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"fmt"
 	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
@@ -43,10 +42,7 @@ func SetPosition() {
 	dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
 	hash := helpers.MakeHash(dbName, Table)
 
-	posKey, nameKey := helpers.MakeTablePosKey(hash)
-
-	system.SetValue(posKey, fmt.Sprint(Position.Pos))
-	system.SetValue(nameKey, Position.Name)
+	system.SetPosition(hash, Position)
 
 	log.Infof(constants.MessagePositionUpdated, Table)
 }

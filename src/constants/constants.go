@@ -8,4 +8,5 @@ const (
 	DBMaster           = "master"
 	ConfigPath         = "configs/%s.json"
 	PluginPath         = "plugins/%s/handler.so"
+	PositionsPath      = "positions/%s.txt"
 )

@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"github.com/siddontang/go-mysql/mysql"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
@@ -27,21 +26,15 @@ func updatePrevPosition(c chan func()) {
 func GetSavedPos(table string) mysql.Position {
 	dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
 	hash := helpers.MakeHash(dbName, table)
-	pos, name := helpers.MakeTablePosKey(hash)
 
-	position := system.GetValue(pos)
-	if position == "" {
+	position := system.GetPosition(hash)
+	if position.Pos == 0 {
 		exit.Fatal(constants.ErrorEmptyPosition, table, table)
 	}
-	tablePosition, err := strconv.ParseUint(position, 10, 32)
-	if err != nil {
-		exit.Fatal(constants.ErrorGetMinPosition, err)
-	}
-	tableLogFile := system.GetValue(name)
 
 	return mysql.Position{
-		Name: tableLogFile,
-		Pos:  uint32(tablePosition),
+		Name: position.Name,
+		Pos:  position.Pos,
 	}
 }
 
@@ -91,11 +84,8 @@ func SetPosition(table string, pos mysql.Position) {
 	dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
 	hash := helpers.MakeHash(dbName, table)
 
-	posKey, nameKey := helpers.MakeTablePosKey(hash)
-
 	channel <- func() {
-		system.SetValue(posKey, fmt.Sprint(pos.Pos))
-		system.SetValue(nameKey, pos.Name)
+		system.SetPosition(hash, pos)
 		PrevPosition[table] = pos
 	}
 }
