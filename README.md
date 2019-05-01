@@ -21,7 +21,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Testing
 
-- Copy `examples/user.json` and `examples/post.json` to `src/configs`
+- Copy `examples/user.json` and `examples/post.json` to `src/system/configs`
 - Execute `cd src` and `go run main.go load`
 
 ### Add tables to replicator

@@ -5,7 +5,7 @@ const (
 	PositionNamePrefix = "position_name_%s"
 	DBSlave            = "slave"
 	DBMaster           = "master"
-	ConfigPath         = "configs/%s.json"
+	ConfigPath         = "system/configs/%s.json"
 	PluginPath         = "plugins/%s/handler.so"
-	PositionsPath      = "positions/%s.txt"
+	PositionsPath      = "system/positions/%s.txt"
 )
