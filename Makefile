@@ -8,7 +8,7 @@ docker-build :
 	sudo docker build -t horgh_replicator -f docker/Dockerfile_prod .
 
 docker-run :
-	sudo docker run -d -P horgh_replicator
+	sudo docker run --restart=on-failure -d -P horgh_replicator
 
 ### dev mode ###
 start-dev : docker-up
