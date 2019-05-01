@@ -1,53 +1,51 @@
 package system
 
 import (
+	"fmt"
+	"github.com/siddontang/go-mysql/mysql"
 	"horgh-replicator/src/constants"
+	"horgh-replicator/src/tools/exit"
+	"io/ioutil"
+	"os"
+	"strconv"
+	"strings"
 )
 
-type replicator struct {
-	Key   string `gorm:"column:param_key"`
-	Value string `gorm:"column:param_value"`
+const (
+	PositionMask = "%s:%s"
+)
+
+func SetPosition(hash string, position mysql.Position) error {
+	content := fmt.Sprintf(PositionMask, position.Name, strconv.Itoa(int(position.Pos)))
+	fileName := fmt.Sprintf(constants.PositionsPath, hash)
+	err := ioutil.WriteFile(fileName, []byte(content), 0644)
+
+	return err
 }
 
-func GetValue(key string) string {
-	query := `SELECT * FROM param_values WHERE param_key=? LIMIT 1;`
-	params := []interface{}{
-		key,
+func GetPosition(hash string) mysql.Position {
+	fileName := fmt.Sprintf(constants.PositionsPath, hash)
+
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+		return mysql.Position{}
 	}
 
-	res := Get(constants.DBReplicator, map[string]interface{}{
-		"query":  query,
-		"params": params,
-	})
-
-	var row replicator
-	for res.Next() {
-		err := res.Scan(&row.Key, &row.Value)
-		if err != nil {
-			panic(err.Error())
-		}
+	content, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		exit.Fatal(constants.ErrorGetPosition, err.Error())
 	}
-	result := row.Value
-
-	defer func() {
-		_ = res.Close()
-	}()
-
-	return result
-}
-
-func SetValue(key string, value string) bool {
-	query := `INSERT INTO param_values(param_key, param_value) VALUES(?, ?) ON DUPLICATE KEY UPDATE param_value=?;`
-	params := []interface{}{
-		key,
-		value,
-		value,
+	data := strings.Split(string(content[:]), ":")
+	if len(data) != 2 {
+		exit.Fatal(constants.ErrorGetPosition, "Can't parse position")
+	}
+	position, err := strconv.Atoi(data[1])
+	if err != nil {
+		exit.Fatal(constants.ErrorGetPosition, err.Error())
+	}
+	pos := mysql.Position{
+		Name: data[0],
+		Pos:  uint32(position),
 	}
 
-	res := Exec(constants.DBReplicator, map[string]interface{}{
-		"query":  query,
-		"params": params,
-	})
-
-	return res
+	return pos
 }
