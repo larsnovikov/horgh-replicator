@@ -13,15 +13,15 @@
 
 ### Quick Start
 - Copy `/src/.env.dist` to `/src/.env` and set credentials.
-- Configure your my MySQL master as `/mysql/mysql.conf`. 
+- Configure your my MySQL master as `examples/master/mysql.conf`. 
 Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
-- Execute `sql/structure.sql` in your MySQL master and slave.
+- Execute `examples/sql/structure.sql` in your MySQL master and slave.
 - Start Docker as `make start-dev`
 - Run as `cd src` and `go run main.go listen` in docker container.
 
 ### Testing
 
-- Copy `examples/user.json` and `examples/post.json` to `src/system/configs`
+- Copy `examples/configs/user.json` and `examples/configs/post.json` to `src/system/configs`
 - Execute `cd src` and `go run main.go load`
 
 ### Add tables to replicator
