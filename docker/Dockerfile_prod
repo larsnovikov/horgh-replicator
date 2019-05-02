@@ -1,7 +1,7 @@
 FROM golang:1.10
 
 RUN apt-get update
-RUN apt-get -y install curl g++ make bzip2 nano supervisor unixodbc unixodbc-dev mysql-client
+RUN apt-get -y install curl g++ make bzip2 nano unixodbc unixodbc-dev mysql-client
 
 WORKDIR /go/src/horgh-replicator
 COPY . .
@@ -16,4 +16,4 @@ CMD ["sh", "-c", "cd /go/src/horgh-replicator/src \
     && dep ensure -update \
     && go build main.go \
     && mv main horgh-replicator \
-    && /usr/bin/supervisord"]
+    && ./horgh-replicator listen"]

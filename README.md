@@ -59,7 +59,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Modes
 
-- Prod mode: build app and execute app as supervisor process. 
+- Prod mode: build app and execute listener. 
   
   Use `make build-prod` and `make start-prod` to start and `make stop-prod` to stop.
 - Dev mode: provides the opportunity for manual start and debug. 
