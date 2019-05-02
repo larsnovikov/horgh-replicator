@@ -9,8 +9,6 @@ COPY . .
 COPY files/vertica-client-7.2.0-0.x86_64.tar.gz /vertica-client.tar.gz
 RUN tar -xvf /vertica-client.tar.gz -C /
 
-VOLUME ../src/system/positions /go/src/horgh-replicator/src/system/positions
-
 #installing dep and vendors
 RUN go get -u github.com/golang/dep/...
 
