@@ -22,4 +22,5 @@ const (
 	ErrorDumpRead            = "Can't read dump. Error: \"%s\""
 	ErrorParseLine           = "Can't parse line \"%s\". Error: \"%s\""
 	ErrorSlaveBuilt          = "Slave table \"%s\" already built. Use \"destroy-slave %s\" before build"
+	ErrorSlaveConnector      = "Undefined slave connector"
 )

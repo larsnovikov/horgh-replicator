@@ -17,6 +17,7 @@ func MakeHandler() {
 func handle(c chan os.Signal) {
 	for {
 		<-c
+		exit.FirstStop = true
 		exit.Fatal(constants.MessageSysCallStop)
 	}
 }

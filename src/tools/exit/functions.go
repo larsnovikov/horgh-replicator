@@ -6,6 +6,7 @@ import (
 )
 
 func HandleBefore() bool {
+	FirstStop = false
 	for _, method := range BeforeExitPool {
 		if method() == false {
 			return false
@@ -16,7 +17,7 @@ func HandleBefore() bool {
 }
 
 func Fatal(msg string, args ...interface{}) {
-	if HandleBefore() {
+	if FirstStop == false || HandleBefore() {
 		log.Warnf(msg, args...)
 		os.Exit(1)
 	}

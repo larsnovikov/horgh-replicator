@@ -148,6 +148,7 @@ func (slave Slave) GetChannelLen() int {
 }
 
 func (slave Slave) Insert(header *Header, positionSet func()) {
+	slave.checkConnector()
 	if slave.BeforeSave() == true {
 		params := slave.connector.GetInsert()
 
@@ -166,6 +167,7 @@ func (slave Slave) Insert(header *Header, positionSet func()) {
 }
 
 func (slave Slave) Update(header *Header, positionSet func()) {
+	slave.checkConnector()
 	if slave.BeforeSave() == true {
 		params := slave.connector.GetUpdate()
 
@@ -185,6 +187,7 @@ func (slave Slave) Update(header *Header, positionSet func()) {
 }
 
 func (slave Slave) Delete(header *Header, positionSet func()) {
+	slave.checkConnector()
 	params := slave.connector.GetDelete(false)
 
 	slave.channel <- func() bool {
@@ -201,6 +204,7 @@ func (slave Slave) Delete(header *Header, positionSet func()) {
 }
 
 func (slave Slave) DeleteAll(header *Header, positionSet func()) {
+	slave.checkConnector()
 	params := slave.connector.GetDelete(true)
 
 	slave.channel <- func() bool {
@@ -213,6 +217,12 @@ func (slave Slave) DeleteAll(header *Header, positionSet func()) {
 		slave.logError("delete")
 
 		return false
+	}
+}
+
+func (slave Slave) checkConnector() {
+	if slave.connector == nil {
+		exit.Fatal(constants.ErrorSlaveConnector)
 	}
 }
 
