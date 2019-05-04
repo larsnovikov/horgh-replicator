@@ -2,6 +2,9 @@
 
 ##### Based on [JackShadow/go-binlog-example](https://github.com/JackShadow/go-binlog-example) 
 
+### Site 
+[https://larsnovikov.github.io/horgh](https://larsnovikov.github.io/horgh) 
+
 ### Master types
 - MySQL
 
@@ -12,7 +15,7 @@
 - HP Vertica
 
 ### Quick Start
-- Copy `/src/.env.dist` to `/src/.env` and set credentials.
+- Copy `src/.env.dist` to `src/.env` and set credentials.
 - Configure your my MySQL master as `examples/master/mysql.conf`. 
 Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 - Execute `examples/sql/structure.sql` in your MySQL master and slave.
@@ -34,7 +37,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 - Create `plugins/user/<plugin_name>/handler.go` like `create plugins/system/set_value/handler.go`
 - Execute `go build -buildmode=plugin -o plugins/user/<plugin_name>/handler.so plugins/user/<plugin_name>/handler.go`
-- Add to field description in your `<model>.json`
+- Add to field description in your `src/system/configs/<model>.json`
 
 ```
 "beforeSave": {
