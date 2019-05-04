@@ -3,7 +3,8 @@
 ##### Based on [JackShadow/go-binlog-example](https://github.com/JackShadow/go-binlog-example) 
 
 ### Site 
-[https://larsnovikov.github.io/horgh](https://larsnovikov.github.io/horgh) 
+
+See full docs [here](https://larsnovikov.github.io/horgh) 
 
 ### Master types
 - MySQL
@@ -14,16 +15,17 @@
 - Yandex ClickHouse
 - HP Vertica
 
-### Quick Start
+### Quick start
+
+See quick start tutorial [here](https://larsnovikov.github.io/horgh#quick_start) 
+
+### Testing
 - Copy `src/.env.dist` to `src/.env` and set credentials.
 - Configure your my MySQL master as `examples/master/mysql.conf`. 
 Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 - Execute `examples/sql/structure.sql` in your MySQL master and slave.
 - Start Docker as `make start-dev`
 - Run as `cd src` and `go run main.go listen` in docker container.
-
-### Testing
-
 - Copy `examples/configs/user.json` and `examples/configs/post.json` to `src/system/configs`
 - Execute `cd src` and `go run main.go load`
 
