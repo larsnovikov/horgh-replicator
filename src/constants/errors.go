@@ -13,7 +13,7 @@ const (
 	ErrorParserPosition      = "Catch error: \"%s\""
 	ErrorGetMinPosition      = "Can't get min position. Error: \"%s\""
 	ErrorEmptyPosition       = "Can't get position. Use \"destroy-slave %s\" and \"build-slave %s\""
-	ErrorUndefinedSlave      = "Can't get slave. Error: \"%s\""
+	ErrorUndefinedSlave      = "Can't get slave."
 	ErrorCobraStarter        = "Catch cobra error: \"%s\""
 	ErrorCachePluginError    = "Catch plugin error: \"%s\""
 	ErrorTableStructure      = "Can't read structure of table %s. Error : \"%s\""
