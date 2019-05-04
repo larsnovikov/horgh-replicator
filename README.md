@@ -35,7 +35,7 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 ### Custom handlers for field value
 
-- Create `plugins/user/<plugin_name>/handler.go` like `create plugins/system/set_value/handler.go`
+- Create `plugins/user/<plugin_name>/handler.go` like `plugins/system/set_value/handler.go`
 - Execute `go build -buildmode=plugin -o plugins/user/<plugin_name>/handler.so plugins/user/<plugin_name>/handler.go`
 - Add to field description in your `src/system/configs/<model>.json`
 
