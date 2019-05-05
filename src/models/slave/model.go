@@ -172,7 +172,6 @@ func (slave Slave) Update(header *Header, positionSet func()) {
 		params := slave.connector.GetUpdate()
 
 		slave.channel <- func() bool {
-			// fmt.Println(params["params"])
 			if slave.connector.Exec(params) {
 				log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
 				positionSet()

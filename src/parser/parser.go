@@ -14,10 +14,7 @@ import (
 type BinlogParser struct{}
 
 func (m *BinlogParser) ParseBinLog(slave slave.Slave, e *canal.RowsEvent, n int) error {
-	row := e.Rows[0]
-	if len(e.Rows) > 1 {
-		row = e.Rows[1]
-	}
+	row := e.Rows[n]
 
 	return ParseRow(slave, row)
 }
