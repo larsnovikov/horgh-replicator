@@ -117,11 +117,18 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	}
 
 	for i := n; i < len(e.Rows); i += k {
-		h.ParseBinLog(slave.GetSlaveByName(e.Table.Name), e, i)
+		if h.ParseBinLog(slave.GetSlaveByName(e.Table.Name), e, i) != nil {
+			exit.Fatal(constants.ErrorBinlogParsing)
+		}
 
 		if e.Action == canal.UpdateAction {
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				slave.GetSlaveByName(e.Table.Name).Update(&header, positionSet)
+				rowsCount := len(e.Rows)
+				positionSetTmp := positionSet
+				if rowsCount > 1 && rowsCount-1 > i {
+					positionSetTmp = func() {}
+				}
+				slave.GetSlaveByName(e.Table.Name).Update(&header, positionSetTmp)
 				SaveLocks[e.Table.Name] = false
 			} else {
 				log.Infof(constants.MessageIgnoreUpdate, header.Timestamp, e.Table.Name, header.LogPos)
