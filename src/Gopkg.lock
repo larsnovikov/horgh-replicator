@@ -83,7 +83,7 @@
   version = "v1.3.6"
 
 [[projects]]
-  digest = "1:bc1c0be40c67b6b4aee09d7508d5a2a52c1c116b1fa43806dad2b0d6b4d4003b"
+  digest = "1:bdd53b87de8185da386bae179c84d4848854c6870bacacf6a154fe63e2e750f7"
   name = "github.com/lib/pq"
   packages = [
     ".",
@@ -91,8 +91,8 @@
     "scram",
   ]
   pruneopts = "UT"
-  revision = "51e2106eed1cea199c802d2a49e91e2491b02056"
-  version = "v1.1.0"
+  revision = "bc6a3c0594130b1e34005880bc600b6d3f49fa7f"
+  version = "v1.1.1"
 
 [[projects]]
   digest = "1:7eefcb5ac6950b024564839227d2c33322cf924fa5a4931a9456e8423b417c35"
@@ -179,11 +179,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fb896b1eee1aed3338192928a64d8cb82477ab39ccd132a6078b34865d42ea28"
+  digest = "1:1fa5ea43bbafccb9bc8a02ab2fa85eefc1eda9c9b14fe0cefa4d7baf505c9469"
   name = "golang.org/x/sys"
   packages = ["windows"]
   pruneopts = "UT"
-  revision = "a129542de9ae0895210abff9c95d67a1f33cb93d"
+  revision = "a43fa875dd822b81eb6d2ad538bc1f4caba169bd"
 
 [[projects]]
   digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"

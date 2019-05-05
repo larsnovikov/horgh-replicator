@@ -85,6 +85,7 @@ func SetPosition(table string, pos mysql.Position) {
 	hash := helpers.MakeHash(dbName, table)
 
 	channel <- func() {
+		// TODO error handler
 		system.SetPosition(hash, pos)
 		PrevPosition[table] = pos
 	}
