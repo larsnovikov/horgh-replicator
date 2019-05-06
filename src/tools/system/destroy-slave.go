@@ -4,6 +4,7 @@ import (
 	"github.com/siddontang/go-log/log"
 	"github.com/spf13/cobra"
 	"horgh-replicator/src/constants"
+	helpers2 "horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/tools/exit"
 	"horgh-replicator/src/tools/helpers"
@@ -11,9 +12,9 @@ import (
 
 var CmdDestroyTable = &cobra.Command{
 	Use:   "destroy-slave",
-	Short: "Destroy slave table from master. Format: [table]",
-	Long:  "Destroy slave table from master. Format: [table]",
-	Args:  cobra.ExactArgs(1),
+	Short: "Destroy slave table from master",
+	Long:  "Destroy slave table from master",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		beforeExit := func() bool {
 			log.Infof(constants.MessageStopTableDestroy)
@@ -21,7 +22,7 @@ var CmdDestroyTable = &cobra.Command{
 		}
 		exit.BeforeExitPool = append(exit.BeforeExitPool, beforeExit)
 
-		tableName := args[0]
+		tableName := helpers2.GetTables()[0]
 		destroyModel(tableName)
 	},
 }

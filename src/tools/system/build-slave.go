@@ -27,9 +27,9 @@ const (
 
 var CmdBuildTable = &cobra.Command{
 	Use:   "build-slave",
-	Short: "Build slave table from master. Format: [table]",
-	Long:  "Build slave table from master. Format: [table]",
-	Args:  cobra.ExactArgs(1),
+	Short: "Build slave table from master",
+	Long:  "Build slave table from master",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		beforeExit := func() bool {
 			log.Infof(constants.MessageStopTableBuild)
@@ -37,8 +37,7 @@ var CmdBuildTable = &cobra.Command{
 		}
 		exit.BeforeExitPool = append(exit.BeforeExitPool, beforeExit)
 
-		tableName := args[0]
-		buildModel(tableName)
+		buildModel(helpers.GetTables()[0])
 	},
 }
 

@@ -33,7 +33,8 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 
 - Use `create-model <table>` to create json config for your table.
 - Create table on slave.
-- Use `build-slave <table>` to copy table data from master and set start position of log for table listener.
+- Set `<table>` to `TABLE` param in `src/.env` 
+- Use `build-slave` to copy table data from master and set start position of log for table listener.
 
 ### Custom handlers for field value
 
@@ -59,8 +60,8 @@ Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
 - `set-position <table> <binlog_name> <binlog_position>` set start position of log for table listener
 - `load` start loader for replication testing (for default tables user and post)
 - `create-model <table>` create model json-file by master table structure
-- `build-slave <table>` create master table dump, restore this dump in slave, set start position of log for table listener
-- `destroy-slave <table>` truncate table, set empty position of log for table listener
+- `build-slave` create master table dump, restore this dump in slave, set start position of log for table listener
+- `destroy-slave` truncate table, set empty position of log for table listener
 
 ### Modes
 

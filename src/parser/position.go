@@ -29,7 +29,7 @@ func GetSavedPos(table string) mysql.Position {
 
 	position := system.GetPosition(hash)
 	if position.Pos == 0 {
-		exit.Fatal(constants.ErrorEmptyPosition, table, table)
+		exit.Fatal(constants.ErrorEmptyPosition)
 	}
 
 	return mysql.Position{

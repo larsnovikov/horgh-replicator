@@ -12,7 +12,7 @@ const (
 	ErrorModelFileExists     = "Model file \"%s\" already exists"
 	ErrorParserPosition      = "Catch error: \"%s\""
 	ErrorGetMinPosition      = "Can't get min position. Error: \"%s\""
-	ErrorEmptyPosition       = "Can't get position. Use \"destroy-slave %s\" and \"build-slave %s\""
+	ErrorEmptyPosition       = "Can't get position. Use \"destroy-slave\" and \"build-slave\""
 	ErrorUndefinedSlave      = "Can't get slave."
 	ErrorCobraStarter        = "Catch cobra error: \"%s\""
 	ErrorCachePluginError    = "Catch plugin error: \"%s\""
