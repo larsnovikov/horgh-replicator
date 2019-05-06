@@ -98,17 +98,8 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 
 	switch e.Action {
 	case canal.DeleteAction:
-		for _, row := range e.Rows {
-			currentSlave.GetConnector().ParseKey(row)
-			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				currentSlave.Delete(&header)
-				SaveLocks[e.Table.Name] = false
-			} else {
-				log.Infof(constants.MessageIgnoreDelete, header.Timestamp, e.Table.Name, header.LogPos)
-			}
-		}
-		currentSlave.CommitTransaction(&header, positionSet)
-		return nil
+		n = 0
+		k = 1
 	case canal.UpdateAction:
 		n = 1
 		k = 2
@@ -129,12 +120,20 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 			} else {
 				log.Infof(constants.MessageIgnoreUpdate, header.Timestamp, e.Table.Name, header.LogPos)
 			}
-		} else {
+		} else if e.Action == canal.InsertAction {
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
 				currentSlave.Insert(&header)
 				SaveLocks[e.Table.Name] = false
 			} else {
 				log.Infof(constants.MessageIgnoreInsert, header.Timestamp, e.Table.Name, header.LogPos)
+			}
+		} else {
+			currentSlave.GetConnector().ParseKey(e.Rows[i])
+			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
+				currentSlave.Delete(&header)
+				SaveLocks[e.Table.Name] = false
+			} else {
+				log.Infof(constants.MessageIgnoreDelete, header.Timestamp, e.Table.Name, header.LogPos)
 			}
 		}
 	}
