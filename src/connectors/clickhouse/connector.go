@@ -26,6 +26,9 @@ func (conn connect) Ping() bool {
 }
 
 func (conn connect) Exec(params map[string]interface{}) bool {
+	if params["query"] == "" {
+		return true
+	}
 	tx, _ := conn.base.Begin()
 	_, err := tx.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
 

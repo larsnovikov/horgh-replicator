@@ -122,25 +122,22 @@ func (model *Model) GetDelete(all bool) map[string]interface{} {
 }
 
 func (model *Model) GetCommitTransaction() map[string]interface{} {
-	// TODO commit
 	return map[string]interface{}{
-		"query":  "aaa",
+		"query":  "COMMIT;",
 		"params": []interface{}{},
 	}
 }
 
 func (model *Model) GetBeginTransaction() map[string]interface{} {
-	// TODO begin
 	return map[string]interface{}{
-		"query":  "aaa",
+		"query":  "START TRANSACTION;",
 		"params": []interface{}{},
 	}
 }
 
 func (model *Model) GetRollbackTransaction() map[string]interface{} {
-	// TODO rollback
 	return map[string]interface{}{
-		"query":  "aaa",
+		"query":  "ROLLBACK;",
 		"params": []interface{}{},
 	}
 }
