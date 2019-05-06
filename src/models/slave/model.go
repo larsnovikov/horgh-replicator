@@ -19,7 +19,11 @@ import (
 type AbstractConnector interface {
 	GetInsert() map[string]interface{}
 	GetUpdate() map[string]interface{}
+	// TODO map[string]interface{} - create struct
 	GetDelete(all bool) map[string]interface{}
+	GetCommitTransaction() map[string]interface{}
+	GetBeginTransaction() map[string]interface{}
+	GetRollbackTransaction() map[string]interface{}
 	Exec(map[string]interface{}) bool
 	GetConfigStruct() interface{}
 	SetConfig(interface{})
@@ -147,7 +151,7 @@ func (slave Slave) GetChannelLen() int {
 	return len(slave.channel)
 }
 
-func (slave Slave) Insert(header *Header, positionSet func()) {
+func (slave Slave) Insert(header *Header) {
 	slave.checkConnector()
 	if slave.BeforeSave() == true {
 		params := slave.connector.GetInsert()
@@ -155,18 +159,17 @@ func (slave Slave) Insert(header *Header, positionSet func()) {
 		slave.channel <- func() bool {
 			if slave.connector.Exec(params) {
 				log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
-				positionSet()
 				return true
 			}
 
-			slave.logError("insert")
+			slave.error("insert")
 
 			return false
 		}
 	}
 }
 
-func (slave Slave) Update(header *Header, positionSet func()) {
+func (slave Slave) Update(header *Header) {
 	slave.checkConnector()
 	if slave.BeforeSave() == true {
 		params := slave.connector.GetUpdate()
@@ -174,46 +177,92 @@ func (slave Slave) Update(header *Header, positionSet func()) {
 		slave.channel <- func() bool {
 			if slave.connector.Exec(params) {
 				log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
-				positionSet()
 				return true
 			}
 
-			slave.logError("update")
+			slave.error("update")
 
 			return false
 		}
 	}
 }
 
-func (slave Slave) Delete(header *Header, positionSet func()) {
+func (slave Slave) Delete(header *Header) {
 	slave.checkConnector()
 	params := slave.connector.GetDelete(false)
 
 	slave.channel <- func() bool {
 		if slave.connector.Exec(params) {
 			log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
-			positionSet()
 			return true
 		}
 
-		slave.logError("delete")
+		slave.error("delete")
 
 		return false
 	}
 }
 
-func (slave Slave) DeleteAll(header *Header, positionSet func()) {
+func (slave Slave) DeleteAll(header *Header) {
 	slave.checkConnector()
 	params := slave.connector.GetDelete(true)
 
 	slave.channel <- func() bool {
 		if slave.connector.Exec(params) {
 			log.Infof(constants.MessageDeletedAll, header.Timestamp, slave.TableName())
-			positionSet()
 			return true
 		}
 
-		slave.logError("delete")
+		slave.error("delete")
+
+		return false
+	}
+}
+
+func (slave Slave) BeginTransaction(header *Header) {
+	slave.checkConnector()
+	params := slave.connector.GetBeginTransaction()
+
+	slave.channel <- func() bool {
+		if slave.connector.Exec(params) {
+			log.Infof(constants.MessageTransactionBegin, header.Timestamp, slave.TableName(), header.LogPos)
+			return true
+		}
+
+		slave.error("begin transaction")
+
+		return false
+	}
+}
+
+func (slave Slave) RollbackTransaction(header *Header) {
+	slave.checkConnector()
+	params := slave.connector.GetRollbackTransaction()
+
+	slave.channel <- func() bool {
+		if slave.connector.Exec(params) {
+			log.Infof(constants.MessageTransactionRollback, header.Timestamp, slave.TableName(), header.LogPos)
+			return true
+		}
+
+		slave.error("rollback transaction")
+
+		return false
+	}
+}
+
+func (slave Slave) CommitTransaction(header *Header, afterSave func()) {
+	slave.checkConnector()
+	params := slave.connector.GetCommitTransaction()
+
+	slave.channel <- func() bool {
+		if slave.connector.Exec(params) {
+			log.Infof(constants.MessageTransactionCommit, header.Timestamp, slave.TableName(), header.LogPos)
+			afterSave()
+			return true
+		}
+
+		slave.error("commit transaction")
 
 		return false
 	}
@@ -225,6 +274,6 @@ func (slave Slave) checkConnector() {
 	}
 }
 
-func (slave Slave) logError(operationType string) {
+func (slave Slave) error(operationType string) {
 	exit.Fatal(constants.ErrorSave, operationType, slave.TableName())
 }

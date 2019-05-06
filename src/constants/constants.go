@@ -8,4 +8,7 @@ const (
 	ConfigPath         = "system/configs/%s.json"
 	PluginPath         = "plugins/%s/handler.so"
 	PositionsPath      = "system/positions/%s.txt"
+	TypeCommit         = "commit_transaction"
+	TypeBegin          = "begin_transaction"
+	TypeRollback       = "rollback_transaction"
 )

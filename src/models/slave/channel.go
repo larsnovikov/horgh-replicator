@@ -16,6 +16,7 @@ func save(c chan func() bool) {
 			method := <-c
 			method()
 		} else {
+			// todo откат транзакции
 			runtime.Goexit()
 		}
 	}
