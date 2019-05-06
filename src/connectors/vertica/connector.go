@@ -23,8 +23,8 @@ func (conn verticaConnection) Ping() bool {
 	return false
 }
 
-func (conn verticaConnection) Exec(params map[string]interface{}) bool {
-	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
+func (conn verticaConnection) Exec(params helpers.Query) bool {
+	_, err := conn.base.Exec(fmt.Sprintf("%v", params.Query), helpers.MakeSlice(params.Params)...)
 
 	if err != nil {
 		log.Warnf(constants.ErrorExecQuery, "vertica", err)

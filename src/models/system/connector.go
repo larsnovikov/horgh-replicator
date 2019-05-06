@@ -7,7 +7,7 @@ import (
 	"horgh-replicator/src/helpers"
 )
 
-func Exec(mode string, params map[string]interface{}) bool {
+func Exec(mode string, params helpers.Query) bool {
 	switch mode {
 	case constants.DBMaster:
 		helpers.ConnPool.Master = mysql.GetConnection(helpers.ConnPool.Master, constants.DBMaster).(helpers.ConnectionMaster)
@@ -17,7 +17,7 @@ func Exec(mode string, params map[string]interface{}) bool {
 	return false
 }
 
-func Get(mode string, params map[string]interface{}) *sql.Rows {
+func Get(mode string, params helpers.Query) *sql.Rows {
 	switch mode {
 	default:
 		helpers.ConnPool.Master = mysql.GetConnection(helpers.ConnPool.Master, constants.DBMaster).(helpers.ConnectionMaster)

@@ -25,8 +25,8 @@ func (conn connect) Ping() bool {
 	return false
 }
 
-func (conn connect) Exec(params map[string]interface{}) bool {
-	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
+func (conn connect) Exec(params helpers.Query) bool {
+	_, err := conn.base.Exec(fmt.Sprintf("%v", params.Query), helpers.MakeSlice(params.Params)...)
 	if err != nil {
 		log.Warnf(constants.ErrorExecQuery, "mysql", err)
 		return false
@@ -35,8 +35,8 @@ func (conn connect) Exec(params map[string]interface{}) bool {
 	return true
 }
 
-func (conn connect) Get(params map[string]interface{}) *sql.Rows {
-	rows, err := conn.base.Query(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
+func (conn connect) Get(params helpers.Query) *sql.Rows {
+	rows, err := conn.base.Query(fmt.Sprintf("%v", params.Query), helpers.MakeSlice(params.Params)...)
 	if err != nil {
 		exit.Fatal(err.Error())
 	}

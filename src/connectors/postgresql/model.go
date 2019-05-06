@@ -65,7 +65,7 @@ func (model *Model) SetParams(params map[string]interface{}) {
 	model.params = params
 }
 
-func (model *Model) GetInsert() map[string]interface{} {
+func (model *Model) GetInsert() helpers.Query {
 	var params []interface{}
 	var fieldNames []string
 	var fieldValues []string
@@ -81,13 +81,13 @@ func (model *Model) GetInsert() map[string]interface{} {
 
 	query := fmt.Sprintf(Insert, model.table, strings.Join(fieldNames, ","), strings.Join(fieldValues, ","))
 
-	return map[string]interface{}{
-		"query":  query,
-		"params": params,
+	return helpers.Query{
+		Query:  query,
+		Params: params,
 	}
 }
 
-func (model *Model) GetUpdate() map[string]interface{} {
+func (model *Model) GetUpdate() helpers.Query {
 	var params []interface{}
 	var fields []string
 
@@ -105,13 +105,13 @@ func (model *Model) GetUpdate() map[string]interface{} {
 	i++
 	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key, "$"+strconv.Itoa(i))
 
-	return map[string]interface{}{
-		"query":  query,
-		"params": params,
+	return helpers.Query{
+		Query:  query,
+		Params: params,
 	}
 }
 
-func (model *Model) GetDelete(all bool) map[string]interface{} {
+func (model *Model) GetDelete(all bool) helpers.Query {
 	var params []interface{}
 	var query string
 	if all == true {
@@ -120,34 +120,34 @@ func (model *Model) GetDelete(all bool) map[string]interface{} {
 		query = fmt.Sprintf(Delete, model.table, model.key)
 		params = append(params, model.params[model.key])
 	}
-	return map[string]interface{}{
-		"query":  query,
-		"params": params,
+	return helpers.Query{
+		Query:  query,
+		Params: params,
 	}
 }
 
-func (model *Model) GetCommitTransaction() map[string]interface{} {
-	return map[string]interface{}{
-		"query":  "COMMIT;",
-		"params": []interface{}{},
+func (model *Model) GetCommitTransaction() helpers.Query {
+	return helpers.Query{
+		Query:  "COMMIT;",
+		Params: []interface{}{},
 	}
 }
 
-func (model *Model) GetBeginTransaction() map[string]interface{} {
-	return map[string]interface{}{
-		"query":  "START TRANSACTION;",
-		"params": []interface{}{},
+func (model *Model) GetBeginTransaction() helpers.Query {
+	return helpers.Query{
+		Query:  "START TRANSACTION;",
+		Params: []interface{}{},
 	}
 }
 
-func (model *Model) GetRollbackTransaction() map[string]interface{} {
-	return map[string]interface{}{
-		"query":  "ROLLBACK;",
-		"params": []interface{}{},
+func (model *Model) GetRollbackTransaction() helpers.Query {
+	return helpers.Query{
+		Query:  "ROLLBACK;",
+		Params: []interface{}{},
 	}
 }
 
-func (model *Model) Exec(params map[string]interface{}) bool {
+func (model *Model) Exec(params helpers.Query) bool {
 	return model.Connection().Exec(params)
 }
 

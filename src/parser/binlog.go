@@ -9,7 +9,6 @@ import (
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/slave"
-	"horgh-replicator/src/models/system"
 	"horgh-replicator/src/tools/exit"
 	"runtime"
 	"runtime/debug"
@@ -179,12 +178,6 @@ func BinlogListener() {
 }
 
 func getDefaultCanal() (*canal.Canal, error) {
-	// try to connect to check credentials
-	system.Exec(constants.DBMaster, map[string]interface{}{
-		"query":  "SELECT 1",
-		"params": make([]interface{}, 0),
-	})
-
 	master := helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB)
 
 	cfg := canal.NewDefaultConfig()

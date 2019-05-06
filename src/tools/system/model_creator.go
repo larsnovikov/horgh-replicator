@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"horgh-replicator/src/connectors"
 	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/models/system"
 	"horgh-replicator/src/tools/exit"
@@ -45,9 +46,9 @@ func makeModel(table string) {
 
 func getStructure(table string) []FieldDefinition {
 	query := fmt.Sprintf("DESCRIBE %s", table)
-	rows := system.Get(constants.DBMaster, map[string]interface{}{
-		"query":  query,
-		"params": []interface{}{},
+	rows := system.Get(constants.DBMaster, helpers.Query{
+		Query:  query,
+		Params: []interface{}{},
 	})
 	var fields []FieldDefinition
 	for rows.Next() {

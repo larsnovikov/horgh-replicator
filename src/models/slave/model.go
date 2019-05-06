@@ -17,14 +17,13 @@ import (
 )
 
 type AbstractConnector interface {
-	GetInsert() map[string]interface{}
-	GetUpdate() map[string]interface{}
-	// TODO map[string]interface{} - create struct
-	GetDelete(all bool) map[string]interface{}
-	GetCommitTransaction() map[string]interface{}
-	GetBeginTransaction() map[string]interface{}
-	GetRollbackTransaction() map[string]interface{}
-	Exec(map[string]interface{}) bool
+	GetInsert() helpers.Query
+	GetUpdate() helpers.Query
+	GetDelete(all bool) helpers.Query
+	GetCommitTransaction() helpers.Query
+	GetBeginTransaction() helpers.Query
+	GetRollbackTransaction() helpers.Query
+	Exec(helpers.Query) bool
 	GetConfigStruct() interface{}
 	SetConfig(interface{})
 	SetParams(map[string]interface{})

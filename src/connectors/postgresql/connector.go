@@ -26,8 +26,8 @@ func (conn connect) Ping() bool {
 	return false
 }
 
-func (conn connect) Exec(params map[string]interface{}) bool {
-	_, err := conn.base.Exec(fmt.Sprintf("%v", params["query"]), helpers.MakeSlice(params["params"])...)
+func (conn connect) Exec(params helpers.Query) bool {
+	_, err := conn.base.Exec(fmt.Sprintf("%v", params.Query), helpers.MakeSlice(params.Params)...)
 	if err != nil {
 		log.Warnf(constants.ErrorExecQuery, "postgresql", err)
 		return false

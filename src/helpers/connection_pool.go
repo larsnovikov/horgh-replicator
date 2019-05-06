@@ -6,7 +6,7 @@ import (
 
 type ConnectionMaster interface {
 	Storage
-	Get(map[string]interface{}) *sql.Rows
+	Get(query Query) *sql.Rows
 }
 
 type ConnectionPool struct {
