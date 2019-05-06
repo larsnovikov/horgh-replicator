@@ -40,7 +40,7 @@ type Slave struct {
 	config    Config
 	key       string
 	table     string
-	channel   chan func() bool
+	channel   chan helpers.QueryAction
 }
 
 type Config struct {
@@ -121,7 +121,7 @@ func makeSlave(modelName string) {
 	slave.connector.SetConfig(slave.config.Slave)
 
 	// make channel
-	slave.channel = make(chan func() bool, helpers.GetChannelSize())
+	slave.channel = make(chan helpers.QueryAction, helpers.GetChannelSize())
 	go save(slave.channel)
 
 	slavePool[modelName] = slave
@@ -155,16 +155,29 @@ func (slave Slave) Insert(header *Header) {
 	slave.checkConnector()
 	if slave.BeforeSave() == true {
 		params := slave.connector.GetInsert()
+		rollbackParams := slave.connector.GetRollbackTransaction()
 
-		slave.channel <- func() bool {
-			if slave.connector.Exec(params) {
-				log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
-				return true
-			}
+		slave.channel <- helpers.QueryAction{
+			Method: func() bool {
+				if slave.connector.Exec(params) {
+					log.Infof(constants.MessageInserted, header.Timestamp, slave.TableName(), header.LogPos)
+					return true
+				}
 
-			slave.error("insert")
+				slave.error("insert")
 
-			return false
+				return false
+			},
+			StopMethod: func() bool {
+				if slave.connector.Exec(rollbackParams) {
+					log.Infof(constants.MessageTransactionRollback, header.Timestamp, slave.TableName(), header.LogPos)
+					return true
+				}
+
+				slave.error("rollback transaction")
+
+				return false
+			},
 		}
 	}
 }
@@ -173,16 +186,29 @@ func (slave Slave) Update(header *Header) {
 	slave.checkConnector()
 	if slave.BeforeSave() == true {
 		params := slave.connector.GetUpdate()
+		rollbackParams := slave.connector.GetRollbackTransaction()
 
-		slave.channel <- func() bool {
-			if slave.connector.Exec(params) {
-				log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
-				return true
-			}
+		slave.channel <- helpers.QueryAction{
+			Method: func() bool {
+				if slave.connector.Exec(params) {
+					log.Infof(constants.MessageUpdated, header.Timestamp, slave.TableName(), header.LogPos)
+					return true
+				}
 
-			slave.error("update")
+				slave.error("update")
 
-			return false
+				return false
+			},
+			StopMethod: func() bool {
+				if slave.connector.Exec(rollbackParams) {
+					log.Infof(constants.MessageTransactionRollback, header.Timestamp, slave.TableName(), header.LogPos)
+					return true
+				}
+
+				slave.error("rollback transaction")
+
+				return false
+			},
 		}
 	}
 }
@@ -190,64 +216,87 @@ func (slave Slave) Update(header *Header) {
 func (slave Slave) Delete(header *Header) {
 	slave.checkConnector()
 	params := slave.connector.GetDelete(false)
+	rollbackParams := slave.connector.GetRollbackTransaction()
 
-	slave.channel <- func() bool {
-		if slave.connector.Exec(params) {
-			log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
-			return true
-		}
+	slave.channel <- helpers.QueryAction{
+		Method: func() bool {
+			if slave.connector.Exec(params) {
+				log.Infof(constants.MessageDeleted, header.Timestamp, slave.TableName(), header.LogPos)
+				return true
+			}
 
-		slave.error("delete")
+			slave.error("delete")
 
-		return false
+			return false
+		},
+		StopMethod: func() bool {
+			if slave.connector.Exec(rollbackParams) {
+				log.Infof(constants.MessageTransactionRollback, header.Timestamp, slave.TableName(), header.LogPos)
+				return true
+			}
+
+			slave.error("rollback transaction")
+
+			return false
+		},
 	}
 }
 
 func (slave Slave) DeleteAll(header *Header) {
 	slave.checkConnector()
 	params := slave.connector.GetDelete(true)
+	rollbackParams := slave.connector.GetRollbackTransaction()
 
-	slave.channel <- func() bool {
-		if slave.connector.Exec(params) {
-			log.Infof(constants.MessageDeletedAll, header.Timestamp, slave.TableName())
-			return true
-		}
+	slave.channel <- helpers.QueryAction{
+		Method: func() bool {
+			if slave.connector.Exec(params) {
+				log.Infof(constants.MessageDeletedAll, header.Timestamp, slave.TableName())
+				return true
+			}
 
-		slave.error("delete")
+			slave.error("delete")
 
-		return false
+			return false
+		},
+		StopMethod: func() bool {
+			if slave.connector.Exec(rollbackParams) {
+				log.Infof(constants.MessageTransactionRollback, header.Timestamp, slave.TableName(), header.LogPos)
+				return true
+			}
+
+			slave.error("rollback transaction")
+
+			return false
+		},
 	}
 }
 
 func (slave Slave) BeginTransaction(header *Header) {
 	slave.checkConnector()
 	params := slave.connector.GetBeginTransaction()
+	rollbackParams := slave.connector.GetRollbackTransaction()
 
-	slave.channel <- func() bool {
-		if slave.connector.Exec(params) {
-			log.Infof(constants.MessageTransactionBegin, header.Timestamp, slave.TableName(), header.LogPos)
-			return true
-		}
+	slave.channel <- helpers.QueryAction{
+		Method: func() bool {
+			if slave.connector.Exec(params) {
+				log.Infof(constants.MessageTransactionBegin, header.Timestamp, slave.TableName(), header.LogPos)
+				return true
+			}
 
-		slave.error("begin transaction")
+			slave.error("begin transaction")
 
-		return false
-	}
-}
+			return false
+		},
+		StopMethod: func() bool {
+			if slave.connector.Exec(rollbackParams) {
+				log.Infof(constants.MessageTransactionRollback, header.Timestamp, slave.TableName(), header.LogPos)
+				return true
+			}
 
-func (slave Slave) RollbackTransaction(header *Header) {
-	slave.checkConnector()
-	params := slave.connector.GetRollbackTransaction()
+			slave.error("rollback transaction")
 
-	slave.channel <- func() bool {
-		if slave.connector.Exec(params) {
-			log.Infof(constants.MessageTransactionRollback, header.Timestamp, slave.TableName(), header.LogPos)
-			return true
-		}
-
-		slave.error("rollback transaction")
-
-		return false
+			return false
+		},
 	}
 }
 
@@ -255,7 +304,7 @@ func (slave Slave) CommitTransaction(header *Header, afterSave func()) {
 	slave.checkConnector()
 	params := slave.connector.GetCommitTransaction()
 
-	slave.channel <- func() bool {
+	method := func() bool {
 		if slave.connector.Exec(params) {
 			log.Infof(constants.MessageTransactionCommit, header.Timestamp, slave.TableName(), header.LogPos)
 			afterSave()
@@ -265,6 +314,11 @@ func (slave Slave) CommitTransaction(header *Header, afterSave func()) {
 		slave.error("commit transaction")
 
 		return false
+	}
+
+	slave.channel <- helpers.QueryAction{
+		Method:     method,
+		StopMethod: method,
 	}
 }
 
