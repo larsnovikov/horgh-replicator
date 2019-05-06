@@ -6,7 +6,6 @@ import (
 	"horgh-replicator/src/tools/exit"
 	"os"
 	"strconv"
-	"strings"
 )
 
 type Credentials struct {
@@ -57,10 +56,8 @@ func MakeCredentials() {
 		os.Getenv("MASTER_DBNAME"),
 	}
 
-	if os.Getenv("ALLOWED_TABLES") != "" {
-		for _, tableName := range strings.Split(os.Getenv("ALLOWED_TABLES"), ",") {
-			tables = append(tables, strings.TrimSpace(tableName))
-		}
+	if os.Getenv("TABLE") != "" {
+		tables = append(tables, os.Getenv("TABLE"))
 	}
 
 	channelSize, _ = strconv.Atoi(os.Getenv("CHANNEL_SIZE"))
