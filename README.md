@@ -23,7 +23,7 @@ See quick start tutorial [here](https://larsnovikov.github.io/horgh#quick_start)
 - Copy `src/.env.dist` to `src/.env` and set credentials.
 - Configure your my MySQL master as `examples/master/mysql.conf`. 
 Don't forget to set `binlog_do_db=<master_db_name>` and restart MySQL service.
-- Execute `examples/sql/structure.sql` in your MySQL master and slave.
+- Create databases and tables as `examples/sql/`.
 - Start Docker as `make start-dev`
 - Run as `cd src` and `go run main.go listen` in docker container.
 - Copy `examples/configs/user.json` and `examples/configs/post.json` to `src/system/configs`
