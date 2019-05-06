@@ -62,7 +62,8 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		return nil
 	}
 
-	slave.GetSlaveByName(e.Table.Name).ClearParams()
+	currentSlave := slave.GetSlaveByName(e.Table.Name)
+	currentSlave.ClearParams()
 
 	var n int
 	var k int
@@ -94,19 +95,20 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 		LogPos:    e.Header.LogPos,
 	}
 
+	currentSlave.BeginTransaction(&header)
+
 	switch e.Action {
 	case canal.DeleteAction:
 		for _, row := range e.Rows {
-			slave.GetSlaveByName(e.Table.Name).GetConnector().ParseKey(row)
+			currentSlave.GetConnector().ParseKey(row)
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				slave.GetSlaveByName(e.Table.Name).Delete(&header, positionSet)
+				currentSlave.Delete(&header)
 				SaveLocks[e.Table.Name] = false
 			} else {
 				log.Infof(constants.MessageIgnoreDelete, header.Timestamp, e.Table.Name, header.LogPos)
-				return nil
 			}
 		}
-
+		currentSlave.CommitTransaction(&header, positionSet)
 		return nil
 	case canal.UpdateAction:
 		n = 1
@@ -117,33 +119,29 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 	}
 
 	for i := n; i < len(e.Rows); i += k {
-		if h.ParseBinLog(slave.GetSlaveByName(e.Table.Name), e, i) != nil {
+		if h.ParseBinLog(currentSlave, e, i) != nil {
 			exit.Fatal(constants.ErrorBinlogParsing)
 		}
 
 		if e.Action == canal.UpdateAction {
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				rowsCount := len(e.Rows)
-				positionSetTmp := positionSet
-				if rowsCount > 1 && rowsCount-1 > i {
-					positionSetTmp = func() {}
-				}
-				slave.GetSlaveByName(e.Table.Name).Update(&header, positionSetTmp)
+				currentSlave.Update(&header)
 				SaveLocks[e.Table.Name] = false
 			} else {
 				log.Infof(constants.MessageIgnoreUpdate, header.Timestamp, e.Table.Name, header.LogPos)
-				return nil
 			}
 		} else {
 			if SaveLocks[e.Table.Name] == false || canSave(getCalculatedPos(), e.Table.Name) {
-				slave.GetSlaveByName(e.Table.Name).Insert(&header, positionSet)
+				currentSlave.Insert(&header)
 				SaveLocks[e.Table.Name] = false
 			} else {
 				log.Infof(constants.MessageIgnoreInsert, header.Timestamp, e.Table.Name, header.LogPos)
-				return nil
 			}
 		}
 	}
+
+	currentSlave.CommitTransaction(&header, positionSet)
+
 	return nil
 }
 

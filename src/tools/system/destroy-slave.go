@@ -28,10 +28,10 @@ var CmdDestroyTable = &cobra.Command{
 
 func destroyModel(tableName string) {
 	helpers.Table = tableName
-	header, positionSet := helpers.GetHeader()
+	header, _ := helpers.GetHeader()
 
 	// delete all from table
-	slave.GetSlaveByName(helpers.Table).DeleteAll(&header, positionSet)
+	slave.GetSlaveByName(helpers.Table).DeleteAll(&header)
 
 	// delete position in db
 	helpers.SetPosition()

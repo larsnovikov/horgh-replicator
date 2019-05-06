@@ -3,6 +3,7 @@ package slave
 import (
 	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
+	"horgh-replicator/src/helpers"
 	"runtime"
 	"strconv"
 	"time"
@@ -10,12 +11,13 @@ import (
 
 var AllowHandling = true
 
-func save(c chan func() bool) {
+func save(c chan helpers.QueryAction) {
 	for {
+		msg := <-c
 		if AllowHandling == true {
-			method := <-c
-			method()
+			msg.Method()
 		} else {
+			msg.StopMethod()
 			runtime.Goexit()
 		}
 	}
