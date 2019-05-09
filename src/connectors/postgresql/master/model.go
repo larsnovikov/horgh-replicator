@@ -8,5 +8,5 @@ func (model *Model) Listen() {
 }
 
 func (model *Model) BuildSlave(table string) {
-
+	buildModel(table)
 }

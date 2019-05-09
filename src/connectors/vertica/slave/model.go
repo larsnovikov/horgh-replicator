@@ -3,6 +3,7 @@ package slave
 import (
 	"fmt"
 	"horgh-replicator/src/connectors"
+	"horgh-replicator/src/connectors/vertica"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
 	"strings"
@@ -147,6 +148,6 @@ func (model *Model) Exec(params helpers.Query) bool {
 }
 
 func (model *Model) Connection() helpers.Storage {
-	helpers.ConnPool.Slave = GetConnection(helpers.ConnPool.Slave, constants.DBSlave).(helpers.Storage)
+	helpers.ConnPool.Slave = vertica.GetConnection(helpers.ConnPool.Slave, constants.DBSlave).(helpers.Storage)
 	return helpers.ConnPool.Slave
 }

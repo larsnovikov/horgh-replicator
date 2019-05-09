@@ -1,4 +1,4 @@
-package slave
+package postgresql
 
 import (
 	"database/sql"
@@ -34,6 +34,15 @@ func (conn connect) Exec(params helpers.Query) bool {
 	}
 
 	return true
+}
+
+func (conn connect) Get(params helpers.Query) *sql.Rows {
+	rows, err := conn.base.Query(fmt.Sprintf("%v", params.Query), helpers.MakeSlice(params.Params)...)
+	if err != nil {
+		exit.Fatal(err.Error())
+	}
+
+	return rows
 }
 
 func GetConnection(connection helpers.Storage, storageType string) interface{} {
