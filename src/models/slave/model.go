@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-type AbstractConnector interface {
+type AbstractSlave interface {
 	GetInsert() helpers.Query
 	GetUpdate() helpers.Query
 	GetDelete(all bool) helpers.Query
@@ -35,7 +35,7 @@ type AbstractConnector interface {
 }
 
 type Slave struct {
-	connector AbstractConnector
+	connector AbstractSlave
 	config    Config
 	key       string
 	table     string
@@ -59,7 +59,7 @@ type Header struct {
 
 var slavePool map[string]Slave
 
-func getModel() AbstractConnector {
+func getModel() AbstractSlave {
 
 	switch os.Getenv("SLAVE_TYPE") {
 	case "mysql":
@@ -76,8 +76,8 @@ func getModel() AbstractConnector {
 }
 
 func GetSlaveByName(name string) Slave {
-	if slave, ok := slavePool[name]; ok {
-		return slave
+	if tmpSlave, ok := slavePool[name]; ok {
+		return tmpSlave
 	}
 
 	exit.Fatal(constants.ErrorUndefinedSlave)
@@ -95,20 +95,20 @@ func MakeSlavePool() {
 
 // make model, read config by modelName, set var model
 func makeSlave(modelName string) {
-	slave := Slave{}
+	tmpSlave := Slave{}
 
-	slave.connector = getModel()
+	tmpSlave.connector = getModel()
 
 	// parse .env config
-	slave.GetConnector().ParseConfig()
+	tmpSlave.GetConnector().ParseConfig()
 
 	// add connector config to base config
-	slave.config.Slave = slave.connector.GetConfigStruct()
+	tmpSlave.config.Slave = tmpSlave.connector.GetConfigStruct()
 
 	// make config
 	file := helpers.ReadConfig(modelName)
 	byteValue, _ := ioutil.ReadAll(file)
-	err := json.Unmarshal(byteValue, &slave.config)
+	err := json.Unmarshal(byteValue, &tmpSlave.config)
 	defer func() {
 		_ = file.Close()
 	}()
@@ -117,20 +117,20 @@ func makeSlave(modelName string) {
 	}
 
 	// set model params from config
-	slave.connector.SetConfig(slave.config.Slave)
+	tmpSlave.connector.SetConfig(tmpSlave.config.Slave)
 
 	// make channel
-	slave.channel = make(chan helpers.QueryAction, helpers.GetChannelSize())
-	go save(slave.channel)
+	tmpSlave.channel = make(chan helpers.QueryAction, helpers.GetChannelSize())
+	go save(tmpSlave.channel)
 
-	slavePool[modelName] = slave
+	slavePool[modelName] = tmpSlave
 }
 
 func (slave Slave) GetConfig() Config {
 	return slave.config
 }
 
-func (slave Slave) GetConnector() AbstractConnector {
+func (slave Slave) GetConnector() AbstractSlave {
 	return slave.connector
 }
 
