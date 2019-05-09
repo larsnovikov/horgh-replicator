@@ -1,4 +1,4 @@
-package clickhouse
+package slave
 
 import (
 	"fmt"
@@ -9,16 +9,15 @@ import (
 )
 
 const (
-	Type      = "clickhouse"
-	Insert    = `INSERT INTO %s.%s(%s) VALUES(%s);`
-	Update    = `ALTER TABLE %s.%s UPDATE %s WHERE %s=?;`
-	Delete    = `ALTER TABLE %s.%s DELETE WHERE %s=?;`
-	DeleteAll = `ALTER TABLE %s.%s DELETE WHERE 1;`
+	Type      = "vertica"
+	Insert    = `INSERT INTO "%s"(%s) VALUES(%s);`
+	Update    = `UPDATE "%s" SET %s WHERE %s=?;`
+	Delete    = `DELETE FROM "%s" WHERE %s=?;`
+	DeleteAll = `DELETE FROM "%s";`
 )
 
 type Model struct {
 	table       string
-	schema      string
 	key         string
 	keyPosition int
 	fields      map[string]connectors.ConfigField
@@ -49,7 +48,6 @@ func (model *Model) GetTable() string {
 
 func (model *Model) SetConfig(config interface{}) {
 	model.table = config.(*connectors.ConfigSlave).Table
-	model.schema = helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
 
 	model.fields = make(map[string]connectors.ConfigField)
 	for pos, value := range config.(*connectors.ConfigSlave).Fields {
@@ -72,13 +70,13 @@ func (model *Model) GetInsert() helpers.Query {
 	var fieldValues []string
 
 	for _, value := range model.fields {
-		fieldNames = append(fieldNames, "`"+value.Name+"`")
+		fieldNames = append(fieldNames, "\""+value.Name+"\"")
 		fieldValues = append(fieldValues, "?")
 
 		params = append(params, model.params[value.Name])
 	}
 
-	query := fmt.Sprintf(Insert, model.schema, model.table, strings.Join(fieldNames, ","), strings.Join(fieldValues, ","))
+	query := fmt.Sprintf(Insert, model.table, strings.Join(fieldNames, ","), strings.Join(fieldValues, ","))
 
 	return helpers.Query{
 		Query:  query,
@@ -91,16 +89,15 @@ func (model *Model) GetUpdate() helpers.Query {
 	var fields []string
 
 	for _, value := range model.fields {
-		if value.Name != model.key {
-			fields = append(fields, "`"+value.Name+"`"+"=?")
-			params = append(params, model.params[value.Name])
-		}
+		fields = append(fields, "\""+value.Name+"\"=?")
+
+		params = append(params, model.params[value.Name])
 	}
 
 	// add key to params
 	params = append(params, model.params[model.key])
 
-	query := fmt.Sprintf(Update, model.schema, model.table, strings.Join(fields, ", "), model.key)
+	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key)
 
 	return helpers.Query{
 		Query:  query,
@@ -112,10 +109,11 @@ func (model *Model) GetDelete(all bool) helpers.Query {
 	var params []interface{}
 	var query string
 	if all == true {
-		query = fmt.Sprintf(DeleteAll, model.schema, model.table)
+		query = fmt.Sprintf(DeleteAll, model.table)
 	} else {
-		query = fmt.Sprintf(Delete, model.schema, model.table, model.key)
+		query = fmt.Sprintf(Delete, model.table, model.key)
 		params = append(params, model.params[model.key])
+
 	}
 	return helpers.Query{
 		Query:  query,
@@ -125,21 +123,21 @@ func (model *Model) GetDelete(all bool) helpers.Query {
 
 func (model *Model) GetCommitTransaction() helpers.Query {
 	return helpers.Query{
-		Query:  "",
+		Query:  "COMMIT;",
 		Params: []interface{}{},
 	}
 }
 
 func (model *Model) GetBeginTransaction() helpers.Query {
 	return helpers.Query{
-		Query:  "",
+		Query:  "START TRANSACTION;",
 		Params: []interface{}{},
 	}
 }
 
 func (model *Model) GetRollbackTransaction() helpers.Query {
 	return helpers.Query{
-		Query:  "",
+		Query:  "ROLLBACK;",
 		Params: []interface{}{},
 	}
 }

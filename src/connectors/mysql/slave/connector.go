@@ -1,9 +1,9 @@
-package clickhouse
+package slave
 
 import (
+	"database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/kshvakov/clickhouse"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
@@ -11,10 +11,10 @@ import (
 	"strconv"
 )
 
-const DSN = "tcp://%s:%s?username=%s&password=%s&database=%s&read_timeout=10&write_timeout=20"
+const DSN = "%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local"
 
 type connect struct {
-	base *sqlx.DB
+	base *sql.DB
 }
 
 func (conn connect) Ping() bool {
@@ -26,28 +26,28 @@ func (conn connect) Ping() bool {
 }
 
 func (conn connect) Exec(params helpers.Query) bool {
-	if params.Query == "" {
-		return true
-	}
-	tx, _ := conn.base.Begin()
-	_, err := tx.Exec(fmt.Sprintf("%v", params.Query), helpers.MakeSlice(params.Params)...)
-
+	_, err := conn.base.Exec(fmt.Sprintf("%v", params.Query), helpers.MakeSlice(params.Params)...)
 	if err != nil {
-		log.Warnf(constants.ErrorExecQuery, "clickhouse", err)
+		log.Warnf(constants.ErrorExecQuery, "mysql", err)
 		return false
 	}
 
-	defer func() {
-		err = tx.Commit()
-	}()
-
 	return true
+}
+
+func (conn connect) Get(params helpers.Query) *sql.Rows {
+	rows, err := conn.base.Query(fmt.Sprintf("%v", params.Query), helpers.MakeSlice(params.Params)...)
+	if err != nil {
+		exit.Fatal(err.Error())
+	}
+
+	return rows
 }
 
 func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
-		conn, err := sqlx.Open("clickhouse", buildDSN(cred))
+		conn, err := sql.Open("mysql", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
 			exit.Fatal(constants.ErrorDBConnect, storageType)
 		} else {
@@ -59,5 +59,5 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 }
 
 func buildDSN(cred helpers.CredentialsDB) string {
-	return fmt.Sprintf(DSN, cred.Host, strconv.Itoa(cred.Port), cred.User, cred.Pass, cred.DBname)
+	return fmt.Sprintf(DSN, cred.User, cred.Pass, cred.Host, strconv.Itoa(cred.Port), cred.DBname)
 }

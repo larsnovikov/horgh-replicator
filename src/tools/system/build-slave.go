@@ -6,10 +6,10 @@ import (
 	"github.com/siddontang/go-log/log"
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/spf13/cobra"
+	"horgh-replicator/src/connectors/mysql/master"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/slave"
-	"horgh-replicator/src/parser"
 	"horgh-replicator/src/tools/exit"
 	helpers2 "horgh-replicator/src/tools/helpers"
 	"os/exec"
@@ -56,7 +56,7 @@ func buildModel(tableName string) {
 }
 
 func canHandle() bool {
-	savedPos := parser.GetSavedPos(helpers2.Table)
+	savedPos := master.GetSavedPos(helpers2.Table)
 	if savedPos.Name == "" && savedPos.Pos == 0 {
 		return true
 	}
@@ -128,7 +128,7 @@ func parseInsert(line string) bool {
 		for i := range params {
 			interfaceParams[i] = params[i]
 		}
-		err := parser.ParseRow(slave.GetSlaveByName(helpers2.Table), interfaceParams)
+		err := master.ParseRow(slave.GetSlaveByName(helpers2.Table), interfaceParams)
 		if err != nil {
 			exit.Fatal(constants.ErrorParseLine, line, err)
 		}

@@ -42,6 +42,7 @@ func SetPosition() {
 	dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
 	hash := helpers.MakeHash(dbName, Table)
 
+	// todo error handler
 	system.SetPosition(hash, Position)
 
 	log.Infof(constants.MessagePositionUpdated, Table)

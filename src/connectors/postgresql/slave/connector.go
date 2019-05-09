@@ -1,4 +1,4 @@
-package postgresql
+package slave
 
 import (
 	"database/sql"

@@ -1,4 +1,4 @@
-package parser
+package master
 
 import (
 	"github.com/siddontang/go-mysql/mysql"

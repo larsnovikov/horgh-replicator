@@ -1,9 +1,9 @@
-package vertica
+package slave
 
 import (
 	"fmt"
-	_ "github.com/alexbrainman/odbc"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/kshvakov/clickhouse"
 	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
@@ -11,11 +11,13 @@ import (
 	"strconv"
 )
 
-type verticaConnection struct {
+const DSN = "tcp://%s:%s?username=%s&password=%s&database=%s&read_timeout=10&write_timeout=20"
+
+type connect struct {
 	base *sqlx.DB
 }
 
-func (conn verticaConnection) Ping() bool {
+func (conn connect) Ping() bool {
 	if conn.base.Ping() == nil {
 		return true
 	}
@@ -23,13 +25,21 @@ func (conn verticaConnection) Ping() bool {
 	return false
 }
 
-func (conn verticaConnection) Exec(params helpers.Query) bool {
-	_, err := conn.base.Exec(fmt.Sprintf("%v", params.Query), helpers.MakeSlice(params.Params)...)
+func (conn connect) Exec(params helpers.Query) bool {
+	if params.Query == "" {
+		return true
+	}
+	tx, _ := conn.base.Begin()
+	_, err := tx.Exec(fmt.Sprintf("%v", params.Query), helpers.MakeSlice(params.Params)...)
 
 	if err != nil {
-		log.Warnf(constants.ErrorExecQuery, "vertica", err)
+		log.Warnf(constants.ErrorExecQuery, "clickhouse", err)
 		return false
 	}
+
+	defer func() {
+		err = tx.Commit()
+	}()
 
 	return true
 }
@@ -37,11 +47,11 @@ func (conn verticaConnection) Exec(params helpers.Query) bool {
 func GetConnection(connection helpers.Storage, storageType string) interface{} {
 	if connection == nil || connection.Ping() == false {
 		cred := helpers.GetCredentials(storageType).(helpers.CredentialsDB)
-		conn, err := sqlx.Open("odbc", buildDSN(cred))
+		conn, err := sqlx.Open("clickhouse", buildDSN(cred))
 		if err != nil || conn.Ping() != nil {
 			exit.Fatal(constants.ErrorDBConnect, storageType)
 		} else {
-			connection = verticaConnection{conn}
+			connection = connect{conn}
 		}
 	}
 
@@ -49,7 +59,5 @@ func GetConnection(connection helpers.Storage, storageType string) interface{} {
 }
 
 func buildDSN(cred helpers.CredentialsDB) string {
-	// TODO check tar
-	driver := "/opt/vertica/opt/vertica/lib64/libverticaodbc.so"
-	return "Driver=" + driver + ";ServerName=" + cred.Host + ";Database=" + cred.DBname + ";Port=" + strconv.Itoa(cred.Port) + ";uid=" + cred.User + ";pwd=" + cred.Pass + ";"
+	return fmt.Sprintf(DSN, cred.Host, strconv.Itoa(cred.Port), cred.User, cred.Pass, cred.DBname)
 }

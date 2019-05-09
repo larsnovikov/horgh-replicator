@@ -2,7 +2,7 @@ package system
 
 import (
 	"database/sql"
-	"horgh-replicator/src/connectors/mysql"
+	"horgh-replicator/src/connectors/mysql/slave"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
 )
@@ -10,7 +10,7 @@ import (
 func Exec(mode string, params helpers.Query) bool {
 	switch mode {
 	case constants.DBMaster:
-		helpers.ConnPool.Master = mysql.GetConnection(helpers.ConnPool.Master, constants.DBMaster).(helpers.ConnectionMaster)
+		helpers.ConnPool.Master = slave.GetConnection(helpers.ConnPool.Master, constants.DBMaster).(helpers.ConnectionMaster)
 		return helpers.ConnPool.Master.Exec(params)
 	}
 
@@ -20,7 +20,7 @@ func Exec(mode string, params helpers.Query) bool {
 func Get(mode string, params helpers.Query) *sql.Rows {
 	switch mode {
 	default:
-		helpers.ConnPool.Master = mysql.GetConnection(helpers.ConnPool.Master, constants.DBMaster).(helpers.ConnectionMaster)
+		helpers.ConnPool.Master = slave.GetConnection(helpers.ConnPool.Master, constants.DBMaster).(helpers.ConnectionMaster)
 		return helpers.ConnPool.Master.Get(params)
 	}
 }

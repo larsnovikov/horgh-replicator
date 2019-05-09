@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/connectors"
-	"horgh-replicator/src/connectors/clickhouse"
-	"horgh-replicator/src/connectors/mysql"
-	"horgh-replicator/src/connectors/postgresql"
-	"horgh-replicator/src/connectors/vertica"
+	"horgh-replicator/src/connectors/clickhouse/slave"
+	slave2 "horgh-replicator/src/connectors/mysql/slave"
+	slave3 "horgh-replicator/src/connectors/postgresql/slave"
+	slave4 "horgh-replicator/src/connectors/vertica/slave"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/tools/exit"
@@ -63,16 +63,16 @@ func getModel() AbstractConnector {
 
 	switch os.Getenv("SLAVE_TYPE") {
 	case "mysql":
-		return &mysql.Model{}
+		return &slave2.Model{}
 	case "clickhouse":
-		return &clickhouse.Model{}
+		return &slave.Model{}
 	case "postgresql":
-		return &postgresql.Model{}
+		return &slave3.Model{}
 	case "vertica":
-		return &vertica.Model{}
+		return &slave4.Model{}
 	}
 
-	return &mysql.Model{}
+	return &slave2.Model{}
 }
 
 func GetSlaveByName(name string) Slave {
