@@ -17,16 +17,16 @@ import (
 )
 
 const (
-	CreateDump      = "mysqldump --extended-insert=FALSE --no-create-info --master-data=1 --port=%s -u%s -p%s -h %s %s %s"
-	InsertRegexp    = `VALUES \([A-Za-z0-9,\s,\S]+\)`
-	PositionRegexp  = `MASTER_LOG_FILE=\'([a-zA-Z\-\.0-9]+)\', MASTER_LOG_POS=([0-9]+)`
-	ParseStringSize = 99999999
+	createDump      = "mysqldump --extended-insert=FALSE --no-create-info --master-data=1 --port=%s -u%s -p%s -h %s %s %s"
+	insertRegexp    = `VALUES \([A-Za-z0-9,\s,\S]+\)`
+	positionRegexp  = `MASTER_LOG_FILE=\'([a-zA-Z\-\.0-9]+)\', MASTER_LOG_POS=([0-9]+)`
+	parseStringSize = 99999999
 )
 
 func buildModel(tableName string) {
 	toolsHelper.Table = tableName
 	if canHandle() == true {
-		toolsHelper.ParseStrings = make(chan string, ParseStringSize)
+		toolsHelper.ParseStrings = make(chan string, parseStringSize)
 		go parseLine(toolsHelper.ParseStrings)
 
 		readDump()
@@ -51,7 +51,7 @@ func readDump() {
 	log.Infof(constants.MessageStartReadDump, toolsHelper.Table)
 	cred := helpers.GetCredentials(constants.DBMaster).(helpers.CredentialsDB)
 
-	dumpCmd := fmt.Sprintf(CreateDump, strconv.Itoa(cred.Port), cred.User, cred.Pass, cred.Host, cred.DBname, toolsHelper.Table)
+	dumpCmd := fmt.Sprintf(createDump, strconv.Itoa(cred.Port), cred.User, cred.Pass, cred.Host, cred.DBname, toolsHelper.Table)
 	cmdArgs := strings.Fields(dumpCmd)
 	cmd := exec.Command(cmdArgs[0], cmdArgs[1:len(cmdArgs)]...)
 	// create a pipe for the output of the script
@@ -93,7 +93,7 @@ func parseLine(c chan string) {
 }
 
 func parseInsert(line string) bool {
-	re := regexp.MustCompile(InsertRegexp)
+	re := regexp.MustCompile(insertRegexp)
 	match := re.FindStringSubmatch(line)
 	if len(match) > 0 {
 		// TODO fix me
@@ -126,7 +126,7 @@ func parseInsert(line string) bool {
 }
 
 func parsePosition(line string) bool {
-	re := regexp.MustCompile(PositionRegexp)
+	re := regexp.MustCompile(positionRegexp)
 	match := re.FindStringSubmatch(line)
 
 	if len(match) > 0 {
