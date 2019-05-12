@@ -110,7 +110,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 
 	for i := n; i < len(e.Rows); i += k {
 		if h.ParseBinLog(currentSlave, e, i) != nil {
-			exit.Fatal(constants.ErrorBinlogParsing)
+			exit.Fatal(constants.ErrorLogParsing)
 		}
 
 		if e.Action == canal.UpdateAction {
@@ -163,7 +163,7 @@ func (h *binlogHandler) String() string {
 	return "binlogHandler"
 }
 
-func BinlogListener() {
+func Listen() {
 	c, err := getDefaultCanal()
 	if err == nil {
 		position, err := c.GetMasterPos()

@@ -5,10 +5,6 @@ import (
 	toolsHelper "horgh-replicator/src/tools/helpers"
 )
 
-const (
-	ParseStringSize = 99999999
-)
-
 func buildModel(tableName string) {
 	toolsHelper.Table = tableName
 	if canHandle() == true {
@@ -18,7 +14,7 @@ func buildModel(tableName string) {
 		// truncate log table
 		// start pgsql dump and listen
 		//
-		toolsHelper.ParseStrings = make(chan string, ParseStringSize)
+		toolsHelper.ParseStrings = make(chan string, parseStringSize)
 		go parseLine(toolsHelper.ParseStrings)
 
 		readDump()

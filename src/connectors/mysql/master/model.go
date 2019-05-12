@@ -9,9 +9,9 @@ type Model struct {
 }
 
 func (model *Model) Listen() {
-	exit.BeforeExitPool = append(exit.BeforeExitPool, Stop)
+	exit.BeforeExitPool = append(exit.BeforeExitPool, stop)
 	exit.BeforeExitPool = append(exit.BeforeExitPool, slave.Stop)
-	BinlogListener()
+	Listen()
 }
 
 func (model *Model) BuildSlave(table string) {

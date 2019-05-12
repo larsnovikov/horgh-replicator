@@ -1,0 +1,3 @@
+CREATE TRIGGER %s_horgh
+AFTER INSERT OR UPDATE OR DELETE ON horgh.%s
+FOR EACH ROW EXECUTE PROCEDURE horgh.if_modified_func();
