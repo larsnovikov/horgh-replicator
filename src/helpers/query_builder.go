@@ -2,7 +2,10 @@ package helpers
 
 import (
 	"fmt"
+	"horgh-replicator/src/constants"
+	"horgh-replicator/src/tools/exit"
 	"io/ioutil"
+	"os"
 )
 
 const (
@@ -23,10 +26,12 @@ func getFilePath(dbType string, queryType string) string {
 }
 
 func getQuery(fileName string, params ...interface{}) string {
-	// TODO check file exists
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+		exit.Fatal(constants.ErrorNoQueryFile, fileName)
+	}
 	content, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		// TODO error
+		exit.Fatal(constants.ErrorQueryFileRead, err.Error())
 	}
 	data := string(content[:])
 

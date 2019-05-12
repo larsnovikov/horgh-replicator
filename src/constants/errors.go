@@ -9,9 +9,11 @@ const (
 	ErrorSave                = "Can't %s model in \"%s\""
 	ErrorExecQuery           = "Can't exec query. Type: \"%s\" error: \"%v\""
 	ErrorNoModelFile         = "Model file \"%s\" not exists"
+	ErrorNoQueryFile         = "Model file \"%s\" not exists"
 	ErrorModelFileExists     = "Model file \"%s\" already exists"
 	ErrorParserPosition      = "Catch error: \"%s\""
 	ErrorGetMinPosition      = "Can't get min position. Error: \"%s\""
+	ErrorSetPosition         = "Can't set position. Error: \"%s\""
 	ErrorEmptyPosition       = "Can't get position. Use \"destroy-slave\" and \"build-slave\""
 	ErrorUndefinedSlave      = "Can't get slave."
 	ErrorCobraStarter        = "Catch cobra error: \"%s\""
@@ -24,4 +26,5 @@ const (
 	ErrorSlaveBuilt          = "Slave table \"%s\" already built. Use \"destroy-slave %s\" before build"
 	ErrorSlaveConnector      = "Undefined slave connector"
 	ErrorLogParsing          = "Can't parse log event"
+	ErrorQueryFileRead       = "Can't read query file. Error: \"%s\""
 )
