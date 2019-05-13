@@ -6,6 +6,7 @@ import (
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/models/system"
+	"horgh-replicator/src/tools/exit"
 	"time"
 )
 
@@ -42,7 +43,10 @@ func SetPosition() {
 	dbName := helpers.GetCredentials(constants.DBSlave).(helpers.CredentialsDB).DBname
 	hash := helpers.MakeHash(dbName, Table)
 
-	system.SetPosition(hash, Position)
+	err := system.SetPosition(hash, Position)
+	if err != nil {
+		exit.Fatal(constants.ErrorSetPosition, err.Error())
+	}
 
 	log.Infof(constants.MessagePositionUpdated, Table)
 }

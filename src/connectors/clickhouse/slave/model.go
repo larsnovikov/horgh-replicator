@@ -1,8 +1,9 @@
-package clickhouse
+package slave
 
 import (
 	"fmt"
 	"horgh-replicator/src/connectors"
+	"horgh-replicator/src/connectors/clickhouse"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
 	"strings"
@@ -149,6 +150,6 @@ func (model *Model) Exec(params helpers.Query) bool {
 }
 
 func (model *Model) Connection() helpers.Storage {
-	helpers.ConnPool.Slave = GetConnection(helpers.ConnPool.Slave, constants.DBSlave).(helpers.Storage)
+	helpers.ConnPool.Slave = clickhouse.GetConnection(helpers.ConnPool.Slave, constants.DBSlave).(helpers.Storage)
 	return helpers.ConnPool.Slave
 }

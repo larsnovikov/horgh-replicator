@@ -1,4 +1,4 @@
-package parser
+package master
 
 import (
 	"fmt"
@@ -25,13 +25,7 @@ var AllowHandling = true
 var curCanal *canal.Canal
 
 func (h *binlogHandler) canOperate(logTableName string) bool {
-	for _, tableName := range helpers.GetTables() {
-		if tableName == logTableName {
-			return true
-		}
-	}
-
-	return false
+	return helpers.GetTable() == logTableName
 }
 
 func (h *binlogHandler) prepareCanal() {
@@ -110,7 +104,7 @@ func (h *binlogHandler) OnRow(e *canal.RowsEvent) error {
 
 	for i := n; i < len(e.Rows); i += k {
 		if h.ParseBinLog(currentSlave, e, i) != nil {
-			exit.Fatal(constants.ErrorBinlogParsing)
+			exit.Fatal(constants.ErrorLogParsing)
 		}
 
 		if e.Action == canal.UpdateAction {
@@ -163,7 +157,7 @@ func (h *binlogHandler) String() string {
 	return "binlogHandler"
 }
 
-func BinlogListener() {
+func Listen() {
 	c, err := getDefaultCanal()
 	if err == nil {
 		position, err := c.GetMasterPos()

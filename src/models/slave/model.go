@@ -4,19 +4,18 @@ import (
 	"encoding/json"
 	"github.com/siddontang/go-log/log"
 	"horgh-replicator/src/connectors"
-	"horgh-replicator/src/connectors/clickhouse"
-	"horgh-replicator/src/connectors/mysql"
-	"horgh-replicator/src/connectors/postgresql"
-	"horgh-replicator/src/connectors/vertica"
+	"horgh-replicator/src/connectors/clickhouse/slave"
+	slave2 "horgh-replicator/src/connectors/mysql/slave"
+	slave3 "horgh-replicator/src/connectors/postgresql/slave"
+	slave4 "horgh-replicator/src/connectors/vertica/slave"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
 	"horgh-replicator/src/tools/exit"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
-type AbstractConnector interface {
+type AbstractSlave interface {
 	GetInsert() helpers.Query
 	GetUpdate() helpers.Query
 	GetDelete(all bool) helpers.Query
@@ -35,7 +34,7 @@ type AbstractConnector interface {
 }
 
 type Slave struct {
-	connector AbstractConnector
+	connector AbstractSlave
 	config    Config
 	key       string
 	table     string
@@ -59,25 +58,25 @@ type Header struct {
 
 var slavePool map[string]Slave
 
-func getModel() AbstractConnector {
+func getModel() AbstractSlave {
 
 	switch os.Getenv("SLAVE_TYPE") {
 	case "mysql":
-		return &mysql.Model{}
+		return &slave2.Model{}
 	case "clickhouse":
-		return &clickhouse.Model{}
+		return &slave.Model{}
 	case "postgresql":
-		return &postgresql.Model{}
+		return &slave3.Model{}
 	case "vertica":
-		return &vertica.Model{}
+		return &slave4.Model{}
 	}
 
-	return &mysql.Model{}
+	return &slave2.Model{}
 }
 
 func GetSlaveByName(name string) Slave {
-	if slave, ok := slavePool[name]; ok {
-		return slave
+	if tmpSlave, ok := slavePool[name]; ok {
+		return tmpSlave
 	}
 
 	exit.Fatal(constants.ErrorUndefinedSlave)
@@ -87,28 +86,25 @@ func GetSlaveByName(name string) Slave {
 
 func MakeSlavePool() {
 	slavePool = make(map[string]Slave)
-	for _, tableName := range helpers.GetTables() {
-		table := strings.TrimSpace(tableName)
-		makeSlave(table)
-	}
+	makeSlave(helpers.GetTable())
 }
 
 // make model, read config by modelName, set var model
 func makeSlave(modelName string) {
-	slave := Slave{}
+	tmpSlave := Slave{}
 
-	slave.connector = getModel()
+	tmpSlave.connector = getModel()
 
 	// parse .env config
-	slave.GetConnector().ParseConfig()
+	tmpSlave.GetConnector().ParseConfig()
 
 	// add connector config to base config
-	slave.config.Slave = slave.connector.GetConfigStruct()
+	tmpSlave.config.Slave = tmpSlave.connector.GetConfigStruct()
 
 	// make config
 	file := helpers.ReadConfig(modelName)
 	byteValue, _ := ioutil.ReadAll(file)
-	err := json.Unmarshal(byteValue, &slave.config)
+	err := json.Unmarshal(byteValue, &tmpSlave.config)
 	defer func() {
 		_ = file.Close()
 	}()
@@ -117,20 +113,20 @@ func makeSlave(modelName string) {
 	}
 
 	// set model params from config
-	slave.connector.SetConfig(slave.config.Slave)
+	tmpSlave.connector.SetConfig(tmpSlave.config.Slave)
 
 	// make channel
-	slave.channel = make(chan helpers.QueryAction, helpers.GetChannelSize())
-	go save(slave.channel)
+	tmpSlave.channel = make(chan helpers.QueryAction, helpers.GetChannelSize())
+	go save(tmpSlave.channel)
 
-	slavePool[modelName] = slave
+	slavePool[modelName] = tmpSlave
 }
 
 func (slave Slave) GetConfig() Config {
 	return slave.config
 }
 
-func (slave Slave) GetConnector() AbstractConnector {
+func (slave Slave) GetConnector() AbstractSlave {
 	return slave.connector
 }
 

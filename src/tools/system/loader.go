@@ -3,9 +3,8 @@ package system
 import (
 	"github.com/siddontang/go-log/log"
 	"github.com/spf13/cobra"
-	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
-	"horgh-replicator/src/models/system"
+	"horgh-replicator/src/models/master"
 	"math/rand"
 	"strconv"
 	"time"
@@ -15,13 +14,13 @@ const (
 	// goroutine count. WARNING if you set more 1, may be concurrency problems
 	ThreadCount = 1
 	// time to create queries in minutes
-	LoadTime = 10
+	LoadTime = 60
 )
 
 var CmdLoad = &cobra.Command{
 	Use:   "load",
 	Short: "Create queries to master",
-	Long:  `Create queries to master`,
+	Long:  "Create queries to master",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		load()
@@ -70,6 +69,13 @@ func makeQueries(id int) {
 		"INSERT INTO test.post (`title`, `text`) VALUE ('Title', 'London is the capital of Great Britain');",
 		"UPDATE test.post SET title='New title' ORDER BY RAND() LIMIT 1;",
 		"DELETE FROM test.post ORDER BY RAND() LIMIT 1;",
+		"INSERT INTO test.news (`title`, `text`) VALUE ('Title', 'London is the capital of Great Britain');",
+		"UPDATE test.news SET title='New title' ORDER BY RAND() LIMIT 1;",
+		"DELETE FROM test.news ORDER BY RAND() LIMIT 1;",
+		"INSERT INTO test.log (`event`) VALUES ('bang!');",
+		"INSERT INTO test.log (`event`) VALUES ('bong!');",
+		"UPDATE test.log SET event='hei';",
+		"INSERT INTO test.log (`event`) VALUES ('aaa'), ('qqq'), ('www'), ('eee'), ('rrr');",
 	}
 
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -81,9 +87,9 @@ func makeQueries(id int) {
 	for {
 		query = queries[randInt(0, len(queries))]
 
-		result = system.Exec(constants.DBMaster, map[string]interface{}{
-			"query":  query,
-			"params": []interface{}{},
+		result = master.Exec(helpers.Query{
+			Query:  query,
+			Params: []interface{}{},
 		})
 
 		if result == true {

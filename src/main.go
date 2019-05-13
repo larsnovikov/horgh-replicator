@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/spf13/cobra"
 	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/models/master"
 	"horgh-replicator/src/models/slave"
 	"horgh-replicator/src/tools"
 	"horgh-replicator/src/tools/system"
@@ -10,6 +11,7 @@ import (
 
 func main() {
 	helpers.MakeCredentials()
+	master.MakeMaster()
 	slave.MakeSlavePool()
 	tools.MakeHandler()
 

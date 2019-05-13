@@ -1,4 +1,4 @@
-package parser
+package master
 
 import (
 	"github.com/siddontang/go-log/log"
@@ -127,7 +127,7 @@ func prepareType(fieldName string, fieldType string, value interface{}, params m
 	}
 }
 
-func Stop() bool {
+func stop() bool {
 	// stop handle binlog
 	log.Infof(constants.MessageStopHandlingBinlog)
 	AllowHandling = false

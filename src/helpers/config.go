@@ -32,7 +32,7 @@ type CredentialsAMQP struct {
 var master CredentialsDB
 var slave interface{}
 
-var tables []string
+var table string
 var channelSize int
 var slaveId int
 var masterLogFilePrefix string
@@ -56,9 +56,7 @@ func MakeCredentials() {
 		os.Getenv("MASTER_DBNAME"),
 	}
 
-	if os.Getenv("TABLE") != "" {
-		tables = append(tables, os.Getenv("TABLE"))
-	}
+	table = os.Getenv("TABLE")
 
 	channelSize, _ = strconv.Atoi(os.Getenv("CHANNEL_SIZE"))
 	slaveId, _ = strconv.Atoi(os.Getenv("SLAVE_ID"))
@@ -84,8 +82,8 @@ func getSlave() interface{} {
 	return slave
 }
 
-func GetTables() []string {
-	return tables
+func GetTable() string {
+	return table
 }
 
 func GetSlaveId() int {

@@ -1,20 +1,20 @@
-package postgresql
+package slave
 
 import (
 	"fmt"
 	"horgh-replicator/src/connectors"
+	"horgh-replicator/src/connectors/mysql"
 	"horgh-replicator/src/constants"
 	"horgh-replicator/src/helpers"
-	"strconv"
 	"strings"
 )
 
 const (
-	Type      = "postgresql"
-	Insert    = `INSERT INTO "%s"(%s) VALUES(%s);`
-	Update    = `UPDATE "%s" SET %s WHERE %s=%s;`
-	Delete    = `DELETE FROM "%s" WHERE %s=$1;`
-	DeleteAll = `TRUNCATE TABLE "%s";`
+	Type      = "mysql"
+	Insert    = `INSERT INTO %s(%s) VALUES(%s);`
+	Update    = `UPDATE %s SET %s WHERE %s=?;`
+	Delete    = `DELETE FROM %s WHERE %s=?;`
+	DeleteAll = `TRUNCATE TABLE %s`
 )
 
 type Model struct {
@@ -70,11 +70,9 @@ func (model *Model) GetInsert() helpers.Query {
 	var fieldNames []string
 	var fieldValues []string
 
-	i := 0
 	for _, value := range model.fields {
-		i++
-		fieldNames = append(fieldNames, "\""+value.Name+"\"")
-		fieldValues = append(fieldValues, "$"+strconv.Itoa(i))
+		fieldNames = append(fieldNames, "`"+value.Name+"`")
+		fieldValues = append(fieldValues, "?")
 
 		params = append(params, model.params[value.Name])
 	}
@@ -91,10 +89,8 @@ func (model *Model) GetUpdate() helpers.Query {
 	var params []interface{}
 	var fields []string
 
-	i := 0
 	for _, value := range model.fields {
-		i++
-		fields = append(fields, "\""+value.Name+"\""+"=$"+strconv.Itoa(i))
+		fields = append(fields, "`"+value.Name+"`"+"=?")
 
 		params = append(params, model.params[value.Name])
 	}
@@ -102,8 +98,7 @@ func (model *Model) GetUpdate() helpers.Query {
 	// add key to params
 	params = append(params, model.params[model.key])
 
-	i++
-	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key, "$"+strconv.Itoa(i))
+	query := fmt.Sprintf(Update, model.table, strings.Join(fields, ","), model.key)
 
 	return helpers.Query{
 		Query:  query,
@@ -127,6 +122,7 @@ func (model *Model) GetDelete(all bool) helpers.Query {
 }
 
 func (model *Model) GetCommitTransaction() helpers.Query {
+
 	return helpers.Query{
 		Query:  "COMMIT;",
 		Params: []interface{}{},
@@ -152,6 +148,6 @@ func (model *Model) Exec(params helpers.Query) bool {
 }
 
 func (model *Model) Connection() helpers.Storage {
-	helpers.ConnPool.Slave = GetConnection(helpers.ConnPool.Slave, constants.DBSlave).(helpers.Storage)
+	helpers.ConnPool.Slave = mysql.GetConnection(helpers.ConnPool.Slave, constants.DBSlave).(helpers.Storage)
 	return helpers.ConnPool.Slave
 }

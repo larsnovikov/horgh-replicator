@@ -22,7 +22,7 @@ var CmdDestroyTable = &cobra.Command{
 		}
 		exit.BeforeExitPool = append(exit.BeforeExitPool, beforeExit)
 
-		tableName := helpers2.GetTables()[0]
+		tableName := helpers2.GetTable()
 		destroyModel(tableName)
 	},
 }
@@ -41,5 +41,5 @@ func destroyModel(tableName string) {
 		return slave.GetSlaveByName(helpers.Table).GetChannelLen() == 0
 	})
 
-	log.Infof(constants.MessageTableDestroyed, helpers.Table)
+	log.Infof(constants.MessageTableDestroyed, slave.GetSlaveByName(helpers.Table).TableName())
 }

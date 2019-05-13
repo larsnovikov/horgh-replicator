@@ -139,7 +139,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:258ed48c4a7e4ff68820e9a59f6122b3165898c59c7a2dc731d6ed537a6d0856"
+  digest = "1:d8c4115cac39ee8b8504084d8a0cb06085ce9400474ca4a5920058b420d050d5"
   name = "github.com/siddontang/go-mysql"
   packages = [
     "canal",
@@ -151,7 +151,7 @@
     "schema",
   ]
   pruneopts = "UT"
-  revision = "c6ab05a85eb86dc51a27ceed6d2f366a32874a24"
+  revision = "b3fc2b70c8a8ea9128d51c968bcab03802d95343"
 
 [[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
@@ -179,11 +179,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1fa5ea43bbafccb9bc8a02ab2fa85eefc1eda9c9b14fe0cefa4d7baf505c9469"
+  digest = "1:e37d3edb1fbfcebfdf8b0c4ce04980d909fb3f927999148f40c88d1f1f4bdf2c"
   name = "golang.org/x/sys"
   packages = ["windows"]
   pruneopts = "UT"
-  revision = "a43fa875dd822b81eb6d2ad538bc1f4caba169bd"
+  revision = "2d0786266e9cd132da844109aa05016f11f3df28"
 
 [[projects]]
   digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
