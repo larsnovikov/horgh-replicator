@@ -13,7 +13,6 @@ import (
 	"horgh-replicator/src/tools/exit"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
 type AbstractSlave interface {
@@ -87,10 +86,7 @@ func GetSlaveByName(name string) Slave {
 
 func MakeSlavePool() {
 	slavePool = make(map[string]Slave)
-	for _, tableName := range helpers.GetTables() {
-		table := strings.TrimSpace(tableName)
-		makeSlave(table)
-	}
+	makeSlave(helpers.GetTable())
 }
 
 // make model, read config by modelName, set var model

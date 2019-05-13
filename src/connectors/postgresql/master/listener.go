@@ -16,7 +16,7 @@ func Listen() {
 	// TODO get from storage
 	lastEventId := 1
 
-	tableName := fmt.Sprintf(logTableName, helpers.GetTables()[0])
+	tableName := fmt.Sprintf(logTableName, helpers.GetTable())
 	query := fmt.Sprintf(`SELECT * FROM "%s" WHERE id>$1`, tableName)
 	rows := helpers.ConnPool.Master.Get(helpers.Query{
 		Query: query,

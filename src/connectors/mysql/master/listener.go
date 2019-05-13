@@ -25,13 +25,7 @@ var AllowHandling = true
 var curCanal *canal.Canal
 
 func (h *binlogHandler) canOperate(logTableName string) bool {
-	for _, tableName := range helpers.GetTables() {
-		if tableName == logTableName {
-			return true
-		}
-	}
-
-	return false
+	return helpers.GetTable() == logTableName
 }
 
 func (h *binlogHandler) prepareCanal() {

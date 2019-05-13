@@ -21,6 +21,6 @@ var CmdBuildTable = &cobra.Command{
 		}
 		exit.BeforeExitPool = append(exit.BeforeExitPool, beforeExit)
 
-		master.GetModel().BuildSlave(helpers.GetTables()[0])
+		master.GetModel().BuildSlave(helpers.GetTable())
 	},
 }

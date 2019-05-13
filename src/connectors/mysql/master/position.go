@@ -39,29 +39,30 @@ func GetSavedPos(table string) mysql.Position {
 }
 
 func getMinPosition(position mysql.Position) mysql.Position {
-
+	// TODO refactor this method
 	// build current position
 	if curPosition.Pos == 0 {
-		for _, table := range helpers.GetTables() {
-			savedPos := GetSavedPos(table)
-			tablePosition := savedPos.Pos
-			tableLogFile := savedPos.Name
+		table := helpers.GetTable()
 
-			tmpLogSuffix := GetLogFileSuffix(position.Name)
-			tableLogSuffix := GetLogFileSuffix(savedPos.Name)
+		savedPos := GetSavedPos(table)
+		tablePosition := savedPos.Pos
+		tableLogFile := savedPos.Name
 
-			// if log file from storage lower than log file in master - set position from storage
-			if tableLogSuffix < tmpLogSuffix {
+		tmpLogSuffix := GetLogFileSuffix(position.Name)
+		tableLogSuffix := GetLogFileSuffix(savedPos.Name)
+
+		// if log file from storage lower than log file in master - set position from storage
+		if tableLogSuffix < tmpLogSuffix {
+			position.Pos = uint32(tablePosition)
+			position.Name = tableLogFile
+		} else {
+			// if log file from storage is greater or equal log file from master - check position
+			if uint32(tablePosition) < position.Pos || position.Pos == 0 {
 				position.Pos = uint32(tablePosition)
 				position.Name = tableLogFile
-			} else {
-				// if log file from storage is greater or equal log file from master - check position
-				if uint32(tablePosition) < position.Pos || position.Pos == 0 {
-					position.Pos = uint32(tablePosition)
-					position.Name = tableLogFile
-				}
 			}
 		}
+
 		curPosition = position
 
 		PrevPosition = make(map[string]mysql.Position)
@@ -70,10 +71,8 @@ func getMinPosition(position mysql.Position) mysql.Position {
 		channel = make(chan func())
 		go updatePrevPosition(channel)
 
-		for _, table := range helpers.GetTables() {
-			PrevPosition[table] = curPosition
-			SaveLocks[table] = true
-		}
+		PrevPosition[table] = curPosition
+		SaveLocks[table] = true
 	}
 
 	return curPosition
