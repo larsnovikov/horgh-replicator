@@ -1,6 +1,10 @@
 package master
 
 import (
+	"fmt"
+	slave2 "horgh-replicator/src/connectors/postgresql/slave"
+	"horgh-replicator/src/helpers"
+	"horgh-replicator/src/models/master"
 	"horgh-replicator/src/models/slave"
 	toolsHelper "horgh-replicator/src/tools/helpers"
 )
@@ -8,9 +12,32 @@ import (
 func buildModel(tableName string) {
 	toolsHelper.Table = tableName
 	if canHandle() == true {
+		dbType := slave2.Type
+		var query string
 		// create table for log if not exists
-		// pgsql create method if not exists
-		// pgsql create trigger if not exists
+		table := fmt.Sprintf(logTableName, tableName)
+
+		// create table for log if not exists
+		query = helpers.GetQuery(dbType, "table", table, table, table, table)
+		master.Exec(helpers.Query{
+			Query:  query,
+			Params: []interface{}{},
+		})
+
+		// create method if not exists
+		query = helpers.GetQuery(dbType, "func", table)
+		master.Exec(helpers.Query{
+			Query:  query,
+			Params: []interface{}{},
+		})
+
+		// create trigger if not exists
+		query = helpers.GetQuery(dbType, "trigger", table, table)
+		master.Exec(helpers.Query{
+			Query:  query,
+			Params: []interface{}{},
+		})
+
 		// truncate log table
 		// start pgsql dump and listen
 		//

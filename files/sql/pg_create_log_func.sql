@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION horgh.if_modified_func() RETURNS TRIGGER AS $body$
+CREATE OR REPLACE FUNCTION horgh.if_%s_modified_func() RETURNS TRIGGER AS $body$
 DECLARE
     v_old_data TEXT;
     v_new_data TEXT;
