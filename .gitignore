@@ -1,0 +1,5 @@
+*.DS_Store
+.idea/
+.env
+/storage/positions/*.txt
+/storage/configs/*.json
