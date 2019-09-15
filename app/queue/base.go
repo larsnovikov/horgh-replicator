@@ -4,10 +4,14 @@ import (
 	"context"
 	"github.com/segmentio/kafka-go"
 	"horgh2-replicator/app/configs"
+	"horgh2-replicator/app/queue/publisher"
+	"horgh2-replicator/app/queue/subscriber"
 )
 
 type Connection struct {
-	connect *kafka.Conn
+	Connect    *kafka.Conn
+	Publisher  publisher.Publisher
+	Subscriber subscriber.Subscriber
 }
 
 func New(config configs.QueueConfig) (Connection, error) {
@@ -18,6 +22,8 @@ func New(config configs.QueueConfig) (Connection, error) {
 	}
 
 	return Connection{
-		connect: conn,
+		Connect:    conn,
+		Publisher:  publisher.New(conn),
+		Subscriber: subscriber.New(conn),
 	}, nil
 }
