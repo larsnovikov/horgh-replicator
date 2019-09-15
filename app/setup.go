@@ -5,12 +5,16 @@ import (
 	"horgh2-replicator/app/container"
 )
 
-func Make() error {
+func New() (container.Container, error) {
 	config, err := configs.New()
 	if err != nil {
-		return err
+		return container.Container{}, err
 	}
-	container.Make(config)
 
-	return nil
+	cont, err := container.New(config)
+	if err != nil {
+		return container.Container{}, err
+	}
+
+	return cont, err
 }

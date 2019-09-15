@@ -5,7 +5,16 @@ import (
 	"github.com/joho/godotenv"
 	"horgh2-replicator/app/constants"
 	"os"
+	"strconv"
 )
+
+type QueueConfig struct {
+	Host        string
+	SASLEnabled bool
+	User        string
+	Password    string
+	Topic       string
+}
 
 type ConnectionConfig struct {
 	DSN   string
@@ -23,6 +32,7 @@ type Config struct {
 	Master      ConnectionConfig
 	Slave       ConnectionConfig
 	Replication ReplicationConfig
+	Queue       QueueConfig
 }
 
 func New() (Config, error) {
@@ -49,6 +59,18 @@ func New() (Config, error) {
 	config.Replication = ReplicationConfig{
 		SlaveId:       os.Getenv("REPLICATION_SLAVE_ID"),
 		LogFilePrefix: os.Getenv("REPLICATION_LOG_FILE_PREFIX"),
+	}
+
+	SASLEnabled, err := strconv.ParseBool(os.Getenv("QUEUE_SASL"))
+	if err != nil {
+		return config, err
+	}
+	config.Queue = QueueConfig{
+		Host:        os.Getenv("QUEUE_HOST"),
+		SASLEnabled: SASLEnabled,
+		User:        os.Getenv("QUEUE_USER"),
+		Password:    os.Getenv("QUEUE_PASSWORD"),
+		Topic:       os.Getenv("QUEUE_TOPIC"),
 	}
 
 	return config, nil
