@@ -1,19 +1,25 @@
 package publisher
 
 import (
+	"context"
 	"github.com/segmentio/kafka-go"
+	"horgh2-replicator/app/configs"
 )
 
 type Publisher struct {
-	conn *kafka.Conn
+	writer *kafka.Writer
 }
 
-func New(connection *kafka.Conn) Publisher {
+func New(config configs.QueueConfig) Publisher {
 	return Publisher{
-		conn: connection,
+		writer: kafka.NewWriter(kafka.WriterConfig{
+			Brokers:  []string{config.Host},
+			Topic:    config.Topic,
+			Balancer: &kafka.LeastBytes{},
+		}),
 	}
 }
 
-func (p Publisher) Handle(msg []byte) (int, error) {
-	return p.conn.WriteMessages(kafka.Message{Value: msg})
+func (p Publisher) Handle(msg []byte) error {
+	return p.writer.WriteMessages(context.Background(), kafka.Message{Value: msg})
 }
