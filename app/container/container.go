@@ -16,11 +16,16 @@ type Container struct {
 }
 
 func New(config configs.Config) (Container, error) {
-	slave := connectors.NewSlave(config.Slave)
-	master := connectors.NewMaster(config.Master)
+	slave, err := connectors.NewSlave(config.Slave)
+	if err != nil {
+		return Container{}, err
+	}
+	master, err := connectors.NewMaster(config.Master)
+	if err != nil {
+		return Container{}, err
+	}
 	storage := replication.NewStorage(config.Master.Type, config.Master.Table)
 	kafka, err := queue.New(config.Queue)
-
 	if err != nil {
 		return Container{}, err
 	}

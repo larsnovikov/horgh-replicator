@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	"github.com/pingcap/errors"
 	"github.com/siddontang/go-log/log"
 	"github.com/spf13/cobra"
@@ -19,8 +18,12 @@ var cmdListen = cobra.Command{
 		if err != nil {
 			panic(errors.Wrap(err, constants.ErrorMakeContainer))
 		}
+
+		go container.MasterConnection.Listen()
 		log.Infof(constants.StartMasterListen)
-		fmt.Println(container)
+
+		go container.Queue.Subscriber.Listen()
+		log.Infof(constants.StartQueueListen)
 	},
 }
 

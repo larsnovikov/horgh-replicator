@@ -44,7 +44,7 @@ func New() (Config, error) {
 
 	config.Master = ConnectionConfig{
 		DSN:   os.Getenv("MASTER_DSN"),
-		Type:  os.Getenv("MASTER_TABLE"),
+		Type:  os.Getenv("MASTER_TYPE"),
 		Table: os.Getenv("MASTER_TABLE"),
 		Role:  constants.RoleMaster,
 	}

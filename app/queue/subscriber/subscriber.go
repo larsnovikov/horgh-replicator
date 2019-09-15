@@ -23,7 +23,7 @@ func New(config configs.QueueConfig) Subscriber {
 	}
 }
 
-func (s Subscriber) Handle() {
+func (s Subscriber) Listen() {
 	ctx := context.Background()
 	for {
 		m, err := s.reader.FetchMessage(ctx)
